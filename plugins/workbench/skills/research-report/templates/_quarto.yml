@@ -1,0 +1,38 @@
+project:
+  type: default
+  output-dir: _output
+
+format:
+  html:
+    theme: [cosmo, styles.scss]
+    embed-resources: true
+    toc: true
+    toc-location: left
+    toc-depth: 3
+    toc-title: Contents
+    number-sections: false
+    fig-cap-location: top
+    tbl-cap-location: top
+    code-tools: false
+    code-fold: false
+    smooth-scroll: true
+    link-external-newwindow: true
+    anchor-sections: true
+    page-layout: full
+    grid:
+      sidebar-width: 260px
+      body-width: 820px
+      margin-width: 200px
+    include-in-header:
+      text: |
+        <link rel="preconnect" href="https://rsms.me/">
+        <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+        <style>
+          html { font-family: 'Inter', sans-serif; }
+          @supports (font-variation-settings: normal) {
+            html { font-family: 'Inter var', sans-serif; }
+          }
+        </style>
+
+execute:
+  freeze: auto

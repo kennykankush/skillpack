@@ -1,0 +1,23 @@
+{
+  "name": "kennykankush-skillpack",
+  "owner": {
+    "name": "kennykankush",
+    "url": "https://github.com/kennykankush"
+  },
+  "metadata": {
+    "description": "A small skillpack of Claude Code utilities under one namespace.",
+    "version": "0.6.0"
+  },
+  "plugins": [
+    {
+      "name": "workbench",
+      "description": "Personal dev workbench — research workflows, skill recommendations, conversation memory capture, and skill lifecycle management.",
+      "version": "0.6.0",
+      "author": {
+        "name": "kennykankush",
+        "url": "https://github.com/kennykankush"
+      },
+      "source": "./plugins/workbench"
+    }
+  ]
+}
