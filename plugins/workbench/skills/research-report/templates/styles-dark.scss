@@ -1,0 +1,298 @@
+/*-- scss:defaults --*/
+
+$font-family-sans-serif: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+$body-color: #d1d5db;
+$body-bg: #0b0f17;
+$primary: #cbd5e1;
+
+$h1-font-size: 2.75rem;
+$h2-font-size: 1.875rem;
+$h3-font-size: 1.375rem;
+$h4-font-size: 1.125rem;
+$headings-font-weight: 700;
+$headings-color: #f3f4f6;
+$line-height-base: 1.65;
+$border-color: #1f2937;
+
+$link-color: #93c5fd;
+$code-bg: #111827;
+$code-color: #e5e7eb;
+
+/*-- scss:rules --*/
+
+body {
+  font-feature-settings: "ss01", "cv11", "kern";
+  letter-spacing: -0.011em;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-feature-settings: "ss01", "cv11";
+  letter-spacing: -0.024em;
+}
+
+h1.title {
+  font-size: 3.25rem;
+  font-weight: 800;
+  letter-spacing: -0.045em;
+  line-height: 1.05;
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  font-size: 1.25rem;
+  color: #9ca3af;
+  font-weight: 400;
+  letter-spacing: -0.015em;
+  margin-top: 0.25rem;
+  margin-bottom: 1.5rem;
+}
+
+h2 {
+  margin-top: 3.5rem;
+  padding-top: 0;
+  border-top: 1px solid #1f2937;
+  padding-top: 2rem;
+}
+
+h3 {
+  margin-top: 2.25rem;
+}
+
+p, li {
+  color: #d1d5db;
+}
+
+/* Report metadata strip under title */
+.report-meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1.5rem;
+  border-top: 1px solid #cbd5e1;
+  border-bottom: 1px solid #1f2937;
+  padding: 1.25rem 0;
+  margin: 1.5rem 0 2.5rem;
+}
+.report-meta-item {
+  font-size: 0.875rem;
+  color: #9ca3af;
+}
+.report-meta-item strong {
+  display: block;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #6b7280;
+  margin-bottom: 0.25rem;
+  font-weight: 600;
+}
+
+/* Tables */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.94rem;
+  margin: 1.5rem 0;
+}
+table th {
+  text-align: left;
+  background: #111827;
+  border-bottom: 2px solid #cbd5e1;
+  padding: 10px 12px;
+  font-weight: 600;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #e5e7eb;
+}
+table td {
+  padding: 12px;
+  border-bottom: 1px solid #1f2937;
+  vertical-align: top;
+  color: #d1d5db;
+}
+table tr:hover td {
+  background: #111827;
+}
+
+/* Status badges */
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.badge-avoid { background: #450a0a; color: #fca5a5; }
+.badge-wait { background: #431407; color: #fdba74; }
+.badge-medium { background: #422006; color: #fcd34d; }
+.badge-post { background: #064e3b; color: #6ee7b7; }
+.badge-clean { background: #1e3a8a; color: #bfdbfe; }
+.badge-blocked { background: #1f2937; color: #d1d5db; }
+
+/* Stats grid */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin: 2rem 0 2.5rem;
+}
+.stat {
+  background: #111827;
+  border: 1px solid #1f2937;
+  border-radius: 6px;
+  padding: 1.25rem;
+}
+.stat-label {
+  font-size: 0.7rem;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+}
+.stat-value {
+  font-size: 2.25rem;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  color: #f3f4f6;
+  margin: 0.5rem 0 0.25rem;
+  line-height: 1;
+}
+.stat-detail {
+  font-size: 0.85rem;
+  color: #9ca3af;
+  margin-top: 0.5rem;
+}
+
+/* Callouts override */
+.callout {
+  border: none;
+  border-left: 3px solid #cbd5e1;
+  background: #111827;
+  padding: 1rem 1.25rem;
+  margin: 1.5rem 0;
+  border-radius: 0 4px 4px 0;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.4);
+}
+.callout-warning { border-left-color: #f59e0b; }
+.callout-important { border-left-color: #ef4444; }
+.callout-tip { border-left-color: #10b981; }
+.callout-note { border-left-color: #3b82f6; }
+
+/* Mermaid diagrams */
+.mermaid {
+  background: #111827;
+  border: 1px solid #1f2937;
+  border-radius: 6px;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+}
+
+/* Code blocks */
+pre {
+  background: #111827;
+  border: 1px solid #1f2937;
+  border-radius: 6px;
+  color: #e5e7eb;
+}
+code {
+  color: #e5e7eb;
+}
+
+/* Lists */
+ul, ol {
+  padding-left: 1.5rem;
+}
+li {
+  margin: 0.4rem 0;
+}
+
+/* Footnotes / methodology */
+.methodology {
+  background: #111827;
+  border: 1px solid #1f2937;
+  border-radius: 6px;
+  padding: 1.5rem;
+  margin: 2rem 0;
+  font-size: 0.9rem;
+  color: #9ca3af;
+}
+
+/* Bar chart container */
+.bar-chart {
+  background: #111827;
+  border: 1px solid #1f2937;
+  border-radius: 6px;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+}
+.bar-row {
+  display: grid;
+  grid-template-columns: 180px 1fr 80px;
+  gap: 12px;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #1f2937;
+}
+.bar-row:last-child { border-bottom: none; }
+.bar-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #e5e7eb;
+}
+.bar-track {
+  background: #1f2937;
+  height: 24px;
+  border-radius: 3px;
+  position: relative;
+  overflow: hidden;
+}
+.bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #cbd5e1 0%, #64748b 100%);
+  border-radius: 3px;
+}
+.bar-fill.danger { background: linear-gradient(90deg, #fca5a5 0%, #dc2626 100%); }
+.bar-fill.warn { background: linear-gradient(90deg, #fdba74 0%, #ea580c 100%); }
+.bar-fill.muted { background: linear-gradient(90deg, #475569 0%, #64748b 100%); }
+.bar-value {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #e5e7eb;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Comparison table — checkmarks */
+.yes { color: #34d399; font-weight: 600; }
+.no { color: #6b7280; }
+.unique { color: #fbbf24; font-weight: 700; }
+
+/* Footer */
+.report-footer {
+  margin-top: 4rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #1f2937;
+  font-size: 0.8rem;
+  color: #9ca3af;
+}
+
+/* Sidebar polish */
+#TOC {
+  font-size: 0.875rem;
+}
+#TOC a {
+  color: #9ca3af;
+  text-decoration: none;
+}
+#TOC a:hover {
+  color: #f3f4f6;
+}
+#TOC .active {
+  color: #f3f4f6;
+  font-weight: 600;
+}
