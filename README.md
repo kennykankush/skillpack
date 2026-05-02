@@ -39,7 +39,7 @@ Add the marketplace once, then install whichever plugins you want:
 The plugin that manages meta / everyday tooling. Four areas, five tools. Codex gets installable bundled skills and marketplace metadata; Claude Code gets plugin metadata, slash commands, and agents.
 
 - **Research.** `research-report` runs deep dives that converge to exactly two files (`notes.md` + a Quarto-rendered `report.html`). Two modes off the same engine: official (writes files) and scan (inline only, promotable).
-- **Memory.** `memory-scriber` captures session residue (the verbatim opening brief, a reflective middle in your voice, and a chronological journey at the bottom), so future sessions inherit the texture of past ones, not sterile minutes.
+- **Memory.** `memory-scriber` writes session residue into Codex native memory (`~/.codex/memories/MEMORY.md` plus `raw_memories.md`) with a legacy project-file fallback for other hosts.
 - **Prompting.** `max-prompt` turns vague feedback, screenshots, taste, and product instinct into implementation-ready prompts for coding agents.
 - **Skills (managing the toolkit itself).** `skill-advisor` reads your installed skill index and ranks 2 to 5 matches read-only. `skill-manager` (Claude agent) handles the full lifecycle across three install mechanisms (plugins, npx skills, skillfish), always proposing before executing.
 
@@ -69,7 +69,7 @@ The catch is heavy use. If you actually rely on skills as a primary way of worki
 What plugins give you that flat skills don't:
 
 1. **A namespace.** Codex gets the `workbench` plugin boundary and bundled skill names. Claude Code gets `/workbench:research` and `/workbench:scan`. Flat skills compete in one global pool.
-2. **A bundle.** Workbench has related tools that depend on each other. `skill-advisor` reads the index `skill-manager` regenerates. `memory-scriber` and `research-report` write into the same project tree. A plugin ships them as one unit. Flat skills install one at a time.
+2. **A bundle.** Workbench has related tools that depend on each other. `skill-advisor` reads the index `skill-manager` regenerates. `memory-scriber` targets host-native memory while `research-report` writes project research artifacts. A plugin ships them as one unit. Flat skills install one at a time.
 3. **Skills and supporting assets together.** Plugins bundle related skills, templates, scripts, apps, and MCP config under one roof. Codex currently loads the skills side of the bundle. Claude Code also supports commands and agents in this package.
 4. **Clean install and uninstall.** One command brings the vertical in, one takes it out. `npx skills remove` famously leaves orphan folders in `~/.agents/skills/` (it's why my `skill-manager` agent has dedicated cleanup logic for it). Plugins clean up properly.
 5. **Versioning and a discoverable home.** Plugin marketplaces have semver, so you can pin, upgrade, or roll back the whole bundle. They're also browseable directories. Flat skills are scattered across whatever repos you happened to find them in.
