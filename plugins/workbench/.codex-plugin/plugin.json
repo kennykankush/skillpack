@@ -1,6 +1,6 @@
 {
   "name": "workbench",
-  "version": "0.6.2",
+  "version": "0.6.3",
   "description": "Portable agent workbench: research workflows, skill recommendations, session memory capture, and prompt translation.",
   "author": {
     "name": "kennykankush",

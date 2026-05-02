@@ -1,6 +1,6 @@
 ---
 name: memory-scriber
-description: Capture a conversation's essence into the active host's memory directory. Supports Codex native memory and Claude Code project memory without assuming the two plugin runtimes share state.
+description: Capture a conversation's essence into the active host's memory directory. Supports Codex with a Workbench project-memory convention and Claude Code project memory without assuming the two plugin runtimes share state.
 ---
 
 # Session Log
@@ -36,18 +36,43 @@ Use the active host's memory store.
 
 ### Codex output
 
-Append to Codex native memory files:
+Codex does not currently expose Claude-style per-project memory directories as a native convention. Workbench adds that convention inside Codex's global memory root.
 
-1. `~/.codex/memories/MEMORY.md` - concise durable memory index for future Codex runs.
-2. `~/.codex/memories/raw_memories.md` - full reflective session entry.
+Global Codex memory root:
 
-Create `~/.codex/memories/` if it does not exist.
+```text
+~/.codex/memories/
+```
+
+Workbench project memory directory:
+
+```text
+~/.codex/memories/projects/{project-slug}/memory/
+```
+
+Derive `{project-slug}` from the absolute project path by replacing `/` with `-`.
+
+Example:
+
+```text
+/Users/hamulia/dev/ai-usage-app
+-> ~/.codex/memories/projects/-Users-hamulia-dev-ai-usage-app/memory/
+```
+
+Write:
+
+1. `~/.codex/memories/projects/{project-slug}/memory/{YYYY-MM-DD}_{session-title}.md` - full reflective session file.
+2. `~/.codex/memories/projects/{project-slug}/memory/MEMORY.md` - concise project memory index.
+3. `~/.codex/memories/MEMORY.md` - global router/index that points to project memory folders.
+4. `~/.codex/memories/raw_memories.md` - append-only pointer log for dated project entries, not the full session narrative.
+
+Create directories and files if needed.
 
 Do not manually edit `~/.codex/memories/memory_summary.md` or `~/.codex/memories/rollout_summaries/`. Those are Codex-owned generated memory/consolidation artifacts.
 
 ### Claude Code output
 
-Write into the Claude project memory directory:
+Claude Code already uses project memory directories. Write into:
 
 ```text
 ~/.claude/projects/{project-slug}/memory/
@@ -79,11 +104,41 @@ Ask the user for a title or suggest one.
 
 Only two things are locked in the full entry: the **opener** and the **journey at the bottom**. Everything in between is you thinking out loud.
 
-### Index entry
+### Global Codex router entries
 
-Append a compact entry near the top of the relevant index:
+Codex only. Keep the global files compact and navigational.
 
-- Codex: `~/.codex/memories/MEMORY.md`
+In `~/.codex/memories/MEMORY.md`, ensure there is a section like:
+
+```markdown
+## Project Memories
+
+Project-specific memories are stored under `~/.codex/memories/projects/`.
+
+- `{project path}` -> `projects/{project-slug}/memory/`
+```
+
+When writing a new Codex project memory, add the project pointer if it is missing. Do not duplicate existing project pointers.
+
+In `~/.codex/memories/raw_memories.md`, append a small pointer entry:
+
+```markdown
+### {YYYY-MM-DD} - {Session Title}
+
+Project: `{project path}`
+Memory: `~/.codex/memories/projects/{project-slug}/memory/{YYYY-MM-DD}_{session-title}.md`
+Host: `codex`
+
+{1 sentence: what this session memory is about.}
+```
+
+Do not put the full reflective session in `raw_memories.md` by default. Full entries belong in the project directory.
+
+### Project index entry
+
+Append a compact entry near the top of the relevant project index:
+
+- Codex: `~/.codex/memories/projects/{project-slug}/memory/MEMORY.md`
 - Claude Code: `~/.claude/projects/{project-slug}/memory/MEMORY.md`
 
 Use a `## Human-authored session memories` section. If that section does not exist, create it below any existing title/frontmatter and above generated index material.
@@ -94,7 +149,7 @@ Keep this entry short enough for future sessions to scan quickly:
 ### {YYYY-MM-DD} - {Session Title}
 
 Source: `{path to full entry}`
-Project: `{project path or "not project-specific"}`
+Project: `{project path}`
 Host: `{codex | claude-code | other}`
 
 {2-5 sentences: the durable thing future agents should remember. Capture working style, decisions, taste signals, product direction, constraints, and where the thread left off.}
@@ -102,16 +157,24 @@ Host: `{codex | claude-code | other}`
 
 ### Full entry
 
-For Codex, append this entry to `~/.codex/memories/raw_memories.md`.
+For Codex, write this entry as:
 
-For Claude Code, write this entry as `~/.claude/projects/{project-slug}/memory/{YYYY-MM-DD}_{session-title}.md`.
+```text
+~/.codex/memories/projects/{project-slug}/memory/{YYYY-MM-DD}_{session-title}.md
+```
+
+For Claude Code, write this entry as:
+
+```text
+~/.claude/projects/{project-slug}/memory/{YYYY-MM-DD}_{session-title}.md
+```
 
 ```markdown
 ---
 session: {YYYY-MM-DD}-{session-title}
 description: {One line - what happened and why it matters}
 source: {codex | claude-code | other}
-project: {project path or "not project-specific"}
+project: {project path}
 ---
 
 # {TITLE} - {Subtitle}
@@ -164,10 +227,11 @@ Match the substance. Some sessions need 3 paragraphs, some need 30.}
 ## Rules
 
 - Choose the active host first; write only to that host by default.
-- Codex uses `~/.codex/memories/MEMORY.md` plus `~/.codex/memories/raw_memories.md`.
-- Claude Code uses `~/.claude/projects/{project-slug}/memory/MEMORY.md` plus a dated file in that same `memory/` directory.
-- Keep `MEMORY.md` compact. It is for durable retrieval signals, not the full session narrative.
-- Keep the full narrative in `raw_memories.md` for Codex or in the dated memory file for Claude Code.
+- Codex uses a Workbench project-memory convention inside `~/.codex/memories/projects/{project-slug}/memory/`.
+- Codex global `MEMORY.md` and `raw_memories.md` are routers/pointer indexes, not the place for full project memories.
+- Claude Code uses `~/.claude/projects/{project-slug}/memory/`.
+- Keep all `MEMORY.md` files compact. They are durable retrieval signals, not full session narratives.
+- Keep the full narrative in the dated project memory file.
 - No emoji.
 - The opening brief is sacred - verbatim, untouched.
 - The journey is non-negotiable - every session gets one.
@@ -175,14 +239,15 @@ Match the substance. Some sessions need 3 paragraphs, some need 30.}
 - Use journal-style headers for scannability, not report categories. "What We Built and Why" = good. "Requirements Summary" = bad.
 - Quote the user when their phrasing reveals something.
 - Don't sanitize failures. Built and killed = important context.
-- Claude Code full-entry file naming: `{YYYY-MM-DD}_{session-name}.md`.
+- Full-entry file naming: `{YYYY-MM-DD}_{session-name}.md`.
 
 ## Gathering
 
 1. **Host:** Determine whether the current runtime is Codex, Claude Code, or another host. If ambiguous, ask.
 2. **Project path:** Use the current working directory as the project path unless the user supplied a different project root.
-3. **Memory root:** Create the active host's memory directory if needed.
-4. **Session transcript:** In Codex, use the current visible thread as the source of truth unless a stable local transcript path is available in the environment. If no transcript file is available, put this in the full entry header:
+3. **Project slug:** Convert the absolute project path to a slug by replacing `/` with `-`.
+4. **Memory root:** Create the active host's project memory directory if needed.
+5. **Session transcript:** In Codex, use the current visible thread as the source of truth unless a stable local transcript path is available in the environment. If no transcript file is available, put this in the full entry header:
    ```
    **Conversation transcript:** `Codex current thread (transcript path unavailable)`
    ```
@@ -190,9 +255,9 @@ Match the substance. Some sessions need 3 paragraphs, some need 30.}
    ```
    **Conversation transcript:** `Claude Code current thread (transcript path unavailable)`
    ```
-5. **Opening brief:** If a transcript file exists, read the first few lines. Parse structured transcript entries when available, find the first user message, extract the text, and copy it verbatim. If no transcript file exists, use the first user message visible in the current conversation and note that it came from visible context.
-6. **Middle section:** Write from what you experienced in the conversation. You were there.
-7. **Journey:** Reconstruct chronologically from the conversation flow.
+6. **Opening brief:** If a transcript file exists, read the first few lines. Parse structured transcript entries when available, find the first user message, extract the text, and copy it verbatim. If no transcript file exists, use the first user message visible in the current conversation and note that it came from visible context.
+7. **Middle section:** Write from what you experienced in the conversation. You were there.
+8. **Journey:** Reconstruct chronologically from the conversation flow.
 
 ## After
 
@@ -202,6 +267,8 @@ For Codex:
 
 - `~/.codex/memories/MEMORY.md`
 - `~/.codex/memories/raw_memories.md`
+- `~/.codex/memories/projects/{project-slug}/memory/MEMORY.md`
+- `~/.codex/memories/projects/{project-slug}/memory/{YYYY-MM-DD}_{session-title}.md`
 
 For Claude Code:
 
