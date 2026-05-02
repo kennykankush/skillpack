@@ -39,7 +39,7 @@ Add the marketplace once, then install whichever plugins you want:
 The plugin that manages meta / everyday tooling. Four areas, five tools. Codex gets installable bundled skills and marketplace metadata; Claude Code gets plugin metadata, slash commands, and agents.
 
 - **Research.** `research-report` runs deep dives that converge to exactly two files (`notes.md` + a Quarto-rendered `report.html`). Two modes off the same engine: official (writes files) and scan (inline only, promotable).
-- **Memory.** `memory-scriber` writes session residue into Codex native memory (`~/.codex/memories/MEMORY.md` plus `raw_memories.md`) with a legacy project-file fallback for other hosts.
+- **Memory.** `memory-scriber` writes session residue into the active host's memory store: Codex native memory under `~/.codex/memories/`, or Claude Code project memory under `~/.claude/projects/<project-slug>/memory/`.
 - **Prompting.** `max-prompt` turns vague feedback, screenshots, taste, and product instinct into implementation-ready prompts for coding agents.
 - **Skills (managing the toolkit itself).** `skill-advisor` reads your installed skill index and ranks 2 to 5 matches read-only. `skill-manager` (Claude agent) handles the full lifecycle across three install mechanisms (plugins, npx skills, skillfish), always proposing before executing.
 

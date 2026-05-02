@@ -40,8 +40,9 @@ Umbrella domains (`marketing`, `engineering`, `uiux`, `product`, etc.) are delib
 
 **`memory-scriber`** — Captures what a colleague internalizes from a working session — how you think, what you care about, where you left off. Not a summary. Not minutes.
 
-- Codex native memory is the default target: `~/.codex/memories/MEMORY.md` and `~/.codex/memories/raw_memories.md`
-- Claude Code and other hosts can use the legacy project-file fallback
+- Codex writes native memory: `~/.codex/memories/MEMORY.md` and `~/.codex/memories/raw_memories.md`
+- Claude Code writes project memory: `~/.claude/projects/<project-slug>/memory/MEMORY.md` plus a dated session file
+- The active host decides the target; it does not mirror between hosts unless asked
 - The opening brief is sacred (verbatim user voice)
 - The journey at the bottom is non-negotiable (chronological reconstruction)
 - The middle is reflective, in your voice — not report categories

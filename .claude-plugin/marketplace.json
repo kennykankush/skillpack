@@ -6,13 +6,13 @@
   },
   "metadata": {
     "description": "A portable skillpack of agent workflows with host-specific adapters for Claude Code, Codex, and future runtimes.",
-    "version": "0.6.1"
+    "version": "0.6.2"
   },
   "plugins": [
     {
       "name": "workbench",
       "description": "Personal dev workbench — research workflows, skill recommendations, conversation memory capture, and skill lifecycle management.",
-      "version": "0.6.1",
+      "version": "0.6.2",
       "author": {
         "name": "kennykankush",
         "url": "https://github.com/kennykankush"
