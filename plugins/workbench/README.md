@@ -14,7 +14,7 @@ From the `skillpack` repo:
 codex plugin marketplace add .
 ```
 
-Restart Codex, open `/plugins`, install `workbench`, and start a new thread. Codex invokes the workflows as bundled skills: `$research-report`, `$skill-advisor`, `$memory-scriber`, and `$max-prompt`.
+Restart Codex, open `/plugins`, install `workbench`, and start a new thread. Codex invokes the workflows as bundled skills: `$workbench:research-report`, `$workbench:skill-advisor`, `$workbench:memory-scriber`, and `$workbench:max-prompt`.
 
 ### Claude Code
 
@@ -32,7 +32,7 @@ Restart Codex, open `/plugins`, install `workbench`, and start a new thread. Cod
 
 - `/workbench:research <topic>` — official: writes both files into `research/<umbrella>/<title>/`
 - `/workbench:scan <topic>` — quick: structured findings inline, no files. Promotable to official.
-- Codex: invoke `$research-report` and say whether you want official mode or scan mode.
+- Codex: invoke `$workbench:research-report` and say whether you want official mode or scan mode.
 
 Umbrella domains (`marketing`, `engineering`, `uiux`, `product`, etc.) are deliberate taxonomy — pick the closest match.
 
@@ -75,11 +75,11 @@ Personal infrastructure for working with AI agents sustainably — not random ut
 
 ### Codex
 
-- `$research-report official <topic>` — full research pipeline
-- `$research-report scan <topic>` — quick research scan, no files
-- `$skill-advisor <task>` — recommend from the installed toolkit
-- `$memory-scriber` — capture the current session
-- `$max-prompt` — translate vague feedback into an implementation prompt
+- `$workbench:research-report official <topic>` — full research pipeline
+- `$workbench:research-report scan <topic>` — quick research scan, no files
+- `$workbench:skill-advisor <task>` — recommend from the installed toolkit
+- `$workbench:memory-scriber` — capture the current session
+- `$workbench:max-prompt` — translate vague feedback into an implementation prompt
 
 ### Claude Code
 

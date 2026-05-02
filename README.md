@@ -20,7 +20,7 @@ Or, after publishing the repo:
 codex plugin marketplace add kennykankush/skillpack
 ```
 
-Then restart Codex, open `/plugins`, install `workbench`, and start a new thread. In Codex, invoke bundled workflows with `$research-report`, `$skill-advisor`, `$memory-scriber`, `$max-prompt`, or natural language.
+Then restart Codex, open `/plugins`, install `workbench`, and start a new thread. In Codex, invoke bundled workflows with `$workbench:research-report`, `$workbench:skill-advisor`, `$workbench:memory-scriber`, `$workbench:max-prompt`, or natural language.
 
 ### Claude Code
 
