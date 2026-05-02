@@ -1,0 +1,42 @@
+{
+  "name": "workbench",
+  "version": "0.6.0",
+  "description": "Portable agent workbench: research workflows, skill recommendations, session memory capture, and prompt translation.",
+  "author": {
+    "name": "kennykankush",
+    "url": "https://github.com/kennykankush"
+  },
+  "homepage": "https://github.com/kennykankush/skillpack/tree/main/plugins/workbench",
+  "repository": "https://github.com/kennykankush/skillpack",
+  "license": "MIT",
+  "keywords": [
+    "research",
+    "skills",
+    "memory",
+    "prompting",
+    "agents",
+    "codex",
+    "workbench"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Workbench",
+    "shortDescription": "Portable research, memory, prompting, and skill-advice workflows.",
+    "longDescription": "A portable workbench for Codex and other coding agents: deep research reports, quick scans, installed-skill recommendations, prompt translation, and session memory capture. Codex loads these as bundled skills; other runtimes can expose their own adapters.",
+    "developerName": "kennykankush",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write",
+      "Research"
+    ],
+    "websiteURL": "https://github.com/kennykankush/skillpack",
+    "termsOfServiceURL": "https://github.com/kennykankush/skillpack/blob/main/LICENSE",
+    "defaultPrompt": [
+      "Run a quick research scan on this topic.",
+      "Recommend the best installed skill for this task.",
+      "Turn this feedback into a coding-agent prompt."
+    ],
+    "brandColor": "#10A37F"
+  }
+}

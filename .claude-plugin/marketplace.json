@@ -5,7 +5,7 @@
     "url": "https://github.com/kennykankush"
   },
   "metadata": {
-    "description": "A small skillpack of Claude Code utilities under one namespace.",
+    "description": "A portable skillpack of agent workflows with host-specific adapters for Claude Code, Codex, and future runtimes.",
     "version": "0.6.0"
   },
   "plugins": [

@@ -1,6 +1,6 @@
 ---
 name: skill-advisor
-description: Recommend which of the user's ALREADY-INSTALLED skills best fits a task or query. Use when the user asks "what skill should I use for X", "which of my skills fits this", "do I have a skill for Y", "what's at my disposal for Z", "recommend a skill from my toolkit", or when you need to pick the right skill from their available toolkit before starting work. This skill is read-only — it advises, it does not install. For installing new skills, invoke the `skill-manager` agent instead.
+description: Recommend which of the user's ALREADY-INSTALLED skills best fits a task or query. Use when the user asks "what skill should I use for X", "which of my skills fits this", "do I have a skill for Y", "what's at my disposal for Z", "recommend a skill from my toolkit", or when you need to pick the right skill from their available toolkit before starting work. This skill is read-only — it advises, it does not install. For installing new skills, use the separate skill-management workflow available in the current agent environment.
 ---
 
 # Skill Advisor — Recommend from the User's Installed Toolkit
@@ -26,7 +26,9 @@ Identify the domain and specifics. Examples:
 ### Step 2 — Read the index
 Always start by reading `~/.agents/CATEGORIES.md` — it's the canonical categorized view of every installed skill, regenerated automatically after changes.
 
-If `CATEGORIES.md` doesn't exist or is stale, fall back to reading:
+If `CATEGORIES.md` doesn't exist or is stale, fall back to reading the relevant local registries for the current agent environment:
+- `~/.codex/plugins/cache/` (Codex plugin cache)
+- `~/.agents/skills/` (shared local skills)
 - `~/.agents/.skill-lock.json` (flat skills via npx skills)
 - `~/.claude/plugins/installed_plugins.json` + plugin caches (plugin skills)
 - `~/.claude/skills/` (standalone / skillfish-managed)

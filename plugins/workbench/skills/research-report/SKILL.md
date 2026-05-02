@@ -1,6 +1,6 @@
 ---
 name: research-report
-description: Run a deep research dive on any topic and either produce a polished Quarto HTML report (official mode — files written to research/<umbrella>/<title>/) or reply with structured findings inline (scan mode — no files). Use when the user invokes /workbench:research or /workbench:scan, or says "research X for me", "do a deep dive on X", "give me a quick read on X", "what's the state of X", "scan X for me", "write up findings on X". Covers maximum surface area across web, Reddit, GitHub, ProductHunt, docs, papers, and any other available sources. Always converges output to exactly notes.md + report.html (official mode) or a structured chat reply (scan mode). Never proliferates files.
+description: Run a deep research dive on any topic and either produce a polished Quarto HTML report (official mode — files written to research/<umbrella>/<title>/) or reply with structured findings inline (scan mode — no files). Use when the user invokes $research-report, /workbench:research, /workbench:scan, or says "research X for me", "do a deep dive on X", "give me a quick read on X", "what's the state of X", "scan X for me", "write up findings on X". Covers maximum surface area across web, Reddit, GitHub, ProductHunt, docs, papers, and any other available sources. Always converges output to exactly notes.md + report.html (official mode) or a structured chat reply (scan mode). Never proliferates files.
 ---
 
 # research-report
@@ -10,6 +10,8 @@ Two-mode research workflow. Same engine, two output destinations.
 ## When to use
 
 Trigger on:
+- `$research-report official <topic>` — Codex official mode (files written, persistent)
+- `$research-report scan <topic>` — Codex scan mode (chat reply only, ephemeral)
 - `/workbench:research <topic>` — official mode (files written, persistent)
 - `/workbench:scan <topic>` — scan mode (chat reply only, ephemeral)
 - Natural language: "research X", "deep dive on Y", "give me a quick read on Z", "scan W", "what's the state of V", "write up findings on U"
@@ -95,7 +97,7 @@ Run `scripts/bootstrap.sh` from this skill's directory. It checks for Quarto at 
 
 ### Phase 1: Plan
 
-1. Parse the topic from `$ARGUMENTS` or the user's message.
+1. Parse the topic from `$ARGUMENTS` when invoked through a Claude command, or from the user's current message when invoked in Codex or natural language.
 2. Pick the umbrella domain. Ask if ambiguous.
 3. Slugify the title: lowercase, kebab-case, no special chars, ~3–6 words max.
 4. Decide which sources to cover based on the topic. Examples:

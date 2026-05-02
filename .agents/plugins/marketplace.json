@@ -1,0 +1,20 @@
+{
+  "name": "kennykankush-skillpack",
+  "interface": {
+    "displayName": "Kennykankush Skillpack"
+  },
+  "plugins": [
+    {
+      "name": "workbench",
+      "source": {
+        "source": "local",
+        "path": "./plugins/workbench"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

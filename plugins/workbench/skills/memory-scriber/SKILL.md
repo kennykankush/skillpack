@@ -1,13 +1,13 @@
 ---
 name: memory-scriber
-description: Capture a conversation's essence into a memory file. Not a summary, not minutes — what you learned from being in the room. Use at the end of a substantial conversation when the work, thinking, and dynamic are worth preserving for future sessions.
+description: Capture a conversation's essence into a memory file. Not a summary, not minutes — what you learned from being in the room. Use at the end of a substantial conversation when the work, thinking, and dynamic are worth preserving for future Codex or Claude sessions.
 ---
 
 # Session Log
 
 ## When to use
 
-End of a conversation that had substance. The user says "log this", "capture this session", or invokes `/session-log`.
+End of a conversation that had substance. The user says "log this", "capture this session", "memory-scribe this", or invokes `/session-log`.
 
 ## What you're doing
 
@@ -93,14 +93,18 @@ Match the substance. Some sessions need 3 paragraphs, some need 30.}
 
 ## Gathering
 
-1. **Session transcript:** The conversation is stored as a `.jsonl` file in the project's `.claude/projects/` directory. Find the current session ID from the environment, or list the `.jsonl` files sorted by modification time and pick the most recent. The path goes in the file header as:
+1. **Session transcript:** In Codex, use the current visible thread as the source of truth unless a stable local transcript path is available in the environment. If no transcript file is available, put this in the file header:
+   ```
+   **Conversation transcript:** `Codex current thread (transcript path unavailable)`
+   ```
+   For Claude Code legacy sessions, the conversation is usually stored as a `.jsonl` file in the project's `.claude/projects/` directory. Find the current session ID from the environment, or list the `.jsonl` files sorted by modification time and pick the most recent. The path goes in the file header as:
    ```
    **Conversation transcript:** `~/.claude/projects/{project-slug}/{session-id}.jsonl`
    ```
-2. **Opening brief:** Read the first few lines of the `.jsonl` file. Parse each JSON line, find the first `type: "user"` entry, extract the `content` text. Copy verbatim.
+2. **Opening brief:** If a transcript file exists, read the first few lines of the `.jsonl` file. Parse each JSON line, find the first `type: "user"` entry, extract the `content` text, and copy it verbatim. If no transcript file exists, use the first user message visible in the current conversation and note that it came from visible context.
 3. **Middle section:** Write from what you experienced in the conversation. You were there.
 4. **Journey:** Reconstruct chronologically from the conversation flow.
 
 ## After
 
-Update MEMORY.md. Tell the user the path. Offer to open the directory.
+Update MEMORY.md if the project has one. Tell the user the path.
