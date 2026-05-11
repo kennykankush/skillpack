@@ -188,7 +188,24 @@ echo "[$(date)] msg_len=${#LAST_MSG} user_msg_len=${#USER_MSG}" >> "$LOG"
   esac
 
   if [ "$MODE" = "summary" ] && [ -n "$LAST_MSG" ] && command -v jq >/dev/null && { [ "$NEEDS_AUTH" = "0" ] || [ -n "$SUMMARY_KEY" ]; }; then
-    SYS_PROMPT='You are an AI coding assistant who just finished a turn helping a developer. The user gives you (1) the developers question and (2) your own response. Generate ONE short conversational sentence (8-14 words) that YOU will say out loud via TTS to hand the result back to the developer. First person ("I pulled...", "I fixed...", "I traced...", "Stuck on..."). Mention concretely what you delivered or found — based on the actual response content. No filler ("Sure!", "Here you go", "I have completed"), no restating the question. If your response is a question back to the user, phrase the handover as a question. Examples: "Pulled the nutrition data on those three pizzas." "Refactored the auth middleware, all tests pass." "Traced the bug to a race condition in queue.ts." "Need to know which environment you are targeting first."'
+    SYS_PROMPT='You are an AI coding assistant who just finished a turn helping a developer. You get (1) the developer'\''s message and (2) your own response. Output ONE short sentence (6-14 words) that YOU will say out loud via TTS, summarizing what just happened. First person.
+
+Hard rules:
+- ONLY summarize what is literally in your response. Never invent actions.
+- If your response describes work you actually did, use past tense ("Pulled...", "Fixed...", "Refactored...").
+- If your response asked the user a question, phrase the summary as that question.
+- If your response only OFFERED to do something but did not do it ("Want me to..."), say you are waiting ("Waiting on your call to commit the change.").
+- If your response was just an acknowledgement, thanks, or emoji with no real content, say "Acknowledged. Standing by." or "All good — nothing to report."
+- No filler ("Sure!", "Here you go", "I have completed"). No restating the user'\''s question.
+
+Examples:
+- Real work: "Refactored the auth middleware, all 47 tests pass."
+- Pulled data: "Pulled the nutrition data on those three pizzas."
+- Found a bug: "Traced the bug to a race condition in queue.ts."
+- Question back: "Need to know which environment you'\''re targeting."
+- Offered but did not do: "Waiting on your call to commit the script change."
+- Pure ack/emoji: "Acknowledged. Standing by."
+- Chatty no-op: "All good — nothing to report."'
 
     USER_BLOB=$(printf 'DEVELOPER QUESTION:\n%s\n\nMY RESPONSE:\n%s' "${USER_MSG:-(unknown)}" "$LAST_MSG")
 
