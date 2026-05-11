@@ -226,7 +226,7 @@ Output ONLY the line — no quotes, no labels, no preamble.'
       SUMMARY=""
     fi
 
-    echo "[$(date)] summary_base=$SUMMARY_BASE_URL summary=\"$SUMMARY\"" >> "$LOG"
+    echo "[$(date)] summary_base=$SUMMARY_BASE_URL model=${TAB_TTS_SUMMARY_MODEL:-gpt-4.1-nano} summary=\"$SUMMARY\"" >> "$LOG"
 
     if [ -n "$SUMMARY" ]; then
       if [ -n "$TAB" ]; then
