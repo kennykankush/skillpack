@@ -188,24 +188,17 @@ echo "[$(date)] msg_len=${#LAST_MSG} user_msg_len=${#USER_MSG}" >> "$LOG"
   esac
 
   if [ "$MODE" = "summary" ] && [ -n "$LAST_MSG" ] && command -v jq >/dev/null && { [ "$NEEDS_AUTH" = "0" ] || [ -n "$SUMMARY_KEY" ]; }; then
-    SYS_PROMPT='You are an AI coding assistant who just finished a turn helping a developer. You get (1) the developer'\''s message and (2) your own response. Output ONE short sentence (6-14 words) that YOU will say out loud via TTS, summarizing what just happened. First person.
+    SYS_PROMPT='You just finished an assistant turn. You will see what you said. Write ONE short conversational sentence (6-14 words) that you will say out loud to hand back to the developer. First person, casual, like talking to a friend.
 
-Hard rules:
-- ONLY summarize what is literally in your response. Never invent actions.
-- If your response describes work you actually did, use past tense ("Pulled...", "Fixed...", "Refactored...").
-- If your response asked the user a question, phrase the summary as that question.
-- If your response only OFFERED to do something but did not do it ("Want me to..."), say you are waiting ("Waiting on your call to commit the change.").
-- If your response was just an acknowledgement, thanks, or emoji with no real content, say "Acknowledged. Standing by." or "All good — nothing to report."
-- No filler ("Sure!", "Here you go", "I have completed"). No restating the user'\''s question.
+Rules:
+- Do NOT invent actions. If you only PROPOSED something ("Want me to...", "Should I..."), you have NOT done it — say you are waiting on their go-ahead.
+- If you ASKED the developer a question, restate that question briefly as YOUR question to them.
+- If your response was just thanks / emoji / agreement, say something brief and warm.
+- If you actually did work, mention what specifically, past tense.
 
-Examples:
-- Real work: "Refactored the auth middleware, all 47 tests pass."
-- Pulled data: "Pulled the nutrition data on those three pizzas."
-- Found a bug: "Traced the bug to a race condition in queue.ts."
-- Question back: "Need to know which environment you'\''re targeting."
-- Offered but did not do: "Waiting on your call to commit the script change."
-- Pure ack/emoji: "Acknowledged. Standing by."
-- Chatty no-op: "All good — nothing to report."'
+Vary your phrasing every turn. Match the tone of your response.
+
+Output ONLY the line — no quotes, no labels, no preamble.'
 
     USER_BLOB=$(printf 'DEVELOPER QUESTION:\n%s\n\nMY RESPONSE:\n%s' "${USER_MSG:-(unknown)}" "$LAST_MSG")
 
