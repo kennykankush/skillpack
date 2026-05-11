@@ -176,25 +176,38 @@ echo "[$(date)] msg_len=${#LAST_MSG} user_msg_len=${#USER_MSG}" >> "$LOG"
 (
   PHRASE=""
 
-  # Try to generate a contextual summary
-  if [ "$MODE" = "summary" ] && [ -n "$LAST_MSG" ] && [ -n "${OPENAI_TTS_KEY:-}" ] && command -v jq >/dev/null; then
+  # Try to generate a contextual summary.
+  # Endpoint defaults to OpenAI but can be repointed to any OpenAI-compatible API
+  # (Ollama, vLLM, llama.cpp, DeepSeek, Together, Groq, etc.) via TAB_TTS_SUMMARY_BASE_URL.
+  SUMMARY_BASE_URL="${TAB_TTS_SUMMARY_BASE_URL:-https://api.openai.com/v1}"
+  # Auth required only when not pointing at localhost
+  SUMMARY_KEY="${TAB_TTS_SUMMARY_KEY:-${OPENAI_TTS_KEY:-}}"
+  case "$SUMMARY_BASE_URL" in
+    *localhost*|*127.0.0.1*) NEEDS_AUTH=0 ;;
+    *) NEEDS_AUTH=1 ;;
+  esac
+
+  if [ "$MODE" = "summary" ] && [ -n "$LAST_MSG" ] && command -v jq >/dev/null && { [ "$NEEDS_AUTH" = "0" ] || [ -n "$SUMMARY_KEY" ]; }; then
     SYS_PROMPT='You are an AI coding assistant who just finished a turn helping a developer. The user gives you (1) the developers question and (2) your own response. Generate ONE short conversational sentence (8-14 words) that YOU will say out loud via TTS to hand the result back to the developer. First person ("I pulled...", "I fixed...", "I traced...", "Stuck on..."). Mention concretely what you delivered or found — based on the actual response content. No filler ("Sure!", "Here you go", "I have completed"), no restating the question. If your response is a question back to the user, phrase the handover as a question. Examples: "Pulled the nutrition data on those three pizzas." "Refactored the auth middleware, all tests pass." "Traced the bug to a race condition in queue.ts." "Need to know which environment you are targeting first."'
 
     USER_BLOB=$(printf 'DEVELOPER QUESTION:\n%s\n\nMY RESPONSE:\n%s' "${USER_MSG:-(unknown)}" "$LAST_MSG")
 
     SUMMARY_BODY=$(jq -nc \
-      --arg model "${TAB_TTS_SUMMARY_MODEL:-gpt-4o-mini}" \
+      --arg model "${TAB_TTS_SUMMARY_MODEL:-gpt-4.1-nano}" \
       --arg system "$SYS_PROMPT" \
       --arg user "$USER_BLOB" \
-      '{model:$model,messages:[{role:"system",content:$system},{role:"user",content:$user}],max_tokens:60,temperature:0.4}')
+      '{model:$model,messages:[{role:"system",content:$system},{role:"user",content:$user}],max_completion_tokens:120,temperature:0.4}')
 
-    RESP=$(curl -sS --max-time 8 \
-      -X POST https://api.openai.com/v1/chat/completions \
-      -H "Authorization: Bearer ${OPENAI_TTS_KEY}" \
+    AUTH_ARGS=()
+    [ "$NEEDS_AUTH" = "1" ] && AUTH_ARGS=(-H "Authorization: Bearer ${SUMMARY_KEY}")
+
+    RESP=$(curl -sS --max-time 15 \
+      -X POST "${SUMMARY_BASE_URL%/}/chat/completions" \
+      "${AUTH_ARGS[@]}" \
       -H "Content-Type: application/json" \
       --data "$SUMMARY_BODY" 2>>"$LOG")
     SUMMARY=$(printf '%s' "$RESP" | jq -r '.choices[0].message.content // empty' 2>/dev/null | tr '\n' ' ' | sed 's/^ *//;s/ *$//')
-    echo "[$(date)] summary=\"$SUMMARY\"" >> "$LOG"
+    echo "[$(date)] summary_base=$SUMMARY_BASE_URL summary=\"$SUMMARY\"" >> "$LOG"
 
     if [ -n "$SUMMARY" ]; then
       if [ -n "$TAB" ]; then
