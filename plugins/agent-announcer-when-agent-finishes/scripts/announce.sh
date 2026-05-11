@@ -224,6 +224,15 @@ Examples:
       -H "Content-Type: application/json" \
       --data "$SUMMARY_BODY" 2>>"$LOG")
     SUMMARY=$(printf '%s' "$RESP" | jq -r '.choices[0].message.content // empty' 2>/dev/null | tr '\n' ' ' | sed 's/^ *//;s/ *$//')
+
+    # Safety guard: a "summary" longer than ~200 chars is almost certainly the
+    # model echoing the input or rambling. Reject it and fall back to tab number.
+    SUMMARY_MAX="${TAB_TTS_SUMMARY_MAX_CHARS:-220}"
+    if [ "${#SUMMARY}" -gt "$SUMMARY_MAX" ]; then
+      echo "[$(date)] summary rejected (${#SUMMARY} chars > $SUMMARY_MAX): \"${SUMMARY:0:80}...\"" >> "$LOG"
+      SUMMARY=""
+    fi
+
     echo "[$(date)] summary_base=$SUMMARY_BASE_URL summary=\"$SUMMARY\"" >> "$LOG"
 
     if [ -n "$SUMMARY" ]; then
