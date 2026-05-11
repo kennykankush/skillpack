@@ -152,13 +152,29 @@ if [ "$MODE" = "summary" ] && [ -n "$STDIN_JSON" ] && command -v jq >/dev/null; 
           | map(select(.type=="text") | .text)
           | join(" ")
         ' "$TRANSCRIPT" 2>/dev/null)
+        # Find the last user message that contains real human-typed text,
+        # skipping tool_result wrappers, system-reminders, and slash-command
+        # output blocks (all of which appear as type=user in Claude's transcript).
         USER_MSG=$(jq -sr '
-          map(select(.type=="user" and (.message.content | type == "array" or type == "string")))
-          | last
-          | if (.message.content | type) == "string"
-            then .message.content
-            else (.message.content | map(select(.type=="text") | .text) | join(" "))
-            end
+          map(select(.type=="user"))
+          | map(
+              (.message.content // [])
+              | (if type == "string" then [{type:"text", text:.}] else . end)
+              | map(select(
+                  .type == "text"
+                  and ((.text // "") | startswith("<system-reminder>") | not)
+                  and ((.text // "") | startswith("<command-") | not)
+                  and ((.text // "") | startswith("<local-command-") | not)
+                  and ((.text // "") | startswith("<bash-input>") | not)
+                  and ((.text // "") | startswith("<bash-stdout>") | not)
+                  and ((.text // "") | startswith("<bash-stderr>") | not)
+                  and ((.text // "") | startswith("Caveat:") | not)
+                ))
+              | map(.text)
+              | join(" ")
+            )
+          | map(select(. != "" and . != null))
+          | last // ""
         ' "$TRANSCRIPT" 2>/dev/null)
       fi
       ;;
