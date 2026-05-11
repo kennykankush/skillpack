@@ -18,6 +18,16 @@
         "url": "https://github.com/kennykankush"
       },
       "source": "./plugins/workbench"
+    },
+    {
+      "name": "agent-announcer-when-agent-finishes",
+      "description": "Speaks a contextual one-line handover summary (with Ghostty tab number) when Claude or Codex finishes a turn or needs input.",
+      "version": "0.1.0",
+      "author": {
+        "name": "kennykankush",
+        "url": "https://github.com/kennykankush"
+      },
+      "source": "./plugins/agent-announcer-when-agent-finishes"
     }
   ]
 }

@@ -1,0 +1,27 @@
+{
+  "description": "Speaks a contextual handover when the agent finishes a turn or needs input.",
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/scripts/announce.sh\" claude-stop",
+            "timeout": 15
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/scripts/announce.sh\" claude-notification",
+            "timeout": 15
+          }
+        ]
+      }
+    ]
+  }
+}

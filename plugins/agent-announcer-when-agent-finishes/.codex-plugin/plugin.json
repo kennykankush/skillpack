@@ -1,0 +1,34 @@
+{
+  "name": "agent-announcer-when-agent-finishes",
+  "version": "0.1.0",
+  "description": "Speaks a contextual handover summary (with Ghostty tab number) when Codex finishes a turn or requests permission.",
+  "author": {
+    "name": "kennykankush",
+    "url": "https://github.com/kennykankush"
+  },
+  "homepage": "https://github.com/kennykankush/skillpack/tree/main/plugins/agent-announcer-when-agent-finishes",
+  "repository": "https://github.com/kennykankush/skillpack",
+  "license": "MIT",
+  "keywords": [
+    "tts",
+    "voice",
+    "hooks",
+    "ghostty",
+    "stop",
+    "permission"
+  ],
+  "interface": {
+    "displayName": "Agent Announcer",
+    "shortDescription": "Speak a one-line handover when an agent finishes.",
+    "longDescription": "Generates a contextual one-sentence summary of what Codex just produced, prefixes it with the Ghostty tab number, and speaks it via OpenAI TTS (gpt-4o-mini-tts) with custom voice instructions. Fires on Stop and PermissionRequest events.",
+    "developerName": "kennykankush",
+    "category": "Productivity",
+    "capabilities": [
+      "Audio",
+      "Hooks"
+    ],
+    "websiteURL": "https://github.com/kennykankush/skillpack",
+    "termsOfServiceURL": "https://github.com/kennykankush/skillpack/blob/main/LICENSE",
+    "brandColor": "#10A37F"
+  }
+}
