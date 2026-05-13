@@ -1,0 +1,28 @@
+{
+  "Stop": [
+    {
+      "hooks": [
+        {
+          "type": "command",
+          "command": "bash \"${PLUGIN_ROOT}/scripts/announce.sh\" codex",
+          "timeoutSec": 15,
+          "async": false,
+          "statusMessage": "Announcing turn completion"
+        }
+      ]
+    }
+  ],
+  "PermissionRequest": [
+    {
+      "hooks": [
+        {
+          "type": "command",
+          "command": "bash \"${PLUGIN_ROOT}/scripts/announce.sh\" codex-permission",
+          "timeoutSec": 15,
+          "async": false,
+          "statusMessage": "Announcing permission request"
+        }
+      ]
+    }
+  ]
+}

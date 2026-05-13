@@ -204,11 +204,25 @@ echo "[$(date)] msg_len=${#LAST_MSG} user_msg_len=${#USER_MSG}" >> "$LOG"
   esac
 
   if [ "$MODE" = "summary" ] && [ -n "$LAST_MSG" ] && command -v jq >/dev/null && { [ "$NEEDS_AUTH" = "0" ] || [ -n "$SUMMARY_KEY" ]; }; then
-    SYS_PROMPT='You just finished an assistant turn. You will see what you said. Write ONE short conversational sentence (6-14 words) that you will say out loud to hand back to the developer. First person, casual, like talking to a friend.
+    LAST_MSG_HAS_QUESTION=0
+    case "$LAST_MSG" in
+      *\?*) LAST_MSG_HAS_QUESTION=1 ;;
+    esac
+
+    SYS_PROMPT='You are the assistant who just finished a turn. Write ONE short conversational sentence (6-14 words) that you will say out loud to hand back to the developer.
+
+Your only source of truth is ASSISTANT_RESPONSE_TO_SUMMARIZE.
+Speak as the assistant handing control back to the developer.
+Use "I" only for actions ASSISTANT_RESPONSE_TO_SUMMARIZE explicitly says the assistant did.
+Do not speak as the developer. Do not summarize or repeat USER_MESSAGE_CONTEXT unless the assistant explicitly asked a follow-up.
 
 Rules:
-- Do NOT invent actions. If you only PROPOSED something ("Want me to...", "Should I..."), you have NOT done it — say you are waiting on their go-ahead.
-- If you ASKED the developer a question, restate that question briefly as YOUR question to them.
+- Summarize ASSISTANT_RESPONSE_TO_SUMMARIZE, not USER_MESSAGE_CONTEXT.
+- If the assistant answered a user question, state the answer briefly.
+- If the assistant gave facts or steps, report those facts or steps as available, not as completed work.
+- Do NOT claim you checked, found, fixed, tested, changed, filed, pushed, or ran anything unless ASSISTANT_RESPONSE_TO_SUMMARIZE says that happened.
+- Output a question only if ASSISTANT_RESPONSE_TO_SUMMARIZE itself asks the developer a direct question.
+- Do NOT invent actions. If you only PROPOSED something ("Want me to...", "Should I..."), you have NOT done it - say you are waiting on their go-ahead.
 - If your response was just thanks / emoji / agreement, say something brief and warm.
 - If you actually did work, mention what specifically, past tense.
 
@@ -216,7 +230,7 @@ Vary your phrasing every turn. Match the tone of your response.
 
 Output ONLY the line — no quotes, no labels, no preamble.'
 
-    USER_BLOB=$(printf 'DEVELOPER QUESTION:\n%s\n\nMY RESPONSE:\n%s' "${USER_MSG:-(unknown)}" "$LAST_MSG")
+    USER_BLOB=$(printf 'USER_MESSAGE_CONTEXT:\n%s\n\nASSISTANT_RESPONSE_TO_SUMMARIZE:\n%s\n\nASSISTANT_RESPONSE_HAS_QUESTION_MARK: %s' "${USER_MSG:-(unknown)}" "$LAST_MSG" "$LAST_MSG_HAS_QUESTION")
 
     SUMMARY_BODY=$(jq -nc \
       --arg model "${TAB_TTS_SUMMARY_MODEL:-gpt-4.1-nano}" \
@@ -240,6 +254,15 @@ Output ONLY the line — no quotes, no labels, no preamble.'
     if [ "${#SUMMARY}" -gt "$SUMMARY_MAX" ]; then
       echo "[$(date)] summary rejected (${#SUMMARY} chars > $SUMMARY_MAX): \"${SUMMARY:0:80}...\"" >> "$LOG"
       SUMMARY=""
+    fi
+
+    if [ -n "$SUMMARY" ] && [ "$LAST_MSG_HAS_QUESTION" = "0" ]; then
+      case "$SUMMARY" in
+        *\?)
+          echo "[$(date)] summary rejected (question without assistant question): \"$SUMMARY\"" >> "$LOG"
+          SUMMARY=""
+          ;;
+      esac
     fi
 
     echo "[$(date)] summary_base=$SUMMARY_BASE_URL model=${TAB_TTS_SUMMARY_MODEL:-gpt-4.1-nano} summary=\"$SUMMARY\"" >> "$LOG"
