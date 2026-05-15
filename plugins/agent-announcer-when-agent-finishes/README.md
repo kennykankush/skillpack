@@ -14,7 +14,7 @@ For each fire:
 1. Detects which Ghostty tab the agent is running in (AppleScript cwd-match + OSC title-marker fallback)
 2. Reads the agent's last response (Claude transcript JSONL or Codex `last_assistant_message` payload)
 3. Asks a chat model for a one-sentence handover summary (defaults to OpenAI `gpt-4.1-nano`; can route to **local Ollama** or any OpenAI-compatible endpoint)
-4. Speaks `Tab N: <summary>` via `gpt-4o-mini-tts` (or macOS `say` if no key)
+4. Speaks `Tab N: <summary>` via ElevenLabs, OpenAI TTS, or macOS `say`
 
 A 2-second debounce prevents duplicate announcements when multiple events fire close together.
 
@@ -24,7 +24,7 @@ A 2-second debounce prevents duplicate announcements when multiple events fire c
 - macOS (uses `osascript` and `afplay`)
 - Ghostty terminal (for tab detection — falls back gracefully on others)
 - `jq`, `curl` (preinstalled or `brew install jq`)
-- An OpenAI API key for TTS (optional — falls back to macOS `say`)
+- An ElevenLabs or OpenAI API key for cloud TTS (optional — falls back to macOS `say`)
 - *Optional:* [Ollama](https://ollama.com) for the summary model if you want local/offline inference
 
 ### Set up the API key
@@ -32,7 +32,7 @@ A 2-second debounce prevents duplicate announcements when multiple events fire c
 mkdir -p ~/.config/tab-tts && chmod 700 ~/.config/tab-tts
 cp <skillpack>/plugins/agent-announcer-when-agent-finishes/env.example ~/.config/tab-tts/env
 chmod 600 ~/.config/tab-tts/env
-# edit the file and paste your OPENAI_TTS_KEY
+# edit the file and paste your ELEVENLABS_API_KEY and/or OPENAI_TTS_KEY
 ```
 
 ### Claude Code
@@ -109,13 +109,54 @@ Inference clocks in around **600 ms warm** on an M-series Mac. The model loads o
 
 Avoid reasoning models (`gpt-5-nano`, `deepseek-r1`, `qwq`) — they burn tokens *thinking* before producing the one-line summary, which is the wrong tool for this task.
 
+## Voice provider: ElevenLabs vs OpenAI vs macOS say
+
+The speaking step is configurable separately from the summary step.
+
+Use ElevenLabs first, then fall back automatically:
+
+```bash
+TAB_TTS_PROVIDER=elevenlabs
+TAB_TTS_FALLBACK_PROVIDER=openai
+ELEVENLABS_API_KEY=...
+OPENAI_TTS_KEY=sk-proj-...
+```
+
+Or use the shorter alias:
+
+```bash
+VOICE_CHANNEL=elevenlabs
+```
+
+`TAB_TTS_PROVIDER=auto` tries ElevenLabs when `ELEVENLABS_API_KEY` is set, then OpenAI when `OPENAI_TTS_KEY` is set, then macOS `say`. ElevenLabs usage is checked through `/v1/user/subscription` before a speech request; if remaining credits are below `phrase length + ELEVENLABS_MIN_REMAINING_CREDITS`, the script skips ElevenLabs and falls through to the next provider.
+
+### ElevenLabs voice presets
+
+Set `ELEVENLABS_VOICE_ID` to whichever voice should speak the announcement:
+
+| Voice ID | Description |
+|---|---|
+| `hpp4J3VqNfWAUOO0d1Us` | Bella, a bright/professional premade female voice |
+| `sJSpUxhUVjGSYgbo5FeK` | User-generated Cortana/Halo-inspired sci-fi AI companion voice |
+
+The Cortana-style ID is not an official Halo/Microsoft/Jen Taylor voice and may only work for accounts where that generated voice is saved. If ElevenLabs returns `voice_not_found`, create or save a similar voice in your own account and replace the ID.
+
 ## Configuration
 
 All env vars are optional. Set them in `~/.config/tab-tts/env`. See `env.example`.
 
 | Var | Default | Notes |
 |---|---|---|
-| `OPENAI_TTS_KEY` | unset → falls back to `say` | Real api.openai.com key (separate from any proxy-scoped `OPENAI_API_KEY`) |
+| `TAB_TTS_PROVIDER` | `auto` | `auto`, `elevenlabs`, `openai`, or `say` |
+| `TAB_TTS_VOICE_CHANNEL` / `VOICE_CHANNEL` | unset | Alias for `TAB_TTS_PROVIDER`; useful if you prefer `VOICE_CHANNEL=elevenlabs` |
+| `TAB_TTS_FALLBACK_PROVIDER` | `auto` | Provider to try after the selected provider fails or is low on credits |
+| `ELEVENLABS_API_KEY` | unset | ElevenLabs key for text-to-speech |
+| `ELEVENLABS_VOICE_ID` | `JBFqnCBsd6RMkjVDRZzb` | ElevenLabs voice id |
+| `ELEVENLABS_MODEL_ID` | `eleven_flash_v2_5` | ElevenLabs TTS model |
+| `ELEVENLABS_OUTPUT_FORMAT` | `mp3_44100_128` | ElevenLabs audio format |
+| `ELEVENLABS_CHECK_CREDITS` | `1` | Check subscription usage before spending credits |
+| `ELEVENLABS_MIN_REMAINING_CREDITS` | `200` | Reserve credits before falling back |
+| `OPENAI_TTS_KEY` | unset | Real api.openai.com key for OpenAI TTS |
 | `TAB_TTS_MODE` | `summary` | `summary` = LLM handover; `number` = just the tab number |
 | `TAB_TTS_VOICE` | `nova` | `nova`, `shimmer`, `sage`, `coral`, `alloy`, `ash`, `ballad`, `echo`, `fable`, `onyx`, `verse` |
 | `TAB_TTS_INSTRUCTIONS` | warm/playful default | Natural-language voice direction (gpt-4o-mini-tts only) |
@@ -132,7 +173,7 @@ Per fire (summary mode, OpenAI cloud route):
 - TTS (~50 chars, `gpt-4o-mini-tts`) ≈ **$0.00003**
 - Total ≈ **$0.0002 per turn** → roughly **$0.20 per 1,000 turns**
 
-Local Ollama route: **$0** for the summary; TTS still hits OpenAI unless you also disable that.
+Local Ollama route: **$0** for the summary; TTS still uses whichever voice provider you select.
 
 Set `TAB_TTS_MODE=number` to skip the chat call entirely if you only want the tab number spoken.
 
@@ -162,7 +203,7 @@ scripts/announce.sh <invoker>      ← sources ~/.config/tab-tts/env
    6. fork → background:
         a. POST $SUMMARY_BASE_URL/chat/completions   → one-sentence summary
            (OpenAI, Ollama, DeepSeek, Groq, etc.)
-        b. POST api.openai.com/v1/audio/speech       → mp3 with voice instructions
+        b. POST selected TTS provider                → mp3 audio
         c. afplay                                    → speak
 ```
 

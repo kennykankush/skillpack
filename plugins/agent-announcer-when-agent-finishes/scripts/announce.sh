@@ -11,10 +11,16 @@
 #   bash tab-tts.sh codex-permission     # Codex CLI PermissionRequest event
 #
 # Env (read from ~/.config/tab-tts/env if present):
-#   OPENAI_TTS_KEY          Real api.openai.com key. Falls back to `say` if unset.
+#   TAB_TTS_PROVIDER        "auto" (default), "elevenlabs", "openai", or "say"
+#   TAB_TTS_FALLBACK_PROVIDER  Provider to try after the primary fails (default: auto)
+#   OPENAI_TTS_KEY          Real api.openai.com key. Falls back to ElevenLabs/`say` if unset.
+#   ELEVENLABS_API_KEY      ElevenLabs API key for TAB_TTS_PROVIDER=elevenlabs.
 #   TAB_TTS_MODE            "summary" (default) or "number"
 #   TAB_TTS_VOICE           OpenAI TTS voice (default: nova)
 #   TAB_TTS_MODEL           OpenAI TTS model (default: gpt-4o-mini-tts)
+#   ELEVENLABS_VOICE_ID     ElevenLabs voice id (default: JBFqnCBsd6RMkjVDRZzb)
+#   ELEVENLABS_MODEL_ID     ElevenLabs model id (default: eleven_flash_v2_5)
+#   ELEVENLABS_MIN_REMAINING_CREDITS  Reserve credits before fallback (default: 200)
 #   TAB_TTS_INSTRUCTIONS    Voice styling for gpt-4o-mini-tts
 #   TAB_TTS_SUMMARY_MODEL   Chat model for summary (default: gpt-4o-mini)
 #   TAB_TTS_DEBOUNCE_SEC    Cross-event debounce window (default: 2)
@@ -287,7 +293,14 @@ Output ONLY the line — no quotes, no labels, no preamble.'
   echo "[$(date)] phrase=\"$PHRASE\"" >> "$LOG"
 
   # TTS + playback
-  if [ -n "${OPENAI_TTS_KEY:-}" ] && command -v jq >/dev/null && command -v curl >/dev/null; then
+  normalize_tts_provider() {
+    printf '%s' "${1:-auto}" | tr '[:upper:]' '[:lower:]' | tr '_' '-'
+  }
+
+  play_openai_tts() {
+    [ -n "${OPENAI_TTS_KEY:-}" ] || return 1
+    command -v jq >/dev/null || return 1
+    command -v curl >/dev/null || return 1
     VOICE="${TAB_TTS_VOICE:-nova}"
     TTS_MODEL="${TAB_TTS_MODEL:-gpt-4o-mini-tts}"
     INSTRUCTIONS="${TAB_TTS_INSTRUCTIONS:-Speak in a warm, soft, slightly playful and intimate tone. Relaxed and unhurried, like a close friend leaning in.}"
@@ -304,15 +317,97 @@ Output ONLY the line — no quotes, no labels, no preamble.'
       -H "Content-Type: application/json" \
       --data "$BODY" 2>>"$LOG")
     if [ "$HTTP" = "200" ] && [ -s "$AUDIO" ]; then
+      echo "[$(date)] tts_provider=openai model=$TTS_MODEL voice=$VOICE http=$HTTP" >> "$LOG"
       afplay "$AUDIO" >>"$LOG" 2>&1
       rm -f "$AUDIO"
-    else
-      echo "[$(date)] OpenAI TTS failed (http=$HTTP), using say" >>"$LOG"
-      rm -f "$AUDIO" 2>/dev/null
-      say "$PHRASE" >>"$LOG" 2>&1
+      return 0
     fi
-  else
+    echo "[$(date)] OpenAI TTS failed (http=$HTTP)" >>"$LOG"
+    rm -f "$AUDIO" 2>/dev/null
+    return 1
+  }
+
+  elevenlabs_credit_check_ok() {
+    [ "${ELEVENLABS_CHECK_CREDITS:-1}" = "1" ] || return 0
+    command -v jq >/dev/null || return 0
+    command -v curl >/dev/null || return 0
+    SUBSCRIPTION=$(curl -sS --max-time 8 \
+      -H "xi-api-key: ${ELEVENLABS_API_KEY}" \
+      https://api.elevenlabs.io/v1/user/subscription 2>>"$LOG") || return 0
+    CHARACTER_COUNT=$(printf '%s' "$SUBSCRIPTION" | jq -r '.character_count // empty' 2>/dev/null)
+    CHARACTER_LIMIT=$(printf '%s' "$SUBSCRIPTION" | jq -r '.character_limit // empty' 2>/dev/null)
+    case "$CHARACTER_COUNT" in ""|*[!0-9]*) return 0 ;; esac
+    case "$CHARACTER_LIMIT" in ""|*[!0-9]*) return 0 ;; esac
+    MIN_REMAINING="${ELEVENLABS_MIN_REMAINING_CREDITS:-200}"
+    case "$MIN_REMAINING" in ""|*[!0-9]*) MIN_REMAINING=200 ;; esac
+    REMAINING=$((CHARACTER_LIMIT - CHARACTER_COUNT))
+    NEEDED=$((${#PHRASE} + MIN_REMAINING))
+    echo "[$(date)] elevenlabs_credits remaining=$REMAINING phrase_chars=${#PHRASE} reserve=$MIN_REMAINING" >> "$LOG"
+    [ "$REMAINING" -ge "$NEEDED" ]
+  }
+
+  play_elevenlabs_tts() {
+    [ -n "${ELEVENLABS_API_KEY:-}" ] || return 1
+    command -v jq >/dev/null || return 1
+    command -v curl >/dev/null || return 1
+    elevenlabs_credit_check_ok || {
+      echo "[$(date)] ElevenLabs TTS skipped: low credits" >> "$LOG"
+      return 1
+    }
+    ELEVEN_VOICE_ID="${ELEVENLABS_VOICE_ID:-JBFqnCBsd6RMkjVDRZzb}"
+    ELEVEN_MODEL_ID="${ELEVENLABS_MODEL_ID:-eleven_flash_v2_5}"
+    ELEVEN_OUTPUT_FORMAT="${ELEVENLABS_OUTPUT_FORMAT:-mp3_44100_128}"
+    AUDIO="/tmp/tab-tts-$$-${RANDOM}.mp3"
+    BODY=$(jq -nc \
+      --arg text "$PHRASE" \
+      --arg model "$ELEVEN_MODEL_ID" \
+      '{text:$text,model_id:$model}')
+    HTTP=$(curl -sS -o "$AUDIO" -w '%{http_code}' \
+      -X POST "https://api.elevenlabs.io/v1/text-to-speech/${ELEVEN_VOICE_ID}?output_format=${ELEVEN_OUTPUT_FORMAT}" \
+      -H "xi-api-key: ${ELEVENLABS_API_KEY}" \
+      -H "Accept: audio/mpeg" \
+      -H "Content-Type: application/json" \
+      --data "$BODY" 2>>"$LOG")
+    if [ "$HTTP" = "200" ] && [ -s "$AUDIO" ]; then
+      echo "[$(date)] tts_provider=elevenlabs model=$ELEVEN_MODEL_ID voice=$ELEVEN_VOICE_ID output=$ELEVEN_OUTPUT_FORMAT http=$HTTP" >> "$LOG"
+      afplay "$AUDIO" >>"$LOG" 2>&1
+      rm -f "$AUDIO"
+      return 0
+    fi
+    echo "[$(date)] ElevenLabs TTS failed (http=$HTTP)" >>"$LOG"
+    rm -f "$AUDIO" 2>/dev/null
+    return 1
+  }
+
+  play_say_tts() {
+    echo "[$(date)] tts_provider=say" >> "$LOG"
     say "$PHRASE" >>"$LOG" 2>&1
+  }
+
+  play_tts_provider() {
+    case "$(normalize_tts_provider "$1")" in
+      elevenlabs|eleven-labs) play_elevenlabs_tts ;;
+      openai) play_openai_tts ;;
+      say|macos|system) play_say_tts ;;
+      auto)
+        play_elevenlabs_tts || play_openai_tts || play_say_tts
+        ;;
+      *)
+        echo "[$(date)] Unknown TAB_TTS_PROVIDER=$1, using auto" >> "$LOG"
+        play_elevenlabs_tts || play_openai_tts || play_say_tts
+        ;;
+    esac
+  }
+
+  PRIMARY_PROVIDER=$(normalize_tts_provider "${TAB_TTS_PROVIDER:-${TAB_TTS_VOICE_CHANNEL:-${VOICE_CHANNEL:-auto}}}")
+  FALLBACK_PROVIDER=$(normalize_tts_provider "${TAB_TTS_FALLBACK_PROVIDER:-auto}")
+  if ! play_tts_provider "$PRIMARY_PROVIDER"; then
+    if [ "$FALLBACK_PROVIDER" != "$PRIMARY_PROVIDER" ]; then
+      echo "[$(date)] primary TTS provider failed ($PRIMARY_PROVIDER), trying fallback=$FALLBACK_PROVIDER" >> "$LOG"
+      play_tts_provider "$FALLBACK_PROVIDER" || play_say_tts
+    else
+      play_say_tts
+    fi
   fi
 ) </dev/null >/dev/null 2>&1 &
 
