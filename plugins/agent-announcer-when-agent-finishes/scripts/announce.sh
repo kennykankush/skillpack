@@ -182,6 +182,81 @@ fi
 TAB_DONE_MS=$(now_ms)
 echo "[$(date)] final tab=[$TAB]" >> "$LOG"
 
+codex_user_msg_from_payload() {
+  printf '%s' "$STDIN_JSON" | jq -r '
+    .last_user_message // .user_message // .prompt // .input // empty
+    | if type == "string" then .
+      elif type == "array" then
+        map(
+          if type == "string" then .
+          elif type == "object" then (.text // .content // empty)
+          else empty
+          end
+        ) | join(" ")
+      elif type == "object" then (.text // .content // .message // empty)
+      else empty
+      end
+  ' 2>/dev/null
+}
+
+codex_session_candidates() {
+  SESSION_HINT=$(printf '%s' "$STDIN_JSON" | jq -r '.transcript_path // .session_path // .conversation_path // empty' 2>/dev/null)
+  if [ -n "$SESSION_HINT" ] && [ -r "$SESSION_HINT" ]; then
+    printf '%s\n' "$SESSION_HINT"
+  fi
+  find "$HOME/.codex/sessions" -type f -name '*.jsonl' -mtime -2 -exec ls -t {} + 2>/dev/null \
+    | head -n 8
+}
+
+codex_user_msg_from_session() {
+  [ -n "$LAST_MSG" ] || return 0
+  codex_session_candidates | while IFS= read -r session_file; do
+    [ -r "$session_file" ] || continue
+    FOUND=$(
+      jq -rs --arg last "$LAST_MSG" '
+        def content_text:
+          if type == "string" then .
+          elif type == "array" then map(content_text) | join("\n")
+          elif type == "object" then (.text // .input_text // .output_text // .content // .message // "" | content_text)
+          else ""
+          end;
+        def message_item:
+          try (
+            select((. | type) == "object")
+            | select(.type? == "response_item")
+            | select((.payload? | type) == "object")
+            | select((.payload? // {} | .type? == "message"))
+            | {
+                role: (.payload.role // ""),
+                text: ((.payload.content // []) | content_text)
+              }
+            | select(.text != "")
+          ) catch empty;
+        reduce (.[] | message_item) as $message (
+          {last_user: "", found: ""};
+          if .found != "" then .
+          elif $message.role == "user" then
+            .last_user = $message.text
+          elif $message.role == "assistant"
+            and (
+              $message.text == $last
+              or ($message.text | contains($last))
+              or ($last | contains($message.text))
+            )
+          then
+            .found = .last_user
+          else .
+          end
+        ) | .found
+      ' "$session_file" 2>/dev/null
+    )
+    if [ -n "$FOUND" ]; then
+      printf '%s' "$FOUND"
+      break
+    fi
+  done
+}
+
 # ---- extract last assistant message SYNC (needs stdin still around) ----
 LAST_MSG=""
 USER_MSG=""
@@ -225,6 +300,8 @@ if [ "$MODE" = "summary" ] && [ -n "$STDIN_JSON" ] && command -v jq >/dev/null; 
       ;;
     codex|codex-permission)
       LAST_MSG=$(printf '%s' "$STDIN_JSON" | jq -r '.last_assistant_message // empty' 2>/dev/null)
+      USER_MSG=$(codex_user_msg_from_payload)
+      [ -n "$USER_MSG" ] || USER_MSG=$(codex_user_msg_from_session)
       ;;
   esac
   # Trim to 2500 chars to keep summary call cheap & fast
@@ -354,6 +431,8 @@ Rules:
 - If your response was just thanks / emoji / agreement, say something brief and warm.
 - If you actually did work, mention what specifically, past tense.
 - If you cannot say something concrete inside the budget, output exactly __TAB_ONLY__.
+- Do NOT praise the work. Avoid phrases like "great fix", "nice work", or "looks good" unless they are quoting the assistant response.
+- Do NOT add generic follow-up questions like "anything else?", "next steps?", or "do you want me to...".
 
 Vary your phrasing every turn. Match the tone of your response.
 
@@ -400,10 +479,15 @@ PROMPT
       SUMMARY=""
     fi
 
-    if [ -n "$SUMMARY" ] && [ "$LAST_MSG_HAS_QUESTION" = "0" ]; then
-      case "$SUMMARY" in
-        *\?)
-          echo "[$(date)] summary rejected (question without assistant question): \"$SUMMARY\"" >> "$LOG"
+	    if [ -n "$SUMMARY" ] && [ "$LAST_MSG_HAS_QUESTION" = "0" ]; then
+	      CLEAN_SUMMARY=$(printf '%s' "$SUMMARY" | perl -CS -pe 's/\s+(Is there anything else[^?]*\?|Anything else[^?]*\?|Do you want me[^?]*\?|Should I[^?]*\?|Ready to[^?]*\?|Next steps\?)$//i; s/^(Great fix!|Nice work!|Looks good[.!]?)\s*//i; s/\s+$//')
+	      if [ -n "$CLEAN_SUMMARY" ] && [ "$CLEAN_SUMMARY" != "$SUMMARY" ]; then
+	        echo "[$(date)] summary stripped generic follow-up: \"$SUMMARY\" -> \"$CLEAN_SUMMARY\"" >> "$LOG"
+	        SUMMARY="$CLEAN_SUMMARY"
+	      fi
+	      case "$SUMMARY" in
+	        *\?)
+	          echo "[$(date)] summary rejected (question without assistant question): \"$SUMMARY\"" >> "$LOG"
           SUMMARY_STATUS="rejected"
           SUMMARY_REJECT_REASON="question_without_assistant_question"
           SUMMARY=""
@@ -428,13 +512,17 @@ PROMPT
     fi
   fi
 
+  tab_only_phrase() {
+    if [ -n "$TAB" ]; then
+      printf 'Tab %s.' "$TAB"
+    else
+      printf 'Done.'
+    fi
+  }
+
   # Fallbacks if summary unavailable
   if [ -z "$PHRASE" ]; then
-    if [ -n "$TAB" ]; then
-      PHRASE="${TAB}"
-    else
-      PHRASE="done"
-    fi
+    PHRASE="$(tab_only_phrase)"
   fi
   echo "[$(date)] phrase=\"$PHRASE\"" >> "$LOG"
   PHRASE_READY_MS=$(now_ms)

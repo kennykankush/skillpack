@@ -159,7 +159,7 @@ VOICE_CHANNEL=elevenlabs
 Summary length is budget-aware. With `TAB_TTS_SUMMARY_BUDGET=auto`, local Qwen
 TTS gets a richer handover, while paid OpenAI/ElevenLabs TTS gets a compact
 handover. Use `TAB_TTS_SUMMARY_BUDGET=tab` when you want the cheapest behavior:
-only the tab number is spoken.
+only the tab label is spoken.
 
 ### ElevenLabs voice presets
 
@@ -198,7 +198,7 @@ All env vars are optional. Set them in `~/.config/tab-tts/env`. See `env.example
 | `ELEVENLABS_CHECK_CREDITS` | `1` | Check subscription usage before spending credits |
 | `ELEVENLABS_MIN_REMAINING_CREDITS` | `200` | Reserve credits before falling back |
 | `OPENAI_TTS_KEY` | unset | Real api.openai.com key for OpenAI TTS |
-| `TAB_TTS_MODE` | `summary` | `summary` = LLM handover; `number` = just the tab number |
+| `TAB_TTS_MODE` | `summary` | `summary` = LLM handover; `number` = just the tab label |
 | `TAB_TTS_VOICE` | `nova` | `nova`, `shimmer`, `sage`, `coral`, `alloy`, `ash`, `ballad`, `echo`, `fable`, `onyx`, `verse` |
 | `TAB_TTS_INSTRUCTIONS` | warm/playful default | Natural-language voice direction (gpt-4o-mini-tts only) |
 | `TAB_TTS_MODEL` | `gpt-4o-mini-tts` | TTS model (the *speaking* model) |
@@ -227,7 +227,7 @@ Per fire (summary mode, OpenAI cloud route):
 
 Local Ollama route: **$0** for the summary; TTS still uses whichever voice provider you select.
 
-Set `TAB_TTS_MODE=number` to skip the chat call entirely if you only want the tab number spoken.
+Set `TAB_TTS_MODE=number` to skip the chat call entirely if you only want the tab label spoken.
 
 ## Diagnostics
 
