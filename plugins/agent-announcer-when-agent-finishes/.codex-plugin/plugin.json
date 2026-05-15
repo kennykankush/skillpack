@@ -1,6 +1,6 @@
 {
   "name": "agent-announcer-when-agent-finishes",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "Speaks a contextual handover summary (with Ghostty tab number) when Codex finishes a turn or requests permission.",
   "author": {
     "name": "kennykankush",
@@ -21,7 +21,7 @@
   "interface": {
     "displayName": "Agent Announcer",
     "shortDescription": "Speak a one-line handover when an agent finishes.",
-    "longDescription": "Generates a contextual one-sentence summary of what Codex just produced, prefixes it with the Ghostty tab number, and speaks it via OpenAI TTS (gpt-4o-mini-tts) with custom voice instructions. Fires on Stop and PermissionRequest events.",
+    "longDescription": "Generates a contextual one-sentence summary of what Codex just produced, prefixes it with the Ghostty tab number, and speaks it via local Qwen, ElevenLabs, OpenAI TTS, or macOS say. Fires on Stop and PermissionRequest events.",
     "developerName": "kennykankush",
     "category": "Productivity",
     "capabilities": [
