@@ -403,7 +403,43 @@ echo "[$(date)] msg_len=${#LAST_MSG} user_msg_len=${#USER_MSG}" >> "$LOG"
     *) NEEDS_AUTH=1 ;;
   esac
 
-  if [ "$MODE" = "summary" ] && [ "$SUMMARY_BUDGET" != "tab" ] && [ -n "$LAST_MSG" ] && command -v jq >/dev/null && { [ "$NEEDS_AUTH" = "0" ] || [ -n "$SUMMARY_KEY" ]; }; then
+  static_summary_from_response() {
+    printf '%s' "$LAST_MSG" | perl -0ne '
+      if (/Pushed to\s+`?([^`\n.]+?)`?\s+main\.\s+Commit:\s+`?([0-9a-f]{7,40})(?:\s+([^`\n]+))?`?/is) {
+        my $repo = $1;
+        my $hash = substr($2, 0, 7);
+        my $subject = $3 // "";
+        $repo =~ s/^\s+|\s+$//g;
+        $subject =~ s/^\s+|\s+$//g;
+        if ($subject ne "") {
+          print "Pushed " . $subject . " to " . $repo . " main.";
+        } else {
+          print "Pushed " . $repo . " main with commit " . $hash . ".";
+        }
+        exit;
+      }
+      if (/Verified\s+`?origin\/main`?\s+matches\s+local\s+`?HEAD`?/is) {
+        print "Verified origin main matches local HEAD.";
+        exit;
+      }
+    '
+  }
+
+  if [ "$MODE" = "summary" ] && [ "$SUMMARY_BUDGET" != "tab" ] && [ -n "$LAST_MSG" ]; then
+    STATIC_SUMMARY=$(static_summary_from_response)
+    if [ -n "$STATIC_SUMMARY" ]; then
+      SUMMARY="$STATIC_SUMMARY"
+      SUMMARY_STATUS="static"
+      echo "[$(date)] summary_static=\"$SUMMARY\"" >> "$LOG"
+      if [ -n "$TAB" ]; then
+        PHRASE="Tab ${TAB}: ${SUMMARY}"
+      else
+        PHRASE="$SUMMARY"
+      fi
+    fi
+  fi
+
+  if [ -z "$PHRASE" ] && [ "$MODE" = "summary" ] && [ "$SUMMARY_BUDGET" != "tab" ] && [ -n "$LAST_MSG" ] && command -v jq >/dev/null && { [ "$NEEDS_AUTH" = "0" ] || [ -n "$SUMMARY_KEY" ]; }; then
     SUMMARY_ATTEMPTED=1
     SUMMARY_STATUS="requested"
     LAST_MSG_HAS_QUESTION=0
