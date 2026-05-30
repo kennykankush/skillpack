@@ -28,6 +28,36 @@
         "url": "https://github.com/kennykankush"
       },
       "source": "./plugins/agent-announcer-when-agent-finishes"
+    },
+    {
+      "name": "extra",
+      "description": "Small personal workflows that are useful enough to package but do not belong in Workbench.",
+      "version": "0.1.0",
+      "author": {
+        "name": "kennykankush",
+        "url": "https://github.com/kennykankush"
+      },
+      "source": "./plugins/extra"
+    },
+    {
+      "name": "agents",
+      "description": "Harness-agnostic agent operating modes for review closeout, watching, verifying, and carrying context across live work.",
+      "version": "0.1.1",
+      "author": {
+        "name": "kennykankush",
+        "url": "https://github.com/kennykankush"
+      },
+      "source": "./plugins/agents"
+    },
+    {
+      "name": "videos",
+      "description": "Opinionated video preproduction workflows for storyboard frames, product-launch motion direction, and AI-video-ready shot batches.",
+      "version": "0.1.0",
+      "author": {
+        "name": "kennykankush",
+        "url": "https://github.com/kennykankush"
+      },
+      "source": "./plugins/videos"
     }
   ]
 }

@@ -1,0 +1,19 @@
+{
+  "name": "extra",
+  "version": "0.1.0",
+  "description": "Small personal workflows that are useful enough to package but do not belong in Workbench.",
+  "author": {
+    "name": "kennykankush",
+    "url": "https://github.com/kennykankush"
+  },
+  "homepage": "https://github.com/kennykankush/skillpack/tree/main/plugins/extra",
+  "repository": "https://github.com/kennykankush/skillpack",
+  "license": "MIT",
+  "keywords": [
+    "workflow",
+    "memory",
+    "trail",
+    "obsidian",
+    "history"
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "name": "extra",
+  "version": "0.1.0",
+  "description": "Small personal workflows that are useful enough to package but do not belong in Workbench.",
+  "author": {
+    "name": "kennykankush",
+    "url": "https://github.com/kennykankush"
+  },
+  "homepage": "https://github.com/kennykankush/skillpack/tree/main/plugins/extra",
+  "repository": "https://github.com/kennykankush/skillpack",
+  "license": "MIT",
+  "keywords": [
+    "workflow",
+    "memory",
+    "trail",
+    "obsidian",
+    "history"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Extra",
+    "shortDescription": "Personal extra workflows outside the main Workbench bundle.",
+    "longDescription": "A small plugin for useful personal workflows that are worth packaging but should not be mixed into the Workbench meta-tooling bundle. Starts with Trail Scriber, a day-by-day conversation trail reconstruction workflow for Codex and Claude history.",
+    "developerName": "kennykankush",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/kennykankush/skillpack",
+    "termsOfServiceURL": "https://github.com/kennykankush/skillpack/blob/main/LICENSE",
+    "defaultPrompt": [
+      "Reconstruct my work trail from these conversation logs.",
+      "Update my day-by-day agenda notes from Codex and Claude history.",
+      "Turn this date range into an Obsidian-friendly work trail.",
+      "Run Trail Scriber procrastinate mode to catch up from the last scan."
+    ],
+    "brandColor": "#6D6A5F"
+  }
+}

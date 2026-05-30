@@ -1,0 +1,41 @@
+{
+  "name": "videos",
+  "version": "0.1.0",
+  "description": "Opinionated video preproduction workflows for storyboard frames, product-launch motion direction, and AI-video-ready shot batches.",
+  "author": {
+    "name": "kennykankush",
+    "url": "https://github.com/kennykankush"
+  },
+  "homepage": "https://github.com/kennykankush/skillpack/tree/main/plugins/videos",
+  "repository": "https://github.com/kennykankush/skillpack",
+  "license": "MIT",
+  "keywords": [
+    "video",
+    "storyboard",
+    "motion",
+    "product-launch",
+    "imagegen",
+    "codex"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Videos",
+    "shortDescription": "Storyboard and product-launch motion preproduction workflows.",
+    "longDescription": "Opinionated storyboard workflows for product-launch and SaaS motion graphics. The storyboard skill studies product truth, source screenshots, brand assets, and taste references before generating cohesive frame sets with Codex imagegen. It logs prompts, vets every frame, and regenerates failures instead of manually editing frames.",
+    "developerName": "kennykankush",
+    "category": "Creativity",
+    "capabilities": [
+      "Read",
+      "Write",
+      "Image"
+    ],
+    "websiteURL": "https://github.com/kennykankush/skillpack",
+    "termsOfServiceURL": "https://github.com/kennykankush/skillpack/blob/main/LICENSE",
+    "defaultPrompt": [
+      "Create storyboard frames for this SaaS product launch.",
+      "Turn these screenshots into a cohesive motion-design storyboard.",
+      "Make AI-video-ready storyboard batches from these frames."
+    ],
+    "brandColor": "#00D4AA"
+  }
+}

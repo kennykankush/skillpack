@@ -857,6 +857,7 @@ PROMPT
       QWEN_SERVER_LOG="${TAB_TTS_QWEN_SERVER_LOG:-/tmp/tab-tts-qwen-server.log}"
       QWEN_SERVER_PID="${TAB_TTS_QWEN_SERVER_PID:-/tmp/tab-tts-qwen-server.pid}"
       QWEN_SERVER_LOCK="${TAB_TTS_QWEN_SERVER_LOCK:-/tmp/tab-tts-qwen-server.lock}"
+      QWEN_SERVER_IDLE_TIMEOUT="${TAB_TTS_QWEN_SERVER_IDLE_TIMEOUT_SEC:-300}"
 
       if mkdir "$QWEN_SERVER_LOCK" 2>/dev/null; then
         if ! qwen_server_healthy; then
@@ -865,6 +866,7 @@ PROMPT
             --voice "$QWEN_VOICE"
             --host "$QWEN_SERVER_HOST"
             --port "$QWEN_SERVER_PORT"
+            --idle-timeout "$QWEN_SERVER_IDLE_TIMEOUT"
           )
           [ -n "$QWEN_DEVICE" ] && SERVER_ARGS+=(--device "$QWEN_DEVICE")
           [ -n "$QWEN_DTYPE" ] && SERVER_ARGS+=(--dtype "$QWEN_DTYPE")
@@ -908,7 +910,7 @@ PROMPT
         --arg seed "$QWEN_SEED" \
         '{voice:$voice,text:$text,output:$output} + (if $seed != "" then {seed:($seed|tonumber)} else {} end)')
       TTS_START_MS=$(now_ms)
-      HTTP=$(curl -sS --max-time "${TAB_TTS_QWEN_SERVER_TIMEOUT_SEC:-30}" -o "$RESP_JSON" -w '%{http_code}' \
+      HTTP=$(curl -sS --max-time "${TAB_TTS_QWEN_SERVER_TIMEOUT_SEC:-120}" -o "$RESP_JSON" -w '%{http_code}' \
         -X POST "${QWEN_SERVER_URL%/}/speak" \
         -H "Content-Type: application/json" \
         --data "$BODY" 2>>"$LOG")
@@ -923,6 +925,12 @@ PROMPT
         emit_timing "success" "qwen-server" "$SERVER_MODEL" "$QWEN_VOICE" "$AUDIO" "$HTTP" "$TTS_START_MS" "$AUDIO_READY_MS" "$PLAY_DONE_MS"
         rm -f "$AUDIO" "$RESP_JSON"
         return 0
+      fi
+      if [ "$HTTP" = "000" ]; then
+        echo "[$(date)] Qwen server TTS timed out or disconnected (url=$QWEN_SERVER_URL), skipping one-shot Qwen fallback" >> "$LOG"
+        emit_timing "failed" "qwen-server" "$QWEN_DEBUG_MODEL" "$QWEN_VOICE" "$AUDIO" "$HTTP" "$TTS_START_MS" "$AUDIO_READY_MS" "$AUDIO_READY_MS"
+        rm -f "$AUDIO" "$RESP_JSON" 2>/dev/null
+        return 1
       fi
       echo "[$(date)] Qwen server TTS failed (url=$QWEN_SERVER_URL http=$HTTP), falling back to runner" >> "$LOG"
       emit_timing "failed" "qwen-server" "$QWEN_DEBUG_MODEL" "$QWEN_VOICE" "$AUDIO" "$HTTP" "$TTS_START_MS" "$AUDIO_READY_MS" "$AUDIO_READY_MS"

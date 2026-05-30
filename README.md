@@ -20,7 +20,7 @@ Or, after publishing the repo:
 codex plugin marketplace add kennykankush/skillpack
 ```
 
-Then restart Codex, open `/plugins`, install `workbench`, and start a new thread. In Codex, invoke bundled workflows with `$workbench:research-report`, `$workbench:skill-advisor`, `$workbench:memory-scriber`, `$workbench:max-prompt`, or natural language.
+Then restart Codex, open `/plugins`, install the plugin you need, and start a new thread. In Codex, invoke bundled workflows with namespaced skills such as `$workbench:research-report`, `$workbench:skill-advisor`, `$workbench:memory-scriber`, `$workbench:max-prompt`, `$extra:trail-scriber`, `$agents:birdwatch`, or `$agents:autoreview`.
 
 ### Claude Code
 
@@ -29,6 +29,8 @@ Add the marketplace once, then install whichever plugins you want:
 ```
 /plugin marketplace add github.com/kennykankush/skillpack
 /plugin install workbench@kennykankush-skillpack
+/plugin install extra@kennykankush-skillpack
+/plugin install agents@kennykankush-skillpack
 /reload-plugins
 ```
 
@@ -45,6 +47,23 @@ The plugin that manages meta / everyday tooling. Four areas, five tools. Codex g
 
 Full breakdown: [`plugins/workbench/README.md`](plugins/workbench/README.md)
 
+### extra
+
+A separate shelf for small personal workflows that are useful enough to package but do not belong in Workbench.
+
+- **Trail.** `trail-scriber` reconstructs day-by-day work logs from Codex and Claude conversation evidence into Obsidian-friendly day, agenda, domain, and conversation notes. It uses commands to locate evidence, then relies on interpretation of the user's messages instead of keyword-only summaries.
+
+Full breakdown: [`plugins/extra/README.md`](plugins/extra/README.md)
+
+### agents
+
+Reusable agent operating modes, kept separate from Workbench meta-tools and Extra's personal workflows.
+
+- **Birdwatch.** `birdwatch` puts the assistant into live watcher mode while you test an app or product flow. It observes logs, APIs, DB rows, browser state, branch state, PRs, and issue state; writes evidence-backed findings; and avoids destructive state changes unless explicitly asked.
+- **Autoreview.** `autoreview` vendors OpenClaw's structured closeout/code-review helper into the Agents pack. It reviews local changes, branch diffs, or commits; verifies accepted findings against the real code; and reruns until no actionable findings remain.
+
+Full breakdown: [`plugins/agents/README.md`](plugins/agents/README.md)
+
 ### More coming
 
 A plugin lands here once it has stuck in my own setup long enough that I trust it. Experiments stay in dotfiles.
@@ -55,6 +74,8 @@ New plugins should be portable first, host-specific second. If a workflow only w
 
 ```
 workbench   -> how I work with coding agents (meta)
+extra       -> small personal workflows outside the main Workbench bundle
+agents      -> reusable agent operating modes
 ...         -> other domains as they emerge
 ```
 

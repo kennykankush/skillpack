@@ -1,0 +1,22 @@
+{
+  "name": "agents",
+  "version": "0.1.1",
+  "description": "Harness-agnostic agent operating modes for review closeout, watching, verifying, and carrying context across live work.",
+  "author": {
+    "name": "kennykankush",
+    "url": "https://github.com/kennykankush"
+  },
+  "homepage": "https://github.com/kennykankush/skillpack/tree/main/plugins/agents",
+  "repository": "https://github.com/kennykankush/skillpack",
+  "license": "MIT",
+  "keywords": [
+    "agents",
+    "review",
+    "autoreview",
+    "watcher",
+    "qa",
+    "observability",
+    "codex",
+    "claude"
+  ]
+}

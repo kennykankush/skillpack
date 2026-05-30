@@ -1,0 +1,44 @@
+{
+  "name": "agents",
+  "version": "0.1.1",
+  "description": "Harness-agnostic agent operating modes for review closeout, watching, verifying, and carrying context across live work.",
+  "author": {
+    "name": "kennykankush",
+    "url": "https://github.com/kennykankush"
+  },
+  "homepage": "https://github.com/kennykankush/skillpack/tree/main/plugins/agents",
+  "repository": "https://github.com/kennykankush/skillpack",
+  "license": "MIT",
+  "keywords": [
+    "agents",
+    "review",
+    "autoreview",
+    "watcher",
+    "qa",
+    "observability",
+    "codex",
+    "claude"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Agents",
+    "shortDescription": "Reusable agent roles and operating modes.",
+    "longDescription": "A portable pack of agent operating modes. Autoreview runs a structured code-review closeout helper and verifies accepted findings before fixes. Birdwatch turns an assistant into a live watcher: it observes logs, APIs, DB state, git state, and user-reported UX findings, then records evidence-backed discrepancies without mutating state unless asked.",
+    "developerName": "kennykankush",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/kennykankush/skillpack",
+    "termsOfServiceURL": "https://github.com/kennykankush/skillpack/blob/main/LICENSE",
+    "defaultPrompt": [
+      "Run autoreview on this branch before final.",
+      "Use autoreview on the latest commit.",
+      "Use birdwatch while I test this app.",
+      "Watch the backend, API, DB, and logs while I sweep this flow.",
+      "Keep an evidence-backed discrepancy log during this product test."
+    ],
+    "brandColor": "#4C7D7A"
+  }
+}

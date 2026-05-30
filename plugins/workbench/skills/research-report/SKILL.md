@@ -95,6 +95,8 @@ Pick the closest match. If two could fit, ask the user. If none fit, ask them to
 
 Run `scripts/bootstrap.sh` from this skill's directory. It checks for Quarto at `~/.local/share/quarto/bin/quarto` and installs if missing. Skip silently if already installed.
 
+> **Portability constraint — do not regress.** The template at `templates/_quarto.yml` and `templates/report.qmd` both set `embed-resources: true`. This is required: the rendered `report.html` is a single self-contained file (CSS, JS, fonts, images all inlined as base64). Without this, Quarto produces `report.html` plus a sibling `report_files/` directory of assets — and the moment the user shares just the HTML over chat, email, or any single-file channel, every stylesheet and script 404s on the recipient's machine. If you ever modify the template format block, keep `embed-resources: true`. To verify after a render: `grep -cE '(src|href)="https?://' report.html` should return `0` (or only return content links, not asset deps).
+
 ### Phase 1: Plan
 
 1. Parse the topic from `$ARGUMENTS` when invoked through a Claude command, or from the user's current message when invoked in Codex or natural language.

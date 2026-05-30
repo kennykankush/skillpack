@@ -46,6 +46,19 @@ else
   exit 1
 fi
 
+# Portability check: warn if any non-content external asset deps slipped in.
+# embed-resources should inline all CSS/JS/font/image refs. Content links (anchors,
+# external doc URLs) are fine. We flag only <link rel="stylesheet" href="http..."> and
+# <script src="http..."> which would 404 if the .html is shared without its sidecar.
+if grep -qE '<(link[^>]+rel="stylesheet"[^>]+href|script[^>]+src)="https?://' "$DEST/report.html"; then
+  echo "" >&2
+  echo "  ⚠  Portability warning: report.html references external CSS/JS over http(s)." >&2
+  echo "     This means embed-resources may not be set or has been overridden." >&2
+  echo "     Sharing this HTML over chat/email will break on the recipient's end." >&2
+  echo "     Check templates/_quarto.yml and templates/report.qmd for embed-resources: true" >&2
+  echo "" >&2
+fi
+
 # Open in default browser
 if command -v open >/dev/null 2>&1; then
   open "$DEST/report.html"
