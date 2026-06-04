@@ -1,7 +1,7 @@
 {
   "name": "workbench",
   "version": "0.6.3",
-  "description": "Personal dev workbench — research workflows, skill recommendations, conversation memory capture, and skill lifecycle management.",
+  "description": "Personal dev workbench - codebase mastery, research workflows, skill recommendations, skill distillation, conversation memory capture, and skill lifecycle management.",
   "author": {
     "name": "kennykankush",
     "url": "https://github.com/kennykankush"

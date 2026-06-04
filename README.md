@@ -20,7 +20,7 @@ Or, after publishing the repo:
 codex plugin marketplace add kennykankush/skillpack
 ```
 
-Then restart Codex, open `/plugins`, install the plugin you need, and start a new thread. In Codex, invoke bundled workflows with namespaced skills such as `$workbench:research-report`, `$workbench:skill-advisor`, `$workbench:memory-scriber`, `$workbench:max-prompt`, `$extra:trail-scriber`, `$agents:birdwatch`, or `$agents:autoreview`.
+Then restart Codex, open `/plugins`, install the plugin you need, and start a new thread. In Codex, invoke bundled workflows with namespaced skills such as `$workbench:devour`, `$workbench:research-report`, `$workbench:skill-advisor`, `$workbench:skill-distiller`, `$workbench:memory-scriber`, `$workbench:max-prompt`, `$videos:storyboard`, `$extra:trail-scriber`, `$agents:birdwatch`, or `$agents:autoreview`.
 
 ### Claude Code
 
@@ -31,6 +31,7 @@ Add the marketplace once, then install whichever plugins you want:
 /plugin install workbench@kennykankush-skillpack
 /plugin install extra@kennykankush-skillpack
 /plugin install agents@kennykankush-skillpack
+/plugin install videos@kennykankush-skillpack
 /reload-plugins
 ```
 
@@ -38,12 +39,13 @@ Add the marketplace once, then install whichever plugins you want:
 
 ### workbench
 
-The plugin that manages meta / everyday tooling. Four areas, five tools. Codex gets installable bundled skills and marketplace metadata; Claude Code gets plugin metadata, slash commands, and agents.
+The plugin that manages meta / everyday tooling. Five areas, seven tools. Codex gets installable bundled skills and marketplace metadata; Claude Code gets plugin skills, slash commands, and agents.
 
+- **Codebase mastery.** `devour` enters study and discovery mode before implementation. It builds a grounded atlas of a repo: terrain, runtime routes, temporal behavior, blast radius, safe extension points, verification commands, and unknowns.
 - **Research.** `research-report` runs deep dives that converge to exactly two files (`notes.md` + a Quarto-rendered `report.html`). Two modes off the same engine: official (writes files) and scan (inline only, promotable).
 - **Memory.** `memory-scriber` writes session residue into the active host's memory store: Claude Code project memory under `~/.claude/projects/<project-slug>/memory/`, or a mirrored Workbench project-memory convention under `~/.codex/memories/projects/<project-slug>/memory/` with Codex global files acting as routers.
 - **Prompting.** `max-prompt` turns vague feedback, screenshots, taste, and product instinct into implementation-ready prompts for coding agents.
-- **Skills (managing the toolkit itself).** `skill-advisor` reads your installed skill index and ranks 2 to 5 matches read-only. `skill-manager` (Claude agent) handles the full lifecycle across three install mechanisms (plugins, npx skills, skillfish), always proposing before executing.
+- **Skills (managing the toolkit itself).** `skill-advisor` reads your installed skill index and ranks 2 to 5 matches read-only. `skill-distiller` turns successful workflows into reusable skills. `skill-manager` (Claude agent) handles the full lifecycle across three install mechanisms (plugins, npx skills, skillfish), always proposing before executing.
 
 Full breakdown: [`plugins/workbench/README.md`](plugins/workbench/README.md)
 
@@ -64,6 +66,16 @@ Reusable agent operating modes, kept separate from Workbench meta-tools and Extr
 
 Full breakdown: [`plugins/agents/README.md`](plugins/agents/README.md)
 
+### videos
+
+Preproduction workflows for product-launch and AI-video-ready motion work.
+
+- **Storyboard.** `storyboard` creates cohesive product-launch frame sets with Codex imagegen, prompt logging, and frame-by-frame quality gating.
+- **Narrative and taste.** `launch-narrative` shapes the product film spine, while `style-contract` captures the reusable visual rules from screenshots, brand assets, and references.
+- **Production handoff.** `frame-qa` reviews generated frames, `batch-prep` creates upload-ready folders, and `motion-handoff` writes keyframe prompts and node workflows for AI video tools.
+
+Full breakdown: [`plugins/videos/README.md`](plugins/videos/README.md)
+
 ### More coming
 
 A plugin lands here once it has stuck in my own setup long enough that I trust it. Experiments stay in dotfiles.
@@ -76,6 +88,7 @@ New plugins should be portable first, host-specific second. If a workflow only w
 workbench   -> how I work with coding agents (meta)
 extra       -> small personal workflows outside the main Workbench bundle
 agents      -> reusable agent operating modes
+videos      -> product-launch and AI-video motion preproduction
 ...         -> other domains as they emerge
 ```
 

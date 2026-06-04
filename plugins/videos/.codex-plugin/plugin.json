@@ -21,7 +21,7 @@
   "interface": {
     "displayName": "Videos",
     "shortDescription": "Storyboard and product-launch motion preproduction workflows.",
-    "longDescription": "Opinionated storyboard workflows for product-launch and SaaS motion graphics. The storyboard skill studies product truth, source screenshots, brand assets, and taste references before generating cohesive frame sets with Codex imagegen. It logs prompts, vets every frame, and regenerates failures instead of manually editing frames.",
+    "longDescription": "Opinionated preproduction workflows for product-launch and SaaS motion graphics: narrative shaping, visual style contracts, storyboard generation with Codex imagegen, frame QA, upload batching, and AI-video motion handoff prompts.",
     "developerName": "kennykankush",
     "category": "Creativity",
     "capabilities": [
@@ -34,7 +34,8 @@
     "defaultPrompt": [
       "Create storyboard frames for this SaaS product launch.",
       "Turn these screenshots into a cohesive motion-design storyboard.",
-      "Make AI-video-ready storyboard batches from these frames."
+      "Make AI-video-ready storyboard batches from these frames.",
+      "Write a Higgsfield Canvas motion handoff prompt for these storyboard frames."
     ],
     "brandColor": "#00D4AA"
   }

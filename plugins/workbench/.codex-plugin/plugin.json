@@ -1,7 +1,7 @@
 {
   "name": "workbench",
   "version": "0.6.3",
-  "description": "Portable agent workbench: research workflows, skill recommendations, session memory capture, and prompt translation.",
+  "description": "Portable agent workbench: codebase mastery, research, skill recommendations, skill distillation, memory capture, and prompt translation.",
   "author": {
     "name": "kennykankush",
     "url": "https://github.com/kennykankush"
@@ -21,8 +21,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Workbench",
-    "shortDescription": "Portable research, memory, prompting, and skill-advice workflows.",
-    "longDescription": "A portable workbench for Codex and other coding agents: deep research reports, quick scans, installed-skill recommendations, prompt translation, and session memory capture. Codex loads these as bundled skills; other runtimes can expose their own adapters.",
+    "shortDescription": "Portable codebase mastery, research, memory, prompting, skill-advice, and skill-distillation workflows.",
+    "longDescription": "A portable workbench for Codex and other coding agents: codebase mastery mode, deep research reports, quick scans, installed-skill recommendations, workflow-to-skill distillation, prompt translation, and session memory capture. Codex loads these as bundled skills; other runtimes can expose their own adapters.",
     "developerName": "kennykankush",
     "category": "Productivity",
     "capabilities": [
@@ -33,8 +33,10 @@
     "websiteURL": "https://github.com/kennykankush/skillpack",
     "termsOfServiceURL": "https://github.com/kennykankush/skillpack/blob/main/LICENSE",
     "defaultPrompt": [
+      "DEVOUR this codebase before we change it.",
       "Run a quick research scan on this topic.",
       "Recommend the best installed skill for this task.",
+      "Distill this workflow into a reusable skill.",
       "Turn this feedback into a coding-agent prompt."
     ],
     "brandColor": "#10A37F"

@@ -178,14 +178,51 @@ Before batching, determine:
 - duration target
 - frame count
 - destination folder
-- target video tool and upload limit
+- target video or editing tool, if known
+- tool constraints, if known: image count, clip duration, keyframe support, start/end support, node workflow, upload size
 - whether prompt logs and contact sheets are needed
 
 Known upload planning examples:
 
 - Gemini/Omni: often split into 10-image chat batches.
 - Higgsfield: split into 9-image batches when needed.
+- Node-based AI video tools: often work better with a master storyboard plus smaller connected keyframe groups, not one huge image dump.
 - Manual motion tools: prefer fewer high-quality plates and editable text layers.
+
+For AI video tools, separate the master storyboard from tool limits:
+
+- Master storyboard: enough frames to create rhythm and breathing room, often 12-18 frames for a short product launch.
+- Delivery batches: copies grouped for the tool limit or workflow.
+- Stitch overlap: repeat one boundary frame between adjacent batches or generated clips when it helps continuity.
+- Motion prompts: write separate prompts for each grouped motion arc when the tool supports multi-image or keyframe-based generation.
+
+### 9. Preflight Decision Gate
+
+Before generating a full storyboard or motion-handoff package, make sure the following are either answered by the user or stated as assumptions:
+
+- output purpose: still storyboard only, AI-video input, manual editing reference, or finished-video planning
+- target tool/workflow: unknown, Gemini/Omni, Higgsfield, Runway, Krea, manual editor, Remotion/HyperFrames, etc.
+- desired final duration or approximate clip length
+- master frame count or acceptable range
+- whether the user wants strict product screenshots, stylized product frames, or a hybrid
+- text policy: exact generated text, textless plates, or editable text later
+- motion handoff needed: yes/no, and whether to create prompt files
+- batch/grouping constraints, if any
+- stitch strategy: clean in/out frames, overlapping boundary frames, or hard cuts
+
+If these decisions are not clear, do not blindly commit to a specific frame count or batching structure. Either ask a concise confirmation question or write an explicit assumption block before proceeding.
+
+Good assumption block:
+
+```text
+Assumptions before generating:
+- Target: AI-video input, not final rendered video.
+- Master storyboard: 12-15 frames.
+- Style: product-launch motion stills using real product UI as the source of truth.
+- Handoff: create prompt files only after the frame sequence is accepted.
+```
+
+Only skip this gate when the user explicitly asks for a fast draft or the missing details have a low impact on the result.
 
 ## Frame Strategy
 
@@ -201,6 +238,8 @@ Strong frame types:
 - invite/link module
 - leaderboard row slice
 - final brand frame
+- empty or near-empty stage frames for clean clip in/out
+- upright/front-facing UI plates for AI-video interpolation when a tool struggles with angled UI
 
 Weak frame types:
 
@@ -210,6 +249,8 @@ Weak frame types:
 - realistic cinematic sports scene
 - background full of decorative objects
 - reference concept copied verbatim
+- repeated centered glass cards with equal visual weight
+- using the same compositional trick on every frame, such as all angled UI plates or all centered cards
 
 ## Generation Workflow
 
@@ -297,6 +338,61 @@ higgsfield/batch-2/
 
 Respect platform image-count limits and preserve story order.
 
+### Step 9 - Motion Handoff Prompts
+
+Create motion-handoff prompts only when the user asks for AI-video input, clip generation prompts, editing guidance, or a tool-specific handoff. Do not make motion prompts a mandatory part of every storyboard.
+
+When making motion prompts, group frames by story arc, not by arbitrary count. Strong groups usually contain one of these arcs:
+
+- setup -> reveal -> resolved object
+- question -> product choice -> product action
+- action -> reaction -> confirmation
+- invitation -> proof -> brand resolve
+
+The grouping can be 2, 3, 4, 5, or more frames depending on the tool and the motion arc. Do not hard-code ranges such as 1-3 or 4-8 into the skill. Ask or infer based on the accepted storyboard.
+
+For each group, save a prompt file with a descriptive name. Examples:
+
+```text
+shot-agent-reveal.md
+shot-prediction-flow.md
+shot-social-proof.md
+shot-brand-resolve.md
+```
+
+If exact frame ranges are known and useful, include them in the filename, but treat this as project-specific:
+
+```text
+frames-04-08-prediction-flow.md
+```
+
+Every multi-image motion prompt should explicitly state how the images should be interpreted:
+
+```text
+Use the connected images as sequential keyframes in this exact chronological order:
+1. <describe keyframe 1>
+2. <describe keyframe 2>
+3. <describe keyframe 3>
+
+Animate one continuous product-launch motion graphic shot that flows through these keyframes in order.
+
+Do not treat the connected images as separate style references. They are the timeline.
+```
+
+When clips will be stitched, add a stitch strategy only if it matches the user's workflow:
+
+```text
+Animate the first keyframe in from a clean empty stage, and animate the final keyframe out into a clean empty stage, so this clip can be stitched smoothly with neighboring clips.
+```
+
+For UI-heavy keyframes, add stability constraints when needed:
+
+```text
+Keep the UI stable and preserve exact text, layout, colors, flags, scores, and typography. Do not warp, redesign, or invent new UI.
+```
+
+If the tool's image order is ambiguous, describe the intended order by content. Do not rely on visual node order alone.
+
 ## Prompt Pattern
 
 Use this compact pattern for imagegen prompts:
@@ -337,6 +433,14 @@ Reject/regenerate if any are true:
 - one frame has a different visual system from the rest
 - motion implied by the still is unclear
 - it looks like a realistic sports ad instead of product motion
+- downstream AI video would likely treat the frame as unstable because the UI is too angled, warped, cramped, or visually ambiguous
+
+For final AI-video-ready storyboards, also check sequence rhythm:
+
+- not every frame should carry the same amount of UI density
+- dense product frames should be separated by quieter hook, reaction, confirmation, social, or brand beats
+- action, reaction, and confirmation should usually be separate frames, not crammed into one
+- leaderboard/proof frames should make one row or one stat the hero rather than showing a busy table
 
 ## Voice And Video Prompting
 
