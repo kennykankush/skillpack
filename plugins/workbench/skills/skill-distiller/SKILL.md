@@ -1,6 +1,6 @@
 ---
 name: skill-distiller
-description: Distill a successful chat, project workflow, or repeated agent behavior into a reusable Codex or Claude skill. Use when the user wants to "skillify" a process, create a new skill from what just worked, generalize a workflow without overfitting one project, or update a skillpack/plugin with reusable instructions.
+description: Distill a successful chat, project workflow, repeated agent behavior, or a way of thinking into a reusable Codex or Claude skill. Use when the user wants to "skillify" a process, capture a reasoning/voice mode that just worked, create a new skill from what just worked, generalize a workflow without overfitting one project, or update a skillpack/plugin with reusable instructions.
 ---
 
 # Skill Distiller - Workflow To Reusable Skill
@@ -16,6 +16,7 @@ Use this skill for requests like:
 - "make this into a skill"
 - "skillify this workflow"
 - "distill what we did"
+- "capture this way of thinking / this mode"
 - "what did you need to know before executing?"
 - "make a videos/storyboard skill"
 - "add this to my skillpack"
@@ -27,12 +28,15 @@ Do not use this skill for ordinary task execution unless the user wants the work
 
 Before writing files, establish:
 
+- skill archetype: a **procedure/workflow** skill (does a task) or a **thinking-mode/voice** skill (installs a way of reasoning). This changes the shape — see Skill Shape.
 - target host: Codex, Claude Code, both, or host-agnostic
+- host coupling: does the skill touch host-specific paths or tools? If not, keep it host-agnostic and add **no** host-selection logic — a pure-reasoning skill is agnostic by default.
 - target package: existing plugin, flat skill folder, project-scoped skill, or new plugin
 - skill name and namespace
 - trigger phrases
 - workflow scope: what this skill should do
 - explicit exclusions: what this skill should not do
+- the skill's own worst failure mode, and the guard built into the skill to defend against it
 - required companion skills or tools
 - safety boundaries: file edits, generation, web research, destructive actions
 - required outputs
@@ -44,6 +48,7 @@ If the user is still shaping the concept, discuss foundations first. Do not rush
 
 Use these to extract the skill:
 
+- Is the prize a *procedure* or a *way of thinking / a voice*? If the latter, the feel is the spec — capture behavior and texture, not just steps.
 - What did the user repeatedly care about?
 - What mistakes did earlier attempts make?
 - What did the agent need to inspect before acting?
@@ -51,6 +56,8 @@ Use these to extract the skill:
 - What outputs made the workflow useful?
 - Which constraints were taste-specific, and which were generally useful?
 - Which tool pairing was essential?
+- What is this skill's own worst failure mode, and how can its core discipline guard against it?
+- What two maximally-different cases prove this generalizes? (you need at least two — see Avoiding Overfit)
 - What failure modes should future agents detect?
 - Which examples help without becoming mandatory one-off rules?
 
@@ -65,22 +72,52 @@ Do:
 - encode tool boundaries
 - encode output formats
 - encode failure diagnosis
-- include examples as examples
+- triangulate with two or more maximally-different worked examples (see Avoiding Overfit)
+- include examples as examples, labeled as instances with the abstract procedure above them
+- carry depth/provenance as "hidden bones" the agent uses but never recites at runtime
+- give the skill a runtime escape hatch: when it should decline and what to do instead
+- make the Quality Gate a falsifiable self-test with a redo trigger
 - include "do not use for" boundaries
 - state when to ask a concise question
 
 Do not:
 
 - hard-code one project's frame numbers, branch names, file paths, or product copy unless the skill is project-scoped
+- ship a skill with a single worked example — one point overfits
 - turn a successful example into the only valid workflow
+- recite a skill's "hidden bones" (academic scaffolding/provenance) to the user at runtime
+- force the procedure template onto a thinking-mode skill
 - bury important constraints in prose that is hard to scan
 - mix unrelated workflows into one skill
 - make the skill over-authoritative when the user still needs taste exploration
 - install global symlinks when plugin discovery is the intended path
 
+## Avoiding Overfit — the mechanism, not just the warning
+
+"Don't overfit" is useless as a warning by itself. Use the mechanism:
+
+- **Triangulate.** Use **two or more maximally-different worked examples**, not one. One
+  example teaches the agent to memorize a point; two distant ones force it to generalize
+  from the *delta* between them. Pick cases that differ in both *subject* and *frame*
+  (e.g. a CLI harness reasoned about via biology AND a bug-fix orchestrator via supply-chain
+  logistics — different target, different source domain).
+- **Examples are calibration, not scope.** Say so inside the skill: the examples tune the
+  *moves and the voice* — they are **not** the menu of allowed inputs. Put the abstract
+  procedure *above* the examples, label each one "one instance," and instruct the agent to
+  re-run from scratch and never default to an example's domain.
+- **Strip the one-off residue.** Names, paths, numbers, and product copy from the source
+  thread come out unless the skill is explicitly project-scoped.
+- **Guard the skill's own failure mode.** Name the worst way *this* skill fails, then build
+  the defense into the skill itself (the way a structural-analogy skill's "structural, not
+  surface" guard is pointed back at the skill's own analogies).
+
 ## Skill Shape
 
-Default `SKILL.md` structure:
+First decide the **archetype** — it changes the shape.
+
+### Procedure / workflow skills
+
+For skills that *do a task* (research, review, memory capture, migration):
 
 ```text
 ---
@@ -93,20 +130,50 @@ description: <trigger-oriented description>
 <One paragraph job definition.>
 
 ## Activation
+## When NOT to fire        # runtime escape hatch: shapes this skill should decline + what to do instead
 ## Preflight
 ## Workflow
 ## Output Format
-## Quality Gate
+## Quality Gate            # a falsifiable self-test, not just a heading (see below)
 ## What Not To Do
 ```
 
-Add sections only when they create operational clarity.
+### Thinking-mode / voice skills
+
+For skills that install a *way of reasoning or a conversational texture*. Here the **feel
+is the spec** — numbered steps alone cannot capture it:
+
+```text
+---
+name: <skill-name>
+description: <trigger-oriented description>
+---
+
+# <Title>
+
+<One paragraph: what the mode is and what it produces.>
+
+## The feel — this IS the spec   # behavioral/voice rules: how it talks, what it never does
+## When to proc / When NOT to proc
+## The loop                       # the moves, as a palette, not a forced march
+## Worked instances               # TWO+ maximally-different, labeled as instances
+## Guardrails                     # including the skill guarding its own failure mode
+## Quality gate                   # falsifiable: what a good run produced, else redo
+## The lineage — hidden bones     # provenance/rigor the agent uses but NEVER recites at runtime
+```
+
+Add or drop sections only for operational clarity. Two rules apply to **both** archetypes:
+
+- **Falsifiable Quality Gate.** A gate is a test, not a heading: *"a run is good only if it
+  produced X; a run that produced Y without X failed — redo."* Always write the redo trigger.
+- **Guard the skill's own failure mode.** Name this skill's worst way to fail, then build
+  the defense into the skill itself.
 
 ## Placement Rules
 
 Choose the narrowest natural home:
 
-- Workbench: meta-agent workflows, research, memory, prompt translation, skill lifecycle, toolkit operations.
+- Workbench: meta-agent workflows, research, memory, prompt translation, skill lifecycle, toolkit operations, reasoning/thinking modes.
 - Videos: storyboard, product-launch, AI-video handoff, batching, motion preproduction.
 - Agents: reusable operating modes like review, watcher, observer, closeout.
 - Extra: small personal workflows that do not belong in a larger vertical.
@@ -163,6 +230,10 @@ Notes:
 
 - Do not create a skill if the user only asked for a one-time answer.
 - Do not overfit a skill to the exact artifacts from one thread.
+- Do not ship a skill with a single worked example — use two or more that differ in subject and frame.
+- Do not force the procedure template onto a thinking-mode skill — capture its voice and feel instead.
+- Do not let the agent recite a skill's "hidden bones" (provenance/scaffolding) to the user at runtime.
+- Do not leave the Quality Gate as a vague heading — make it a falsifiable test with a redo trigger.
 - Do not skip preflight when the target host or package is unclear.
 - Do not edit memory files unless the user explicitly asks to update memory.
 - Do not use destructive git commands.
