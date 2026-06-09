@@ -77,6 +77,9 @@ Do:
 - carry depth/provenance as "hidden bones" the agent uses but never recites at runtime
 - give the skill a runtime escape hatch: when it should decline and what to do instead
 - make the Quality Gate a falsifiable self-test with a redo trigger
+- if the skill reads or writes a shared repo artifact (a ledger, map, or vision doc at
+  repo root), name the artifact and which sibling skills also touch it — wiring is part
+  of the skill
 - include "do not use for" boundaries
 - state when to ask a concise question
 
@@ -185,7 +188,7 @@ If the user says a plugin destination, use it.
 
 1. Inspect existing plugin or skill folder conventions.
 2. Draft the skill around triggers, boundaries, workflow, outputs, and failure modes.
-3. Create the folder and `SKILL.md` with `apply_patch`.
+3. Create the folder and `SKILL.md` with the host's file-editing tool.
 4. Update local README/catalog files when the repo uses them.
 5. Validate with `git diff --check` and any host validation commands that are available.
 6. Leave unrelated dirty files alone.

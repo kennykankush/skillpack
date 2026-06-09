@@ -1,19 +1,76 @@
 ---
 name: memory-scriber
-description: Capture a conversation's essence into the active host's memory directory. Supports Codex with a Workbench project-memory convention and Claude Code project memory without assuming the two plugin runtimes share state.
+description: Capture a conversation's essence into the active host's memory directory, and recall it back like a colleague - not a database. Use at the tail end of a substantive session ("log this", "memory-scribe this"), progressively during one ("scribe as we go", "checkpoint this"), or in reverse when the user asks "where did we leave off", "what do you remember about this project", "pick up the thread". Supports Codex with a Workbench project-memory convention and Claude Code project memory without assuming the two plugin runtimes share state.
 ---
 
 # Session Log
 
 ## When to use
 
-End of a conversation that had substance. The user says "log this", "capture this session", "memory-scribe this", or invokes `/session-log`.
+Three doors into the same skill:
+
+- **Tail end** (the classic): end of a conversation that had substance. The user says
+  "log this", "capture this session", "memory-scribe this", or invokes `/session-log`.
+- **Progressive** (during): the user says "scribe as we go" or "checkpoint this" — or a
+  session has clearly become heavy enough that losing it would hurt, in which case you
+  may offer once. See Progressive scribing.
+- **Recall** (the reverse): the user asks "where did we leave off?", "what do you
+  remember about this project?", "pick up the thread". See Recall.
 
 ## What you're doing
 
 You're writing what you learned from this conversation - the way a colleague internalizes a working session, not documents it. When your friend works with you for 6 hours on a project, he doesn't go home and write meeting minutes. He just... knows things now. How you think, what you care about, what you built together, where you left off, what to never do again.
 
 That's what this file is. The residue. The stuff that sticks.
+
+This is not a technical memory system — no graphs, no embeddings, no retrieval
+machinery. It mimics what happens to a *person* after a working session, in both
+directions: forming the memory, and walking back in the next day already knowing things.
+
+## Recall — the colleague walks back in
+
+Writing without reading is half a memory. When the user asks "where did we leave off?",
+"what do you remember about this project?", "pick up the thread" — or you're starting
+substantive work in a project you've scribed before — read the memory back:
+
+1. Resolve the active host and project slug the same way the write side does.
+2. Read the project `MEMORY.md` index, then open the dated session files that matter for
+   *this* moment — usually the most recent one, plus anything the index flags as relevant
+   to the current task.
+3. **Speak it like a colleague, never like a file.** "Last time we were deep in the
+   bedrock design — you'd just decided to decouple the dreamer into its own skill, and we
+   left off owing the vision backfill." Not a bullet dump, not file paths, not frontmatter.
+   The user should feel the thread being handed back, warm.
+4. Honesty over fabrication: if there's no memory for this project, say so plainly —
+   "we haven't scribed anything here before." Never invent a past. Never present another
+   project's residue as this one's.
+
+Recall is read-only. It never edits memory files.
+
+## Progressive scribing — memory forms during, not after
+
+A colleague's memory doesn't switch on at the end of the meeting — things stick the
+moment they land. And unlike a human, an agent can lose its memory *mid-meeting*:
+context compacts, sessions crash, terminals close. A six-hour session that dies before
+the tail-end scribe currently loses everything. Progressive scribing makes the residue
+crash-safe. Three layers:
+
+1. **Silent noticing (always, in-flow).** During a substantive session, notice what's
+   sticking — decisions crystallizing, taste revealed, pivots, the user's exact words
+   when they carry weight. No files, no announcements, no interruptions. A colleague
+   listening hard, not a stenographer reaching for his pad.
+2. **Quiet checkpoints (rare, at natural pauses).** When a major thread closes — a
+   decision lands, a phase completes, the session has clearly become historic — append a
+   short checkpoint to the session's dated memory file (create it early if needed, marked
+   as in-progress). Three lines in a hallway notebook, not a full entry. Allowed when the
+   user pre-authorized ("scribe as we go"), asked ("checkpoint this"), or — at most once
+   per session — when you offer at a genuinely heavy moment and they accept. Never
+   mid-riff, never as a flow-break.
+3. **Consolidation (tail end, the unchanged ritual).** The final scribe folds every
+   checkpoint into the one reflective entry — opener, the middle in your voice, the
+   journey. Checkpoints are drafts that merge, never fragments left behind. One session,
+   one entry, always. If a session died before consolidation, the next session's scribe
+   or recall finds the orphaned checkpoints and folds them in.
 
 ## Host selection
 
@@ -240,6 +297,17 @@ Match the substance. Some sessions need 3 paragraphs, some need 30.}
 - Quote the user when their phrasing reveals something.
 - Don't sanitize failures. Built and killed = important context.
 - Full-entry file naming: `{YYYY-MM-DD}_{session-name}.md`.
+- **Index weight budget.** A `MEMORY.md` index must stay readable in one sitting. As it
+  grows, collapse older entries to a single line each — the dated files keep the full
+  residue; the index is the retrieval signal, not the archive.
+- **Point at repo artifacts, never duplicate them.** If the session changed `VISION.md`,
+  `MAP.md`, or `AUDIT.md` (or any repo-owned document), the memory references them —
+  "we adopted the hospital twin, see VISION.md" — and never copies their content. Repo
+  truth lives in the repo; the memory keeps what it *meant*.
+- **Recall never fabricates.** No memory for this project means saying so. Another
+  project's residue is never presented as this one's.
+- **Checkpoints are drafts.** They exist to survive a crash, not to accumulate.
+  Consolidation always merges them into the single reflective entry.
 
 ## Gathering
 

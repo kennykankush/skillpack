@@ -88,14 +88,16 @@ Keep it tight. No preamble. No "I'll help you with that" fluff.
 - **Don't recommend skills the user doesn't have.** Only recommend from CATEGORIES.md.
 - **Don't be verbose.** 3 ranked recommendations beat 10 loose mentions.
 
-## User toolkit context (for grounding)
+## Toolkit grounding
 
-His skills live across three mechanisms:
-- **Plugins** (namespaced like `plugin:skill`) — `impeccable:*`, `gsap-skills:*`, `ui-design:*`, `ui-ux-pro-max:*`, `frontend-design:*`, `codex:*`
-- **Flat via npx skills** — things like `emil-design-eng`, `neon-postgres`, `hyperframes`, `text-to-speech`, `find-skills`
-- **Skillfish / hand-authored** — `ios-design`, `motion-design`, `lottie-animator`, `memory-scriber`
+The toolkit changes constantly — skills get installed, removed, and migrated across
+mechanisms (plugins, npx skills, skillfish, hand-authored). `CATEGORIES.md` and the live
+registries are the **only** source of truth. Never recommend from a remembered or assumed
+inventory; what was installed last month may be gone, and what's installed now may not be
+in any prior snapshot.
 
-Plus project-scoped skills in specific dirs (foundation-builder in jobber, element-quality in interfaces, chronicler + git-sync in fantopy-hadi). Don't recommend those outside their context.
+Project-scoped skills exist in some repos. Only recommend those inside their own
+project — respect scope.
 
 ## Example exchanges
 
