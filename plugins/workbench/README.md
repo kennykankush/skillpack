@@ -1,8 +1,8 @@
 # workbench
 
-Everyday agent workbench. Five areas, seven tools, one posture: opinionated, disciplined, no mess.
+Everyday agent workbench. Six areas, eleven tools, one posture: opinionated, disciplined, no mess.
 
-The workflow layer is meant to be portable. Codex, Claude Code, and future hosts can expose different invocation surfaces, but the codebase mastery, research, memory, prompt translation, skill-advice, and skill-distillation behaviors should remain the same.
+The workflow layer is meant to be portable. Codex, Claude Code, and future hosts can expose different invocation surfaces, but the codebase mastery, foundation audit, potential reading, vision keeping, systemic thinking, research, memory, prompt translation, skill-advice, and skill-distillation behaviors should remain the same.
 
 ## Install
 
@@ -14,7 +14,7 @@ From the `skillpack` repo:
 codex plugin marketplace add .
 ```
 
-Restart Codex, open `/plugins`, install `workbench`, and start a new thread. Codex invokes the workflows as bundled skills: `$workbench:devour`, `$workbench:research-report`, `$workbench:skill-advisor`, `$workbench:skill-distiller`, `$workbench:memory-scriber`, and `$workbench:max-prompt`.
+Restart Codex, open `/plugins`, install `workbench`, and start a new thread. Codex invokes the workflows as bundled skills: `$workbench:devour`, `$workbench:bedrock`, `$workbench:potential`, `$workbench:vision`, `$workbench:isomorph`, `$workbench:research-report`, `$workbench:skill-advisor`, `$workbench:skill-distiller`, `$workbench:memory-scriber`, and `$workbench:max-prompt`.
 
 ### Claude Code
 
@@ -30,7 +30,17 @@ Claude Code loads the plugin skills as portable workflows. Invoke `devour` in pl
 
 ### Codebase Mastery
 
-**`devour`** — Codebase study and discovery mode. It builds a working atlas of the repo before implementation: surface census, system topology, runtime routes, temporal map, blast-radius map, live probes, safe extension points, and unknowns. The point is not to read many files; the point is to gain enough grounded system intuition to know where and when a change will matter.
+**`devour`** — Codebase study and discovery mode. It builds a working atlas of the repo before implementation: surface census, system topology, runtime routes, temporal map, blast-radius map, live probes, safe extension points, and unknowns. The point is not to read many files; the point is to gain enough grounded system intuition to know where and when a change will matter. The atlas persists to `MAP.md` at the repo root — later devours, bedrock, and potential read it instead of starting from zero.
+
+**`bedrock`** — Foundation audit mode. After heavy build sprints, an adversarial inspector walks the building: stress-tests load-bearing logic to bank-grade (atomicity, double-fire, races, swallowed failures), limit-tests feature flows by actually running them, and files findings backed by runnable repros. Maintains an `AUDIT.md` ledger at repo root — every run opens with a regression sweep of past findings. Two modes: report (default) and report-then-fix.
+
+**`potential`** — Bedrock's generative counterpart: the developer across the street who reads the structure and sees what it wants to become. Surfaces features the building already implies (squeeze, birth, combine, expose, generalize), each cited to real beams and graded by honest distance (already-built / one-beam / new-wing). Two modes: open ("what does this want to become?") and wish ("I wish it could X" — the structure answers). Conversational like isomorph; never implements, never writes files.
+
+**`vision`** — Keeps what the building is *for* on file: one `VISION.md` at the repo root holding the verbatim spark, the experience promise, non-goals, taste principles, and current direction. Three moments: birth (carry a warroom exploration's distilled intent into a new repo), backfill (projects already alive with no vision doc), refresh (the doc drifted from current intent). Constitutional rule: the vision comes from the visionary — evidence drafts, the user's voice decides. Devour, bedrock, and potential all read it.
+
+### Thinking
+
+**`isomorph`** — Reason about a whole system by mapping it onto a mature, structurally-similar domain that already paid for its mistakes, then read that domain's laws back onto the system as invariants and blindspots. A thinking mode, not a file-producing workflow — with one exception: when the user adopts a twin as the project's design bible, it's recorded into `VISION.md` as the system shape, where bedrock audits against its laws, potential consults it for wishes, and devour labels the map in its language.
 
 ### Research
 
@@ -81,6 +91,10 @@ memory-scriber  → "preserve what I learned today"
 research-report → "go deep on something I want to know"
 max-prompt      → "turn this feeling into a buildable prompt"
 devour          → "study this codebase until you can change it safely"
+bedrock         → "prove the foundations still hold after all that building"
+potential       → "see what the building wants to become"
+vision          → "keep what the building is for written down and alive"
+isomorph        → "find the mature twin of this system and inherit its laws"
 ```
 
 Personal infrastructure for working with AI agents sustainably — not random utilities.
@@ -92,6 +106,10 @@ Personal infrastructure for working with AI agents sustainably — not random ut
 - `$workbench:research-report official <topic>` — full research pipeline
 - `$workbench:research-report scan <topic>` — quick research scan, no files
 - `$workbench:devour <repo/task>` — codebase mastery mode before implementation
+- `$workbench:bedrock [area] [fix]` — foundation audit; add `fix` for report-then-fix
+- `$workbench:potential [wish]` — what the building wants to become; pass a wish for wish mode
+- `$workbench:vision [backfill|refresh]` — write or revive the repo's VISION.md
+- `$workbench:isomorph <system>` — map the system onto its mature twin
 - `$workbench:skill-advisor <task>` — recommend from the installed toolkit
 - `$workbench:skill-distiller` — distill a workflow into a reusable skill
 - `$workbench:memory-scriber` — capture the current session

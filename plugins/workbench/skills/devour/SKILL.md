@@ -1,6 +1,6 @@
 ---
 name: devour
-description: Enter codebase mastery mode before implementation. Use when the user asks to DEVOUR a repo or codebase, learn everything, deeply onboard, map architecture, trace runtime flows, understand blast radius, or build intuition about where and when things happen in a system.
+description: Enter codebase mastery mode before implementation. Use when the user asks to DEVOUR a repo or codebase, learn everything, deeply onboard, map architecture, trace runtime flows, understand blast radius, or build intuition about where and when things happen in a system. Persists its atlas to MAP.md at the repo root so later runs, bedrock, and potential start from the map instead of zero.
 ---
 
 # Devour - Codebase Mastery Mode
@@ -45,6 +45,9 @@ Devour is allowed to run safe local discovery commands when useful:
 
 Devour must not silently mutate the project.
 
+- Exception, and the only one: devour's declared artifact is `MAP.md` at the repo root
+  (see Persist The Atlas). Writing or updating it is announced output, not silent
+  mutation. Everything else stays read-only.
 - Do not edit code while devouring unless the user explicitly shifts from study to implementation.
 - Do not run destructive commands, reset git state, apply migrations, wipe data, rotate credentials, push commits, deploy, or change remote state without explicit permission.
 - Do not mutate local auth, routing, database rows, or user state unless the user asks for that kind of probe.
@@ -66,10 +69,13 @@ Do not claim mastery just because many files were opened. Mastery means the agen
 Before deep study:
 
 1. Identify the real repo root and current working directory.
-2. Check current git branch and dirty state; do not disturb unrelated changes.
-3. Identify workspace shape: monorepo, app folders, packages, services, generated folders, vendored dependencies, docs, and scripts.
-4. Read top-level orientation files first: README, AGENTS, CLAUDE, package manifests, build files, env examples, docs indexes, and architecture notes when present.
-5. Ask at most one concise question only if the goal or safety boundary is genuinely ambiguous.
+2. If `MAP.md` exists at the repo root, read it first: it is a prior devour's persisted
+   atlas. Treat it as claims to verify, not truth — reconcile it against the real repo as
+   you study, and note what has drifted since it was written.
+3. Check current git branch and dirty state; do not disturb unrelated changes.
+4. Identify workspace shape: monorepo, app folders, packages, services, generated folders, vendored dependencies, docs, and scripts.
+5. Read top-level orientation files first: README, AGENTS, CLAUDE, VISION.md (the project's stated intent, when present), package manifests, build files, env examples, docs indexes, and architecture notes.
+6. Ask at most one concise question only if the goal or safety boundary is genuinely ambiguous.
 
 ## Workflow
 
@@ -214,6 +220,31 @@ Readiness
 
 Use file references when the host supports them. Avoid huge paste dumps. The value is in the connected map.
 
+### Persist The Atlas
+
+The atlas does not evaporate with the session. After synthesis, write it to `MAP.md` at
+the repo root — create it on the first devour, reconcile and update it on every devour
+after. Announce that it was written; if the user declines persistence, keep the atlas in
+chat only.
+
+Rules for `MAP.md`:
+
+- One file, readable in one sitting. Weight budget is law: compress, collapse stale
+  detail, never spawn a second map file.
+- Stamp each update with the date and the scope of what was actually studied.
+- If `VISION.md` declares an adopted system twin ("this is built as a hospital"), label
+  the atlas in both languages where it helps — `sessions/ = the wards` — so the map
+  speaks the building's own metaphor.
+- Keep the Unknowns section honest — a map that hides its blank regions is worse than no
+  map.
+- Future readers (a later devour, `bedrock`, `potential`, any agent) must treat it as
+  claims to verify, not truth. Write it so that spot-checking is easy: file references,
+  not prose vibes.
+
+This is what makes the family compound: bedrock orients its audit walk with `MAP.md`,
+potential reads it as the structure to dream from, and the next devour starts from a
+checkpoint instead of zero.
+
 ## Quality Gate
 
 Before saying the repo has been devoured, check whether you can answer:
@@ -236,8 +267,10 @@ For long devours:
 - Send short progress updates as the map sharpens.
 - Keep a running list of discovered subsystems, flows, and unknowns.
 - Do not disappear into endless reading without synthesizing.
-- If context or time is limited, produce a checkpoint atlas and say exactly what remains.
-- Prefer continuing from the checkpoint over restarting from scratch.
+- If context or time is limited, produce a checkpoint atlas, persist it to `MAP.md` with
+  its Unknowns section marking exactly what remains, and say so.
+- Prefer continuing from the checkpoint over restarting from scratch — that is what
+  `MAP.md` is for.
 
 ## What Not To Do
 

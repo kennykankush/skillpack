@@ -1,7 +1,7 @@
 {
   "name": "workbench",
-  "version": "0.6.3",
-  "description": "Portable agent workbench: codebase mastery, research, skill recommendations, skill distillation, memory capture, and prompt translation.",
+  "version": "0.7.0",
+  "description": "Portable agent workbench: codebase mastery, foundation audits, potential reading, vision keeping, systemic thinking, research, skill recommendations, skill distillation, memory capture, and prompt translation.",
   "author": {
     "name": "kennykankush",
     "url": "https://github.com/kennykankush"
@@ -34,6 +34,9 @@
     "termsOfServiceURL": "https://github.com/kennykankush/skillpack/blob/main/LICENSE",
     "defaultPrompt": [
       "DEVOUR this codebase before we change it.",
+      "Run a bedrock audit on the foundations.",
+      "Run potential - what does this codebase want to become?",
+      "Backfill this project's VISION.md.",
       "Run a quick research scan on this topic.",
       "Recommend the best installed skill for this task.",
       "Distill this workflow into a reusable skill.",

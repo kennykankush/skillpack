@@ -113,7 +113,10 @@ The shared posture across this repo:
 
 Everyday meta-work for coding agents.
 
-- [`workbench:devour`](plugins/workbench/skills/devour/SKILL.md) - Codebase mastery mode before risky implementation, refactors, migrations, debugging, or onboarding.
+- [`workbench:devour`](plugins/workbench/skills/devour/SKILL.md) - Codebase mastery mode before risky implementation, refactors, migrations, debugging, or onboarding. Persists its atlas to `MAP.md` at the repo root.
+- [`workbench:bedrock`](plugins/workbench/skills/bedrock/SKILL.md) - Foundation audit mode: adversarial inspection of load-bearing logic to bank-grade, limit-tested feature flows, runnable repros, and a persistent `AUDIT.md` ledger. Report or report-then-fix.
+- [`workbench:potential`](plugins/workbench/skills/potential/SKILL.md) - Generative counterpart to bedrock: reads the structure and surfaces what it wants to become, every vision cited to real beams and graded by honest distance. Open mode or wish mode; never implements, never writes files.
+- [`workbench:vision`](plugins/workbench/skills/vision/SKILL.md) - Keeps a project's `VISION.md` written and alive: birth (handoff from exploration), backfill (repos with no vision doc), refresh (drifted intent). The vision comes from the visionary - evidence drafts, the user's voice decides.
 - [`workbench:research-report`](plugins/workbench/skills/research-report/SKILL.md) - Deep research with scan mode for inline answers and official mode for `notes.md` plus rendered `report.html`.
 - [`workbench:memory-scriber`](plugins/workbench/skills/memory-scriber/SKILL.md) - Captures the residue of a meaningful session into the active host's memory directory.
 - [`workbench:max-prompt`](plugins/workbench/skills/max-prompt/SKILL.md) - Converts fuzzy feedback, screenshots, taste, or frustration into an implementation-ready coding-agent prompt.

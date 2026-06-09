@@ -1,6 +1,6 @@
 ---
 name: isomorph
-description: Reason about a whole system by mapping it onto a mature, structurally-similar domain that already paid for its mistakes, then read that domain's laws, invariants, and blindspots back onto the system. Use when the user wants the big-picture / first-principles view of an architecture, codebase, product, or vision; asks "what is this really like", "find the analogy", "what are we blind to", "think about this systemically / from first principles", "is this like X"; or wants to pressure-test a design by inheriting a proven domain's failure modes. A thinking mode, not a file-producing workflow.
+description: Reason about a whole system by mapping it onto a mature, structurally-similar domain that already paid for its mistakes, then read that domain's laws, invariants, and blindspots back onto the system. Use when the user wants the big-picture / first-principles view of an architecture, codebase, product, or vision; asks "what is this really like", "find the analogy", "what are we blind to", "think about this systemically / from first principles", "is this like X", or asks mid-conversation to "isomorph this" because the talk got too technical; or wants to pressure-test a design by inheriting a proven domain's failure modes. A thinking mode, not a file-producing workflow - with one exception: when the user adopts a twin as the project's design bible, offer to record it into VISION.md as the system shape.
 ---
 
 # Isomorph — Think About a System Through Its Mature Twin
@@ -48,6 +48,10 @@ That's decoration. Redo it.
 - "pressure-test this design" / "is this foundationally sound?"
 - the user is trying to *map out* a system they built intuitively and wants to engineer
   it deliberately, or to inherit a proven domain's failure modes.
+- the conversation has gone too technical and the user asks to "isomorph it" — translate
+  the technical material into the established world so they can *feel* it again.
+  Lightweight, conversational, no files; if a twin is already on file in VISION.md, speak
+  in that world rather than inventing a new one.
 
 ## When NOT to proc
 
@@ -91,6 +95,40 @@ all eight on a small problem is the kitchen-sink failure.
 
 **Output:** ranked invariants (esp. the violated ones), the blindspots, and any
 *architectural reframe* the twin implies. Keep it in the world's language.
+
+## When a twin gets adopted — black and white
+
+Most isomorph runs are ephemeral by design — casual analogising, mid-conversation
+comprehension, exploration. Those live in the chat and die with it. That is correct;
+never nag to persist them.
+
+But sometimes the user **adopts** the twin: "yes — this is built as a hospital; this is
+the design bible." An adopted twin is no longer conversation, it is architecture. Offer
+once to record it into `VISION.md` at the repo root (the vision skill's artifact), as the
+**system shape**: the twin's name and the one-to-one mapping in both languages — "intake
+desk = command input, triage = priority queue, wards = model sessions."
+
+Why black and white: every sibling skill reads VISION.md. With the twin on file, bedrock
+audits the building against the twin's laws, devour can label its map in both languages,
+potential answers wishes by asking how the twin does it, and future sessions inherit the
+architecture instead of re-deriving it from scratch.
+
+The system shape may be **composite**: real buildings often have different wings
+following different domains — an orchestrator whose happy path is a *factory* (material
+arrives, flows through stations, ships) and whose failure path is a *hospital* (a sick
+job is triaged, treated, discharged). Record each twin **with the region it owns and
+where the boundary runs**, so laws never get applied to the wrong wing. Each twin in a
+composite must still pass the structural guard *for its region* — a composite is two
+precise mappings with a border, not permission to grab whatever metaphor fits today.
+
+Two boundaries:
+
+- **Adoption is the user's word, never assumed.** One offer, their call. Everything else
+  stays file-free.
+- **The architect never does inspector paperwork.** Do not write worries or violated
+  invariants into AUDIT.md yourself — with the twin on file, bedrock derives the
+  testable deviations at audit time and owns the translation into its logbook. The
+  architect draws; the inspector drills.
 
 ## Two worked instances — calibration, NOT scope
 
