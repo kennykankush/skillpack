@@ -123,6 +123,7 @@ Everyday meta-work for coding agents.
 - [`workbench:skill-advisor`](plugins/workbench/skills/skill-advisor/SKILL.md) - Recommends from already-installed skills without installing anything.
 - [`workbench:skill-distiller`](plugins/workbench/skills/skill-distiller/SKILL.md) - Generalizes a successful workflow into a reusable `SKILL.md`.
 - [`workbench:isomorph`](plugins/workbench/skills/isomorph/SKILL.md) - Systemic-thinking mode that maps a system onto its mature twin in another domain to surface required invariants and blindspots.
+- [`workbench:scour`](plugins/workbench/skills/scour/SKILL.md) - Reality-check hotline: mid-conversation, go to the internet and ground a confident narrative against how the world actually does it (verify) or find the pattern when stuck (discover). Currency-aware, conversational, never answers from memory.
 - `skill-manager` - Claude Code agent for discovering, installing, updating, and cleaning up skills across multiple mechanisms.
 
 Full plugin docs: [`plugins/workbench/README.md`](plugins/workbench/README.md)

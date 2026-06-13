@@ -1,8 +1,8 @@
 # workbench
 
-Everyday agent workbench. Six areas, eleven tools, one posture: opinionated, disciplined, no mess.
+Everyday agent workbench. Six areas, twelve tools, one posture: opinionated, disciplined, no mess.
 
-The workflow layer is meant to be portable. Codex, Claude Code, and future hosts can expose different invocation surfaces, but the codebase mastery, foundation audit, potential reading, vision keeping, systemic thinking, research, memory, prompt translation, skill-advice, and skill-distillation behaviors should remain the same.
+The workflow layer is meant to be portable. Codex, Claude Code, and future hosts can expose different invocation surfaces, but the codebase mastery, foundation audit, potential reading, vision keeping, systemic thinking, reality-checking, research, memory, prompt translation, skill-advice, and skill-distillation behaviors should remain the same.
 
 ## Install
 
@@ -14,7 +14,7 @@ From the `skillpack` repo:
 codex plugin marketplace add .
 ```
 
-Restart Codex, open `/plugins`, install `workbench`, and start a new thread. Codex invokes the workflows as bundled skills: `$workbench:devour`, `$workbench:bedrock`, `$workbench:potential`, `$workbench:vision`, `$workbench:isomorph`, `$workbench:research-report`, `$workbench:skill-advisor`, `$workbench:skill-distiller`, `$workbench:memory-scriber`, and `$workbench:max-prompt`.
+Restart Codex, open `/plugins`, install `workbench`, and start a new thread. Codex invokes the workflows as bundled skills: `$workbench:devour`, `$workbench:bedrock`, `$workbench:potential`, `$workbench:vision`, `$workbench:isomorph`, `$workbench:scour`, `$workbench:research-report`, `$workbench:skill-advisor`, `$workbench:skill-distiller`, `$workbench:memory-scriber`, and `$workbench:max-prompt`.
 
 ### Claude Code
 
@@ -41,6 +41,8 @@ Claude Code loads the plugin skills as portable workflows. Invoke `devour` in pl
 ### Thinking
 
 **`isomorph`** — Reason about a whole system by mapping it onto a mature, structurally-similar domain that already paid for its mistakes, then read that domain's laws back onto the system as invariants and blindspots. A thinking mode, not a file-producing workflow — with one exception: when the user adopts a twin as the project's design bible, it's recorded into `VISION.md` as the system shape, where bedrock audits against its laws, potential consults it for wishes, and devour labels the map in its language.
+
+**`scour`** — The reality-check hotline. Mid-conversation, leave the closed room and go to the internet to ground what was just said. Two faces: verify (a confident narrative was just produced — pull the load-bearing claims and check each against real fetched sources: confirmed / wrong / oversimplified / outdated / no-consensus) and discover (stuck or starting fresh — find the dominant pattern and the gotchas). The evidence twin of isomorph; currency-aware (catches "true at training, the world moved"). Fast and conversational — never writes files, never answers from memory. Promotes to research-report when a reach cracks open something worth keeping.
 
 ### Research
 
@@ -95,6 +97,7 @@ bedrock         → "prove the foundations still hold after all that building"
 potential       → "see what the building wants to become"
 vision          → "keep what the building is for written down and alive"
 isomorph        → "find the mature twin of this system and inherit its laws"
+scour           → "open the window — check what we just said against the real world"
 ```
 
 Personal infrastructure for working with AI agents sustainably — not random utilities.
@@ -110,6 +113,7 @@ Personal infrastructure for working with AI agents sustainably — not random ut
 - `$workbench:potential [wish]` — what the building wants to become; pass a wish for wish mode
 - `$workbench:vision [backfill|refresh]` — write or revive the repo's VISION.md
 - `$workbench:isomorph <system>` — map the system onto its mature twin
+- `$workbench:scour [claim|problem]` — reality-check the conversation against the web
 - `$workbench:skill-advisor <task>` — recommend from the installed toolkit
 - `$workbench:skill-distiller` — distill a workflow into a reusable skill
 - `$workbench:memory-scriber` — capture the current session
