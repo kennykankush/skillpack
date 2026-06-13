@@ -1,6 +1,6 @@
 {
   "name": "agents",
-  "version": "0.1.1",
+  "version": "0.1.1+codex.20260613162746",
   "description": "Harness-agnostic agent operating modes for review closeout, watching, verifying, and carrying context across live work.",
   "author": {
     "name": "kennykankush",

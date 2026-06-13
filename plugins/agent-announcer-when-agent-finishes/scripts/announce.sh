@@ -828,6 +828,28 @@ PROMPT
       curl -fsS --max-time "${TAB_TTS_QWEN_SERVER_HEALTH_TIMEOUT_SEC:-0.8}" "${QWEN_SERVER_URL%/}/health" >/dev/null 2>&1
     }
 
+    reclaim_wedged_qwen_server() {
+      # A memory-starved server can keep holding the port without answering
+      # /health. A fresh start then dies with "Address already in use" and the
+      # wedged instance lingers, so every announcement falls through to `say`.
+      # When the port is held but health is failing, kill the squatter so a
+      # clean server can bind. Only ever runs after a failed health check.
+      command -v lsof >/dev/null 2>&1 || return 0
+      local port="$1" pids
+      [ -n "$port" ] || return 0
+      pids=$(lsof -ti "tcp:${port}" -sTCP:LISTEN 2>/dev/null)
+      [ -n "$pids" ] || return 0
+      echo "[$(date)] reclaiming wedged Qwen server on port $port (pids=$(echo $pids | tr '\n' ' '))" >> "$LOG"
+      kill $pids 2>/dev/null
+      for _ in 1 2 3 4 5 6; do
+        lsof -ti "tcp:${port}" -sTCP:LISTEN >/dev/null 2>&1 || return 0
+        sleep 0.5
+      done
+      pids=$(lsof -ti "tcp:${port}" -sTCP:LISTEN 2>/dev/null)
+      [ -n "$pids" ] && kill -9 $pids 2>/dev/null
+      sleep 0.5
+    }
+
     start_qwen_server_if_needed() {
       [ -n "$QWEN_SERVER_URL" ] || return 1
       command -v curl >/dev/null || return 1
@@ -861,6 +883,7 @@ PROMPT
 
       if mkdir "$QWEN_SERVER_LOCK" 2>/dev/null; then
         if ! qwen_server_healthy; then
+          reclaim_wedged_qwen_server "$QWEN_SERVER_PORT"
           SERVER_ARGS=(
             "$QWEN_SERVER_RUNNER"
             --voice "$QWEN_VOICE"
@@ -961,7 +984,15 @@ PROMPT
     TTS_START_MS=$(now_ms)
     AUDIO_READY_MS="$TTS_START_MS"
     log_audio_ready "say" "macos-say" "system-voice" "$TTS_START_MS" "$AUDIO_READY_MS"
-    say "$(tts_phrase_for_model "macos-say" "system-voice")" >>"$LOG" 2>&1
+    # Default the last-resort macOS voice to a female one (Samantha) so a
+    # fallback never surfaces as a jarring male system voice. Override with
+    # TAB_TTS_SAY_VOICE; falls back to the system default if it isn't installed.
+    SAY_VOICE="${TAB_TTS_SAY_VOICE:-Samantha}"
+    SAY_VOICE_ARGS=()
+    if [ -n "$SAY_VOICE" ] && say -v '?' 2>/dev/null | grep -qi "^${SAY_VOICE}[[:space:]]"; then
+      SAY_VOICE_ARGS=(-v "$SAY_VOICE")
+    fi
+    say "${SAY_VOICE_ARGS[@]}" "$(tts_phrase_for_model "macos-say" "system-voice")" >>"$LOG" 2>&1
     PLAY_DONE_MS=$(now_ms)
     emit_timing "success" "say" "macos-say" "system-voice" "" "" "$TTS_START_MS" "$AUDIO_READY_MS" "$PLAY_DONE_MS"
   }

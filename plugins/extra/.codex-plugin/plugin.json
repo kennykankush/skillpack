@@ -1,6 +1,6 @@
 {
   "name": "extra",
-  "version": "0.1.0",
+  "version": "0.1.0+codex.20260613162745",
   "description": "Small personal workflows that are useful enough to package but do not belong in Workbench.",
   "author": {
     "name": "kennykankush",
