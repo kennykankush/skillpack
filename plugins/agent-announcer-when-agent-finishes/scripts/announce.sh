@@ -850,6 +850,20 @@ PROMPT
       sleep 0.5
     }
 
+    system_memory_critical() {
+      # True when macOS reports memory pressure at/above the configured level. Used to
+      # DECLINE cold-loading the ~5GB TTS model onto an already-thrashing machine (which
+      # would only deepen swap and make the render time out -> male/`say` fallback). A
+      # warm, already-loaded server is still used; this gates only fresh starts.
+      # Levels: 1 normal, 2 warning, 4 critical. 0/unset disables the guard.
+      local threshold="${TAB_TTS_QWEN_SKIP_PRESSURE_LEVEL:-0}"
+      [ "$threshold" -gt 0 ] 2>/dev/null || return 1
+      local level
+      level=$(sysctl -n kern.memorystatus_vm_pressure_level 2>/dev/null) || return 1
+      [ -n "$level" ] || return 1
+      [ "$level" -ge "$threshold" ] 2>/dev/null
+    }
+
     start_qwen_server_if_needed() {
       [ -n "$QWEN_SERVER_URL" ] || return 1
       command -v curl >/dev/null || return 1
@@ -860,6 +874,11 @@ PROMPT
 
       if tab_tts_falsey "$QWEN_AUTO_SERVER"; then
         echo "[$(date)] Qwen warm server not running and auto start is disabled (url=$QWEN_SERVER_URL)" >> "$LOG"
+        return 1
+      fi
+
+      if system_memory_critical; then
+        echo "[$(date)] skipping Qwen cold-start: OS memory pressure >= ${TAB_TTS_QWEN_SKIP_PRESSURE_LEVEL} (1 normal/2 warn/4 crit); using light fallback to avoid worsening swap" >> "$LOG"
         return 1
       fi
 
