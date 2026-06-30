@@ -19,6 +19,11 @@ Use this skill when the user asks for any of these:
 - "onboard yourself to this repo"
 - "figure out the architecture and blast radius"
 
+There is also a two-brain variant, triggered by `devour collab` (e.g. `/devour collab`,
+`$devour collab`, optionally scoped: `devour collab src/api`). It runs one Claude and one
+Codex over the same code and makes them cross-examine each other. See **Collab Mode** below.
+Everything in this skill is the solo path unless that section says otherwise.
+
 Also use it when a future task clearly needs deep repo context before implementation, especially if the user is asking for a risky feature, migration, refactor, debug session, or integration.
 
 ## Host-Agnostic Contract
@@ -244,6 +249,86 @@ Rules for `MAP.md`:
 This is what makes the family compound: bedrock orients its audit walk with `MAP.md`,
 potential reads it as the structure to dream from, and the next devour starts from a
 checkpoint instead of zero.
+
+## Collab Mode
+
+Triggered by `devour collab`. Solo devour is one mind. Collab runs two *different* minds —
+one Claude, one Codex — over the same code, because their blindspots are **decorrelated**:
+two of the same harness miss the same things; one of each do not. The point is not
+throughput. It is catching what a single model is structurally blind to.
+
+### Roles
+
+- **Conductor** — the harness you invoked from. It does *not* devour. It launches the two
+  brains, carries messages between them, and merges as a disinterested third party.
+  Neutrality is the job: a conductor that also devoured would defend its own atlas.
+- **Two brains** — always one Claude and one Codex, never two of a kind. Whichever harness
+  is conducting, the *other* is spawned as the second brain, and the conductor's own
+  harness is spawned as a fresh, separate process for the first brain — never the
+  conductor's live session — so neither brain is also the judge.
+
+Both brains run **read-only**. The conductor owns every file write; `MAP.md` stays
+devour's only repo mutation.
+
+### How They Talk
+
+They do not hold a live conversation, and that is deliberate. They exchange **written
+atlases through the conductor, in rounds** — like two reviewers trading written reviews,
+not a phone call. Live chat would let them anchor on each other and re-correlate their
+blindspots; the whole value is that each forms a *complete independent model first*, then
+is forced to confront the other's.
+
+**Round 1 — Independent (blind).** Each brain devours the scope alone and emits a Devour
+Atlas. Neither sees the other. `file:line` references are mandatory here — they are what
+let the peer verify in round 2. Run the two in parallel (background the first, run the
+second alongside, join when both land):
+
+```text
+codex exec -s read-only -C <repo> -o <scratch>/atlas-codex.md  "$(cat <scratch>/brief.md)"
+claude -p --permission-mode plan "$(cat <scratch>/brief.md)"  > <scratch>/atlas-claude.md
+```
+
+**Round 2 — Critique.** The conductor hands each brain the *other's* atlas: "Re-enter the
+code and verify. Report (1) what they caught that you missed, (2) their claims you believe
+are wrong — with `file:line` proof, (3) what you now think you both missed." Each re-reads
+real files to check the other's citations. This is the blindspot exchange.
+
+**Round 3 — Rebuttal (the actual conversation).** The conductor hands each brain the
+critique written *about its own atlas*. Each concedes or defends with evidence. Two passes
+of written exchange make a real, grounded dialogue — mediated and on the record, so the
+conductor sees exactly where they converged and where they dug in. One critique+rebuttal
+cycle by default; loop again only if the user asks or genuine disagreements remain open.
+
+**Round 4 — Reconcile.** The conductor reads both atlases and the full exchange and writes
+the merged `MAP.md`, adding the section a solo devour cannot produce:
+
+- **Agreed map** — held by both, or asserted by one and verified by the other. Standard
+  Devour Atlas sections.
+- **Resolved** — what the exchange settled, with the deciding evidence.
+- **Contested / Unverified** — genuine standoffs, both positions with their citations:
+  `Claude: boot driven by init.ts:40. Codex: bootstrap.ts:12. Unresolved — inspect both.`
+  This is where a human looks first.
+
+Stamp the update: collab devour, the date, the scope, and the two harnesses with their
+model ids.
+
+### Mechanics And Guardrails
+
+- **Scratch lives outside the repo** (a temp/session dir): `brief.md`, the two atlases,
+  and the critique/rebuttal files. Only `MAP.md` lands in the repo. Drop scratch when done
+  unless the user wants it kept.
+- **The brief is self-contained.** Embed the condensed devour study contract, the scope,
+  and the output format into `brief.md`, so each brain runs a real devour without
+  depending on this skill being loaded in its host.
+- **Read-only asymmetry, by design.** Codex's read-only sandbox can still run read-only
+  probes (grep, tests that do not write); Claude in plan mode reads and reasons but will
+  not run probes headless. If a probe matters, the conductor runs it and feeds the result
+  into round 2. Note this rather than pretend symmetry.
+- **Cost.** Roughly 2x a full devour plus the exchange, so it is opt-in. For a quick map,
+  plain `devour` is right; reach for collab when the map must be *trusted* — before a risky
+  migration, an unfamiliar inherited repo, or a foundation audit.
+- **Host-agnostic.** Invoked from Claude → conductor Claude, brains `claude -p` +
+  `codex exec`. Invoked from Codex → mirror image. Same contract either way.
 
 ## Quality Gate
 
