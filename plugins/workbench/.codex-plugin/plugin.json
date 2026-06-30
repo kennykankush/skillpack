@@ -1,7 +1,7 @@
 {
   "name": "workbench",
-  "version": "0.8.0+codex.20260614185751",
-  "description": "Portable agent workbench: codebase mastery, foundation audits, potential reading, vision keeping, systemic thinking, reality-checking, research, skill recommendations, skill distillation, memory capture, and prompt translation.",
+  "version": "0.9.0+codex.20260701054054",
+  "description": "Portable agent workbench: codebase mastery, foundation audits, end-to-end simulation sweeps, potential reading, vision keeping, systemic thinking, reality-checking, research, skill recommendations, skill distillation, memory capture, and prompt translation.",
   "author": {
     "name": "kennykankush",
     "url": "https://github.com/kennykankush"
@@ -35,6 +35,7 @@
     "defaultPrompt": [
       "DEVOUR this codebase before we change it.",
       "Run a bedrock audit on the foundations.",
+      "Run the gauntlet on this user flow - sweep-test the machinery behind each step.",
       "Run potential - what does this codebase want to become?",
       "Backfill this project's VISION.md.",
       "Scour the web - are we on the right page about this?",

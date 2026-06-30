@@ -1,7 +1,7 @@
 {
   "name": "workbench",
-  "version": "0.8.0",
-  "description": "Personal dev workbench - codebase mastery, foundation audits, potential reading, vision keeping, systemic thinking, reality-checking, research workflows, skill recommendations, skill distillation, conversation memory capture, and skill lifecycle management.",
+  "version": "0.9.0",
+  "description": "Personal dev workbench - codebase mastery, foundation audits, potential reading, vision keeping, systemic thinking, reality-checking, end-to-end simulation sweeps, research workflows, skill recommendations, skill distillation, conversation memory capture, and skill lifecycle management.",
   "author": {
     "name": "kennykankush",
     "url": "https://github.com/kennykankush"

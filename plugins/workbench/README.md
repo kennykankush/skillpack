@@ -1,8 +1,8 @@
 # workbench
 
-Everyday agent workbench. Six areas, twelve tools, one posture: opinionated, disciplined, no mess.
+Everyday agent workbench. Six areas, thirteen tools, one posture: opinionated, disciplined, no mess.
 
-The workflow layer is meant to be portable. Codex, Claude Code, and future hosts can expose different invocation surfaces, but the codebase mastery, foundation audit, potential reading, vision keeping, systemic thinking, reality-checking, research, memory, prompt translation, skill-advice, and skill-distillation behaviors should remain the same.
+The workflow layer is meant to be portable. Codex, Claude Code, and future hosts can expose different invocation surfaces, but the codebase mastery, foundation audit, simulation sweeps, potential reading, vision keeping, systemic thinking, reality-checking, research, memory, prompt translation, skill-advice, and skill-distillation behaviors should remain the same.
 
 ## Install
 
@@ -14,7 +14,7 @@ From the `skillpack` repo:
 codex plugin marketplace add .
 ```
 
-Restart Codex, open `/plugins`, install `workbench`, and start a new thread. Codex invokes the workflows as bundled skills: `$workbench:devour`, `$workbench:bedrock`, `$workbench:potential`, `$workbench:vision`, `$workbench:isomorph`, `$workbench:scour`, `$workbench:research-report`, `$workbench:skill-advisor`, `$workbench:skill-distiller`, `$workbench:memory-scriber`, and `$workbench:max-prompt`.
+Restart Codex, open `/plugins`, install `workbench`, and start a new thread. Codex invokes the workflows as bundled skills: `$workbench:devour`, `$workbench:bedrock`, `$workbench:gauntlet`, `$workbench:potential`, `$workbench:vision`, `$workbench:isomorph`, `$workbench:scour`, `$workbench:research-report`, `$workbench:skill-advisor`, `$workbench:skill-distiller`, `$workbench:memory-scriber`, and `$workbench:max-prompt`.
 
 ### Claude Code
 
@@ -33,6 +33,8 @@ Claude Code loads the plugin skills as portable workflows. Invoke `devour` in pl
 **`devour`** — Codebase study and discovery mode. It builds a working atlas of the repo before implementation: surface census, system topology, runtime routes, temporal map, blast-radius map, live probes, safe extension points, and unknowns. The point is not to read many files; the point is to gain enough grounded system intuition to know where and when a change will matter. The atlas persists to `MAP.md` at the repo root — later devours, bedrock, and potential read it instead of starting from zero.
 
 **`bedrock`** — Foundation audit mode. After heavy build sprints, an adversarial inspector walks the building: stress-tests load-bearing logic to bank-grade (atomicity, double-fire, races, swallowed failures), limit-tests feature flows by actually running them, and files findings backed by runnable repros. Maintains an `AUDIT.md` ledger at repo root — every run opens with a regression sweep of past findings. Two modes: report (default) and report-then-fix.
+
+**`gauntlet`** — Bedrock's bigger sibling: run the whole product through its trials. Drive a realistic, goal-driven user journey end to end as the spine, and at every action sweep-test the *real* subsystem behind it — a surface pass (breadth across the journey that triages each touchpoint into a risk-ranked hit-list) funnelling into a deep pass (depth on the risky stations: a varied + adversarial population, breadth × volume, independent verification). It proves both that the user's experience held and that the machinery is sound — skeptical, flaw-hunting, the strongest independent oracle each subsystem affords, run safely and reversibly (snapshot → sweep → restore). A fusion of deterministic simulation testing, agent playtesting, synthetic user journeys, and the test-oracle problem; bedrock runs code to ground a claim, gauntlet drives a whole stateful lifecycle as god + user and verifies the truth it computes.
 
 **`potential`** — Bedrock's generative counterpart: the developer across the street who reads the structure and sees what it wants to become. Surfaces features the building already implies (squeeze, birth, combine, expose, generalize), each cited to real beams and graded by honest distance (already-built / one-beam / new-wing). Two modes: open ("what does this want to become?") and wish ("I wish it could X" — the structure answers). Conversational like isomorph; never implements, never writes files.
 
@@ -94,6 +96,7 @@ research-report → "go deep on something I want to know"
 max-prompt      → "turn this feeling into a buildable prompt"
 devour          → "study this codebase until you can change it safely"
 bedrock         → "prove the foundations still hold after all that building"
+gauntlet        → "run the whole product through its trials — drive it as god+user and verify the truth"
 potential       → "see what the building wants to become"
 vision          → "keep what the building is for written down and alive"
 isomorph        → "find the mature twin of this system and inherit its laws"
@@ -110,6 +113,7 @@ Personal infrastructure for working with AI agents sustainably — not random ut
 - `$workbench:research-report scan <topic>` — quick research scan, no files
 - `$workbench:devour <repo/task>` — codebase mastery mode before implementation
 - `$workbench:bedrock [area] [fix]` — foundation audit; add `fix` for report-then-fix
+- `$workbench:gauntlet <flow/system>` — drive a user journey end to end and sweep-test the machinery behind each step
 - `$workbench:potential [wish]` — what the building wants to become; pass a wish for wish mode
 - `$workbench:vision [backfill|refresh]` — write or revive the repo's VISION.md
 - `$workbench:isomorph <system>` — map the system onto its mature twin
