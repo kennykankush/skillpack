@@ -1,6 +1,6 @@
 {
   "name": "agent-announcer-when-agent-finishes",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Speaks a contextual handover summary (with Ghostty tab number) when Claude finishes a turn or needs input. Supports local Qwen, ElevenLabs, OpenAI TTS, and macOS say.",
   "author": {
     "name": "kennykankush",
