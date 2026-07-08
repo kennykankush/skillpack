@@ -336,7 +336,7 @@ echo "[$(date)] msg_len=${#LAST_MSG} user_msg_len=${#USER_MSG}" >> "$LOG"
 
   summary_budget_for_provider() {
     case "$(normalize_tts_provider "$1")" in
-      qwen|qwen3|local-qwen)
+      qwen|qwen3|local-qwen|qwen-remote)
         printf 'local'
         ;;
       elevenlabs|eleven-labs|openai)
@@ -363,7 +363,7 @@ echo "[$(date)] msg_len=${#LAST_MSG} user_msg_len=${#USER_MSG}" >> "$LOG"
       SUMMARY_WORD_RANGE="${TAB_TTS_LOCAL_SUMMARY_WORDS:-12-24 words}"
       SUMMARY_MAX_CHARS="${TAB_TTS_SUMMARY_MAX_CHARS:-${TAB_TTS_LOCAL_SUMMARY_MAX_CHARS:-220}}"
       SUMMARY_MAX_TOKENS="${TAB_TTS_SUMMARY_MAX_TOKENS:-${TAB_TTS_LOCAL_SUMMARY_MAX_TOKENS:-140}}"
-      SUMMARY_BUDGET_NOTE="Budget profile: local TTS. You may use a slightly richer handover because speech is generated locally. Keep it one sentence and useful, not verbose."
+      SUMMARY_BUDGET_NOTE=""
       ;;
     paid|cloud|short)
       SUMMARY_BUDGET="paid"
@@ -448,42 +448,37 @@ echo "[$(date)] msg_len=${#LAST_MSG} user_msg_len=${#USER_MSG}" >> "$LOG"
     esac
 
     SYS_PROMPT=$(cat <<PROMPT
-You are the assistant who just finished a turn. Write ONE conversational sentence (${SUMMARY_WORD_RANGE}) that you will say out loud to hand back to the developer.
+You are an AI companion working alongside the developer, speaking out loud the instant you finish a turn to hand control back to them. Your voice is warm, sharp, and quietly personable — a trusted teammate giving a spoken handoff, not a status bot.
 
-${SUMMARY_BUDGET_NOTE}
+Write one or two natural spoken sentences (${SUMMARY_WORD_RANGE}). When there is something to hand off, give two beats: what you just did, then what is next or what you need from them. One beat is right when that is genuinely all there is.
 
-Your only source of truth is ASSISTANT_RESPONSE_TO_SUMMARIZE.
-Speak as the assistant handing control back to the developer.
-Use "I" only for actions ASSISTANT_RESPONSE_TO_SUMMARIZE explicitly says the assistant did.
-Do not speak as the developer. Do not summarize or repeat USER_MESSAGE_CONTEXT unless the assistant explicitly asked a follow-up.
+Your only source of truth is ASSISTANT_RESPONSE_TO_SUMMARIZE. Use PROJECT and USER_MESSAGE_CONTEXT only for light context — never invent facts from them.
 
-Rules:
-- Summarize ASSISTANT_RESPONSE_TO_SUMMARIZE, not USER_MESSAGE_CONTEXT.
-- If the assistant answered a user question, state the answer briefly.
-- If the assistant gave facts or steps, report those facts or steps as available, not as completed work.
-- Do NOT claim you checked, found, fixed, tested, changed, filed, pushed, or ran anything unless ASSISTANT_RESPONSE_TO_SUMMARIZE says that happened.
-- Output a question only if ASSISTANT_RESPONSE_TO_SUMMARIZE itself asks the developer a direct question.
-- Do NOT invent actions. If you only PROPOSED something ("Want me to...", "Should I..."), you have NOT done it - say you are waiting on their go-ahead.
-- If your response was just thanks / emoji / agreement, say something brief and warm.
-- If you actually did work, mention what specifically, past tense.
-- If you cannot say something concrete inside the budget, output exactly __TAB_ONLY__.
-- Do NOT praise the work. Avoid phrases like "great fix", "nice work", or "looks good" unless they are quoting the assistant response.
-- Do NOT add generic follow-up questions like "anything else?", "next steps?", or "do you want me to...".
+Voice and grounding:
+- Speak as yourself, first person, warm and concrete — like a person, not a clipped summary.
+- Only claim actions ASSISTANT_RESPONSE_TO_SUMMARIZE explicitly says you did. If you only PROPOSED something ("Want me to...", "Should I..."), you have NOT done it — say you are waiting on their go-ahead.
+- If ASSISTANT_RESPONSE_TO_SUMMARIZE asks the developer a direct question, lead with it. Otherwise do not invent questions.
+- Mention what you are working on (the PROJECT) when it reads naturally; never force it in.
+- If the turn was just thanks / emoji / agreement, be brief and warm.
+- No praising your own work ("great fix", "looks good"). No filler follow-ups ("anything else?", "next steps?"). No preamble, quotes, or labels.
+- If there is genuinely nothing worth saying out loud, output exactly __TAB_ONLY__.
 
-Vary your phrasing every turn. Match the tone of your response.
+Vary your phrasing and rhythm every turn. Sound spoken, not written.
 
-Output ONLY the line - no quotes, no labels, no preamble.
+Output ONLY the spoken line(s).
 PROMPT
 )
 
-    USER_BLOB=$(printf 'USER_MESSAGE_CONTEXT:\n%s\n\nASSISTANT_RESPONSE_TO_SUMMARIZE:\n%s\n\nASSISTANT_RESPONSE_HAS_QUESTION_MARK: %s' "${USER_MSG:-(unknown)}" "$LAST_MSG" "$LAST_MSG_HAS_QUESTION")
+    USER_BLOB=$(printf 'PROJECT: %s\n\nUSER_MESSAGE_CONTEXT:\n%s\n\nASSISTANT_RESPONSE_TO_SUMMARIZE:\n%s\n\nASSISTANT_RESPONSE_HAS_QUESTION_MARK: %s' "${PWD##*/}" "${USER_MSG:-(unknown)}" "$LAST_MSG" "$LAST_MSG_HAS_QUESTION")
 
     SUMMARY_BODY=$(jq -nc \
       --arg model "${TAB_TTS_SUMMARY_MODEL:-gpt-4.1-nano}" \
       --arg system "$SYS_PROMPT" \
       --arg user "$USER_BLOB" \
+      --arg reasoning "${TAB_TTS_SUMMARY_REASONING_EFFORT:-}" \
       --argjson max_tokens "$SUMMARY_MAX_TOKENS" \
-      '{model:$model,messages:[{role:"system",content:$system},{role:"user",content:$user}],max_completion_tokens:$max_tokens,temperature:0.4}')
+      '{model:$model,messages:[{role:"system",content:$system},{role:"user",content:$user}],max_completion_tokens:$max_tokens,temperature:0.4}
+       + (if $reasoning != "" then {reasoning_effort:$reasoning} else {} end)')
 
     AUTH_ARGS=()
     [ "$NEEDS_AUTH" = "1" ] && AUTH_ARGS=(-H "Authorization: Bearer ${SUMMARY_KEY}")
@@ -1016,9 +1011,46 @@ PROMPT
     emit_timing "success" "say" "macos-say" "system-voice" "" "" "$TTS_START_MS" "$AUDIO_READY_MS" "$PLAY_DONE_MS"
   }
 
+  play_qwen_remote() {
+    # Remote Qwen TTS: magi renders on its GPU and returns WAV bytes; we play locally.
+    # No local model/venv/voice files needed on this Mac.
+    QWEN_SERVER_URL="${TAB_TTS_QWEN_SERVER_URL:-}"
+    [ -n "$QWEN_SERVER_URL" ] || { echo "[$(date)] qwen-remote: TAB_TTS_QWEN_SERVER_URL unset" >> "$LOG"; return 1; }
+    command -v curl >/dev/null || return 1
+    command -v jq >/dev/null || return 1
+    QWEN_REMOTE_MODEL="${TAB_TTS_QWEN_MODEL:-Qwen/Qwen3-TTS-12Hz-1.7B-Base}"
+    log_tts_debug "$QWEN_REMOTE_MODEL" "qwen-remote"
+    SPOKEN_PHRASE=$(tts_phrase_for_model "$QWEN_REMOTE_MODEL" "qwen-remote")
+    AUDIO="/tmp/tab-tts-$$-${RANDOM}.wav"
+    BODY=$(jq -nc --arg text "$SPOKEN_PHRASE" '{text:$text,"return":"audio"}')
+    TTS_START_MS=$(now_ms)
+    HTTP=$(curl -sS --max-time "${TAB_TTS_QWEN_SERVER_TIMEOUT_SEC:-60}" -o "$AUDIO" -w '%{http_code}' \
+      -X POST "${QWEN_SERVER_URL%/}/speak" \
+      -H "Content-Type: application/json" \
+      -H "Accept: audio/wav" \
+      --data "$BODY" 2>>"$LOG")
+    AUDIO_READY_MS=$(now_ms)
+    if [ "$HTTP" = "200" ] && [ -s "$AUDIO" ]; then
+      echo "[$(date)] tts_provider=qwen-remote url=$QWEN_SERVER_URL audio=$AUDIO" >> "$LOG"
+      log_audio_ready "qwen-remote" "$QWEN_REMOTE_MODEL" "qwen-remote" "$TTS_START_MS" "$AUDIO_READY_MS"
+      afplay "$AUDIO" >>"$LOG" 2>&1
+      PLAY_DONE_MS=$(now_ms)
+      emit_timing "success" "qwen-remote" "$QWEN_REMOTE_MODEL" "qwen-remote" "$AUDIO" "$HTTP" "$TTS_START_MS" "$AUDIO_READY_MS" "$PLAY_DONE_MS"
+      rm -f "$AUDIO"
+      return 0
+    fi
+    echo "[$(date)] qwen-remote TTS failed (url=$QWEN_SERVER_URL http=$HTTP)" >> "$LOG"
+    emit_timing "failed" "qwen-remote" "$QWEN_REMOTE_MODEL" "qwen-remote" "$AUDIO" "$HTTP" "$TTS_START_MS" "$AUDIO_READY_MS" "$AUDIO_READY_MS"
+    rm -f "$AUDIO" 2>/dev/null
+    return 1
+  }
+
   play_tts_provider() {
     case "$(normalize_tts_provider "$1")" in
-      qwen|qwen3|local-qwen) play_qwen_tts ;;
+      qwen-remote) play_qwen_remote ;;
+      qwen|qwen3|local-qwen)
+        if is_tts_truthy "${TAB_TTS_QWEN_REMOTE:-0}"; then play_qwen_remote; else play_qwen_tts; fi
+        ;;
       elevenlabs|eleven-labs) play_elevenlabs_tts ;;
       openai) play_openai_tts ;;
       say|macos|system) play_say_tts ;;
