@@ -311,766 +311,84 @@ fi
 MSG_DONE_MS=$(now_ms)
 echo "[$(date)] msg_len=${#LAST_MSG} user_msg_len=${#USER_MSG}" >> "$LOG"
 
-# ---- async: summary + TTS + playback ----
+# ---- async: hand the raw context to the dispatcher on magi, play what comes back ----
+# The dispatcher (dashboard.py :8080 /announce) now owns the writer (summary LLM) and the
+# mouth (TTS), plus the queue: admission control + per-session coalescing + staleness. This
+# hook is deliberately thin — it extracts context (above, sync) and plays audio (below).
 (
   ASYNC_START_MS=$(now_ms)
-  SUMMARY_ATTEMPTED=0
-  SUMMARY_START_MS=0
-  SUMMARY_DONE_MS=0
-  SUMMARY_MS=0
-  SUMMARY_STATUS="skipped"
-  SUMMARY_REJECT_REASON=""
-  # Per-hook metric only: 1 means this invocation launched the warm server.
-  # The real server state is checked via GET /health on the localhost server.
-  QWEN_SERVER_STARTED_THIS_RUN=0
-  QWEN_SERVER_WAIT_MS=0
-  PHRASE_READY_MS=0
-  PHRASE=""
+  DISPATCHER="${TAB_TTS_DISPATCHER_URL:-${TAB_TTS_QWEN_SERVER_URL:-}}"
+  CLIENT_TTL="${TAB_TTS_DISPATCHER_TIMEOUT_SEC:-45}"
 
-  normalize_tts_provider() {
-    printf '%s' "${1:-auto}" | tr '[:upper:]' '[:lower:]' | tr '_' '-'
-  }
+  # Coalescing key = the agent's session/transcript path (stable across a session's turns),
+  # so the dispatcher collapses a burst from ONE agent to its latest line while still serving
+  # other agents. Falls back to tty/cwd when no transcript path is present.
+  SESSION_KEY=$(printf '%s' "$STDIN_JSON" | jq -r '.transcript_path // .session_path // .conversation_path // empty' 2>/dev/null)
+  [ -n "$SESSION_KEY" ] || SESSION_KEY="${TTY:-$PWD}"
 
-  PRIMARY_PROVIDER=$(normalize_tts_provider "${TAB_TTS_PROVIDER:-${TAB_TTS_VOICE_CHANNEL:-${VOICE_CHANNEL:-auto}}}")
-  FALLBACK_PROVIDER=$(normalize_tts_provider "${TAB_TTS_FALLBACK_PROVIDER:-auto}")
+  HTTP=""; STATUS="failed"; LINE=""; SUMMARY_MS=0; RENDER_MS=0
+  TTS_START_MS=$(now_ms); AUDIO_READY_MS="$TTS_START_MS"; PLAY_DONE_MS="$TTS_START_MS"
 
-  summary_budget_for_provider() {
-    case "$(normalize_tts_provider "$1")" in
-      qwen|qwen3|local-qwen|qwen-remote)
-        printf 'local'
-        ;;
-      elevenlabs|eleven-labs|openai)
-        printf 'paid'
-        ;;
-      auto)
-        if [ -n "${ELEVENLABS_API_KEY:-}" ] || [ -n "${OPENAI_TTS_KEY:-}" ]; then
-          printf 'paid'
-        else
-          printf 'tab'
-        fi
-        ;;
-      *)
-        printf 'tab'
-        ;;
-    esac
-  }
+  if [ -n "$DISPATCHER" ] && command -v jq >/dev/null && command -v curl >/dev/null; then
+    BODY=$(jq -nc \
+      --arg last "$LAST_MSG" --arg user "$USER_MSG" --arg proj "${PWD##*/}" \
+      --arg tab "${TAB:-}" --arg cwd "$PWD" --arg session "$SESSION_KEY" --arg mode "$MODE" \
+      '{last_msg:$last,user_msg:$user,project:$proj,tab:$tab,cwd:$cwd,session:$session,mode:$mode}')
 
-  SUMMARY_BUDGET=$(normalize_tts_provider "${TAB_TTS_SUMMARY_BUDGET:-auto}")
-  [ "$SUMMARY_BUDGET" = "auto" ] && SUMMARY_BUDGET=$(summary_budget_for_provider "$PRIMARY_PROVIDER")
-  case "$SUMMARY_BUDGET" in
-    local|rich)
-      SUMMARY_BUDGET="local"
-      SUMMARY_WORD_RANGE="${TAB_TTS_LOCAL_SUMMARY_WORDS:-12-24 words}"
-      SUMMARY_MAX_CHARS="${TAB_TTS_SUMMARY_MAX_CHARS:-${TAB_TTS_LOCAL_SUMMARY_MAX_CHARS:-220}}"
-      SUMMARY_MAX_TOKENS="${TAB_TTS_SUMMARY_MAX_TOKENS:-${TAB_TTS_LOCAL_SUMMARY_MAX_TOKENS:-140}}"
-      SUMMARY_BUDGET_NOTE=""
-      ;;
-    paid|cloud|short)
-      SUMMARY_BUDGET="paid"
-      SUMMARY_WORD_RANGE="${TAB_TTS_PAID_SUMMARY_WORDS:-6-10 words}"
-      SUMMARY_MAX_CHARS="${TAB_TTS_SUMMARY_MAX_CHARS:-${TAB_TTS_PAID_SUMMARY_MAX_CHARS:-90}}"
-      SUMMARY_MAX_TOKENS="${TAB_TTS_SUMMARY_MAX_TOKENS:-${TAB_TTS_PAID_SUMMARY_MAX_TOKENS:-60}}"
-      SUMMARY_BUDGET_NOTE="Budget profile: paid TTS. Keep it extremely compact because every character can cost money. If the useful summary would become vague or awkward, output exactly __TAB_ONLY__."
-      ;;
-    tab|number|none)
-      SUMMARY_BUDGET="tab"
-      SUMMARY_WORD_RANGE="0 words"
-      SUMMARY_MAX_CHARS=0
-      SUMMARY_MAX_TOKENS=1
-      SUMMARY_BUDGET_NOTE="Budget profile: tab only."
-      SUMMARY_STATUS="skipped_budget"
-      ;;
-    *)
-      SUMMARY_BUDGET="paid"
-      SUMMARY_WORD_RANGE="${TAB_TTS_PAID_SUMMARY_WORDS:-6-10 words}"
-      SUMMARY_MAX_CHARS="${TAB_TTS_SUMMARY_MAX_CHARS:-${TAB_TTS_PAID_SUMMARY_MAX_CHARS:-90}}"
-      SUMMARY_MAX_TOKENS="${TAB_TTS_SUMMARY_MAX_TOKENS:-${TAB_TTS_PAID_SUMMARY_MAX_TOKENS:-60}}"
-      SUMMARY_BUDGET_NOTE="Budget profile: paid TTS. Keep it extremely compact because every character can cost money. If the useful summary would become vague or awkward, output exactly __TAB_ONLY__."
-      ;;
-  esac
-  case "$SUMMARY_MAX_CHARS" in ""|*[!0-9]*) SUMMARY_MAX_CHARS=120 ;; esac
-  case "$SUMMARY_MAX_TOKENS" in ""|*[!0-9]*) SUMMARY_MAX_TOKENS=80 ;; esac
-  echo "[$(date)] summary_budget=$SUMMARY_BUDGET words=\"$SUMMARY_WORD_RANGE\" max_chars=$SUMMARY_MAX_CHARS max_tokens=$SUMMARY_MAX_TOKENS provider=$PRIMARY_PROVIDER" >> "$LOG"
+    AUDIO="/tmp/tab-tts-$$-${RANDOM}.wav"
+    HDRS="/tmp/tab-tts-$$-${RANDOM}.hdr"
+    TTS_START_MS=$(now_ms)
+    HTTP=$(curl -sS --max-time "$CLIENT_TTL" -o "$AUDIO" -D "$HDRS" -w '%{http_code}' \
+      -X POST "${DISPATCHER%/}/announce" \
+      -H 'Content-Type: application/json' -H 'Accept: audio/wav' \
+      --data "$BODY" 2>>"$LOG")
+    AUDIO_READY_MS=$(now_ms)
 
-  # Try to generate a contextual summary.
-  # Endpoint defaults to OpenAI but can be repointed to any OpenAI-compatible API
-  # (Ollama, vLLM, llama.cpp, DeepSeek, Together, Groq, etc.) via TAB_TTS_SUMMARY_BASE_URL.
-  SUMMARY_BASE_URL="${TAB_TTS_SUMMARY_BASE_URL:-https://api.openai.com/v1}"
-  # Auth required only when not pointing at localhost
-  SUMMARY_KEY="${TAB_TTS_SUMMARY_KEY:-${OPENAI_TTS_KEY:-}}"
-  case "$SUMMARY_BASE_URL" in
-    *localhost*|*127.0.0.1*) NEEDS_AUTH=0 ;;
-    *) NEEDS_AUTH=1 ;;
-  esac
+    LINE=$(grep -i '^x-line:' "$HDRS" 2>/dev/null | sed 's/^[^:]*: *//;s/\r$//' | head -1)
+    SUMMARY_MS=$(grep -i '^x-summary-ms:' "$HDRS" 2>/dev/null | sed 's/^[^:]*: *//;s/\r$//' | head -1)
+    RENDER_MS=$(grep -i '^x-render-ms:' "$HDRS" 2>/dev/null | sed 's/^[^:]*: *//;s/\r$//' | head -1)
+    case "$SUMMARY_MS" in ""|*[!0-9]*) SUMMARY_MS=0 ;; esac
+    case "$RENDER_MS" in ""|*[!0-9]*) RENDER_MS=0 ;; esac
 
-  static_summary_from_response() {
-    printf '%s' "$LAST_MSG" | perl -0ne '
-      if (/Pushed to\s+`?([^`\n.]+?)`?\s+main\.\s+Commit:\s+`?([0-9a-f]{7,40})(?:\s+([^`\n]+))?`?/is) {
-        my $repo = $1;
-        my $hash = substr($2, 0, 7);
-        my $subject = $3 // "";
-        $repo =~ s/^\s+|\s+$//g;
-        $subject =~ s/^\s+|\s+$//g;
-        if ($subject ne "") {
-          print "Pushed " . $subject . " to " . $repo . " main.";
-        } else {
-          print "Pushed " . $repo . " main with commit " . $hash . ".";
-        }
-        exit;
-      }
-      if (/Verified\s+`?origin\/main`?\s+matches\s+local\s+`?HEAD`?/is) {
-        print "Verified origin main matches local HEAD.";
-        exit;
-      }
-    '
-  }
-
-  if [ "$MODE" = "summary" ] && [ "$SUMMARY_BUDGET" != "tab" ] && [ -n "$LAST_MSG" ]; then
-    STATIC_SUMMARY=$(static_summary_from_response)
-    if [ -n "$STATIC_SUMMARY" ]; then
-      SUMMARY="$STATIC_SUMMARY"
-      SUMMARY_STATUS="static"
-      echo "[$(date)] summary_static=\"$SUMMARY\"" >> "$LOG"
-      if [ -n "$TAB" ]; then
-        PHRASE="Tab ${TAB}: ${SUMMARY}"
-      else
-        PHRASE="$SUMMARY"
-      fi
-    fi
-  fi
-
-  if [ -z "$PHRASE" ] && [ "$MODE" = "summary" ] && [ "$SUMMARY_BUDGET" != "tab" ] && [ -n "$LAST_MSG" ] && command -v jq >/dev/null && { [ "$NEEDS_AUTH" = "0" ] || [ -n "$SUMMARY_KEY" ]; }; then
-    SUMMARY_ATTEMPTED=1
-    SUMMARY_STATUS="requested"
-    LAST_MSG_HAS_QUESTION=0
-    case "$LAST_MSG" in
-      *\?*) LAST_MSG_HAS_QUESTION=1 ;;
-    esac
-
-    SYS_PROMPT=$(cat <<PROMPT
-You are an AI companion working alongside the developer, speaking out loud the instant you finish a turn to hand control back to them. Your voice is warm, sharp, and quietly personable — a trusted teammate giving a spoken handoff, not a status bot.
-
-Write one or two natural spoken sentences (${SUMMARY_WORD_RANGE}). When there is something to hand off, give two beats: what you just did, then what is next or what you need from them. One beat is right when that is genuinely all there is.
-
-Your only source of truth is ASSISTANT_RESPONSE_TO_SUMMARIZE. Use PROJECT and USER_MESSAGE_CONTEXT only for light context — never invent facts from them.
-
-Voice and grounding:
-- Speak as yourself, first person, warm and concrete — like a person, not a clipped summary.
-- Only claim actions ASSISTANT_RESPONSE_TO_SUMMARIZE explicitly says you did. If you only PROPOSED something ("Want me to...", "Should I..."), you have NOT done it — say you are waiting on their go-ahead.
-- If ASSISTANT_RESPONSE_TO_SUMMARIZE asks the developer a direct question, lead with it. Otherwise do not invent questions.
-- Mention what you are working on (the PROJECT) when it reads naturally; never force it in.
-- If the turn was just thanks / emoji / agreement, be brief and warm.
-- No praising your own work ("great fix", "looks good"). No filler follow-ups ("anything else?", "next steps?"). No preamble, quotes, or labels.
-- If there is genuinely nothing worth saying out loud, output exactly __TAB_ONLY__.
-
-Vary your phrasing and rhythm every turn. Sound spoken, not written.
-
-Output ONLY the spoken line(s).
-PROMPT
-)
-
-    USER_BLOB=$(printf 'PROJECT: %s\n\nUSER_MESSAGE_CONTEXT:\n%s\n\nASSISTANT_RESPONSE_TO_SUMMARIZE:\n%s\n\nASSISTANT_RESPONSE_HAS_QUESTION_MARK: %s' "${PWD##*/}" "${USER_MSG:-(unknown)}" "$LAST_MSG" "$LAST_MSG_HAS_QUESTION")
-
-    SUMMARY_BODY=$(jq -nc \
-      --arg model "${TAB_TTS_SUMMARY_MODEL:-gpt-4.1-nano}" \
-      --arg system "$SYS_PROMPT" \
-      --arg user "$USER_BLOB" \
-      --arg reasoning "${TAB_TTS_SUMMARY_REASONING_EFFORT:-}" \
-      --argjson max_tokens "$SUMMARY_MAX_TOKENS" \
-      '{model:$model,messages:[{role:"system",content:$system},{role:"user",content:$user}],max_completion_tokens:$max_tokens,temperature:0.4}
-       + (if $reasoning != "" then {reasoning_effort:$reasoning} else {} end)')
-
-    AUTH_ARGS=()
-    [ "$NEEDS_AUTH" = "1" ] && AUTH_ARGS=(-H "Authorization: Bearer ${SUMMARY_KEY}")
-
-    SUMMARY_START_MS=$(now_ms)
-    RESP=$(curl -sS --max-time 15 \
-      -X POST "${SUMMARY_BASE_URL%/}/chat/completions" \
-      "${AUTH_ARGS[@]}" \
-      -H "Content-Type: application/json" \
-      --data "$SUMMARY_BODY" 2>>"$LOG")
-    SUMMARY_DONE_MS=$(now_ms)
-    SUMMARY_MS=$((SUMMARY_DONE_MS - SUMMARY_START_MS))
-    SUMMARY=$(printf '%s' "$RESP" | jq -r '.choices[0].message.content // empty' 2>/dev/null | tr '\n' ' ' | sed 's/^ *//;s/ *$//')
-
-    case "$SUMMARY" in
-      "__TAB_ONLY__"|TAB_ONLY|tab|Tab)
-        echo "[$(date)] summary budget chose tab-only" >> "$LOG"
-        SUMMARY_STATUS="budget_tab"
-        SUMMARY=""
-        ;;
-    esac
-
-    # Safety guard: a "summary" longer than ~200 chars is almost certainly the
-    # model echoing the input or rambling. Reject it and fall back to tab number.
-    if [ "${#SUMMARY}" -gt "$SUMMARY_MAX_CHARS" ]; then
-      echo "[$(date)] summary rejected (${#SUMMARY} chars > $SUMMARY_MAX_CHARS, budget=$SUMMARY_BUDGET): \"${SUMMARY:0:80}...\"" >> "$LOG"
-      SUMMARY_STATUS="rejected"
-      SUMMARY_REJECT_REASON="too_long"
-      SUMMARY=""
-    fi
-
-	    if [ -n "$SUMMARY" ] && [ "$LAST_MSG_HAS_QUESTION" = "0" ]; then
-	      CLEAN_SUMMARY=$(printf '%s' "$SUMMARY" | perl -CS -pe 's/\s+(Is there anything else[^?]*\?|Anything else[^?]*\?|Do you want me[^?]*\?|Should I[^?]*\?|Ready to[^?]*\?|Next steps\?)$//i; s/^(Great fix!|Nice work!|Looks good[.!]?)\s*//i; s/\s+$//')
-	      if [ -n "$CLEAN_SUMMARY" ] && [ "$CLEAN_SUMMARY" != "$SUMMARY" ]; then
-	        echo "[$(date)] summary stripped generic follow-up: \"$SUMMARY\" -> \"$CLEAN_SUMMARY\"" >> "$LOG"
-	        SUMMARY="$CLEAN_SUMMARY"
-	      fi
-	      case "$SUMMARY" in
-	        *\?)
-	          echo "[$(date)] summary rejected (question without assistant question): \"$SUMMARY\"" >> "$LOG"
-          SUMMARY_STATUS="rejected"
-          SUMMARY_REJECT_REASON="question_without_assistant_question"
-          SUMMARY=""
+    if [ "$HTTP" = "200" ] && [ -s "$AUDIO" ]; then
+      echo "[$(date)] dispatcher spoke: \"$LINE\" (summary_ms=$SUMMARY_MS render_ms=$RENDER_MS)" >> "$LOG"
+      afplay "$AUDIO" >>"$LOG" 2>&1
+      PLAY_DONE_MS=$(now_ms); STATUS="success"
+    elif [ "$HTTP" = "204" ] || [ "$HTTP" = "503" ]; then
+      # 204 = nothing worth speaking (coalesced/superseded/tab-only); 503 = shed under load.
+      # Either way we stay SILENT — no "Done.", no robotic `say`.
+      echo "[$(date)] dispatcher: nothing to play (http=$HTTP), staying silent" >> "$LOG"
+      PLAY_DONE_MS=$(now_ms); STATUS="silent"
+    else
+      echo "[$(date)] dispatcher unreachable/failed (http=$HTTP)" >> "$LOG"
+      PLAY_DONE_MS=$(now_ms); STATUS="failed"
+      # Degraded fallback is OFF by default: when magi is down, silence beats the robot voice.
+      # Set TAB_TTS_FALLBACK_ON_FAIL=1 to speak a minimal local `say` on hard failure.
+      case "${TAB_TTS_FALLBACK_ON_FAIL:-0}" in
+        1|true|TRUE|yes|YES|on|ON)
+          if [ -n "${TAB:-}" ]; then say -v "${TAB_TTS_SAY_VOICE:-Samantha}" "Tab ${TAB}." >>"$LOG" 2>&1; fi
           ;;
       esac
     fi
-
-    if [ -n "$SUMMARY" ]; then
-      SUMMARY_STATUS="accepted"
-    elif [ "$SUMMARY_STATUS" = "requested" ]; then
-      SUMMARY_STATUS="empty"
-    fi
-
-    echo "[$(date)] summary_base=$SUMMARY_BASE_URL model=${TAB_TTS_SUMMARY_MODEL:-gpt-4.1-nano} budget=$SUMMARY_BUDGET summary=\"$SUMMARY\"" >> "$LOG"
-
-    if [ -n "$SUMMARY" ]; then
-      if [ -n "$TAB" ]; then
-        PHRASE="Tab ${TAB}: ${SUMMARY}"
-      else
-        PHRASE="$SUMMARY"
-      fi
-    fi
+    rm -f "$AUDIO" "$HDRS" 2>/dev/null
+  else
+    echo "[$(date)] dispatcher not configured (set TAB_TTS_DISPATCHER_URL or TAB_TTS_QWEN_SERVER_URL)" >> "$LOG"
   fi
 
-  tab_only_phrase() {
-    if [ -n "$TAB" ]; then
-      printf 'Tab %s.' "$TAB"
-    else
-      printf 'Done.'
-    fi
-  }
-
-  # Fallbacks if summary unavailable
-  if [ -z "$PHRASE" ]; then
-    PHRASE="$(tab_only_phrase)"
-  fi
-  echo "[$(date)] phrase=\"$PHRASE\"" >> "$LOG"
-  PHRASE_READY_MS=$(now_ms)
-
-  # TTS + playback
-  is_tts_truthy() {
-    case "${1:-0}" in
-      1|true|TRUE|yes|YES|on|ON) return 0 ;;
-      *) return 1 ;;
-    esac
-  }
-
-  debug_tts_line() {
-    DEBUG_TAB="${TAB:-no-tab}"
-    DEBUG_SOURCE="${2:-unknown-source}"
-    printf '[%s] } %s } %s } %s }' "$1" "$DEBUG_TAB" "$DEBUG_SOURCE" "$PHRASE"
-  }
-
-  log_tts_debug() {
-    is_tts_truthy "${TAB_TTS_DEBUG:-0}" && echo "[$(date)] tts_debug=$(debug_tts_line "$1" "$2")" >> "$LOG"
-  }
-
-  tts_phrase_for_model() {
-    if is_tts_truthy "${TAB_TTS_DEBUG_SPEAK:-0}"; then
-      debug_tts_line "$1" "$2"
-    else
-      printf '%s' "$PHRASE"
-    fi
-  }
-
-  log_audio_ready() {
-    PROVIDER="$1"
-    MODEL_NAME="$2"
-    SOURCE_NAME="$3"
-    TTS_START="$4"
-    AUDIO_READY="$5"
-    TTS_MS=$((AUDIO_READY - TTS_START))
-    TOTAL_MS=$((AUDIO_READY - HOOK_START_MS))
-    echo "[$(date)] audio_ready run_id=$RUN_ID provider=$PROVIDER model=$MODEL_NAME source=$SOURCE_NAME tts_ms=${TTS_MS} total_to_audio_ready_ms=${TOTAL_MS}" >> "$LOG"
-  }
-
-  emit_timing() {
-    STATUS="$1"
-    PROVIDER="$2"
-    MODEL_NAME="$3"
-    SOURCE_NAME="$4"
-    AUDIO_PATH="$5"
-    HTTP_STATUS="$6"
-    TTS_START="$7"
-    AUDIO_READY="$8"
-    PLAY_DONE="$9"
-
-    if tab_tts_falsey "${TAB_TTS_TIMING:-1}"; then
-      return 0
-    fi
-
-    TTS_MS=$((AUDIO_READY - TTS_START))
-    PLAY_MS=$((PLAY_DONE - AUDIO_READY))
+  # ---- compact timing record (schema evolved: dispatcher path) ----
+  if ! tab_tts_falsey "${TAB_TTS_TIMING:-1}" && command -v jq >/dev/null; then
+    TTS_MS=$((AUDIO_READY_MS - TTS_START_MS))
+    PLAY_MS=$((PLAY_DONE_MS - AUDIO_READY_MS))
     HOOK_SYNC_MS=$((MSG_DONE_MS - HOOK_START_MS))
-    STDIN_MS=$((STDIN_DONE_MS - HOOK_START_MS))
-    TAB_MS=$((TAB_DONE_MS - STDIN_DONE_MS))
-    MSG_MS=$((MSG_DONE_MS - TAB_DONE_MS))
-    ASYNC_DELAY_MS=$((ASYNC_START_MS - MSG_DONE_MS))
-    PHRASE_READY_TOTAL_MS=$((PHRASE_READY_MS - HOOK_START_MS))
-    TOTAL_AUDIO_MS=$((AUDIO_READY - HOOK_START_MS))
-    TOTAL_PLAY_MS=$((PLAY_DONE - HOOK_START_MS))
-
-    echo "[$(date)] timing run_id=$RUN_ID status=$STATUS provider=$PROVIDER hook_sync_ms=$HOOK_SYNC_MS summary_ms=$SUMMARY_MS tts_ms=$TTS_MS play_ms=$PLAY_MS total_to_audio_ready_ms=$TOTAL_AUDIO_MS total_to_play_done_ms=$TOTAL_PLAY_MS" >> "$LOG"
-
-    command -v jq >/dev/null || return 0
+    TOTAL_PLAY_MS=$((PLAY_DONE_MS - HOOK_START_MS))
     jq -nc \
-      --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-      --arg run_id "$RUN_ID" \
-      --arg invoker "$INVOKER" \
-      --arg status "$STATUS" \
-      --arg provider "$PROVIDER" \
-      --arg model "$MODEL_NAME" \
-      --arg source "$SOURCE_NAME" \
-      --arg audio "$AUDIO_PATH" \
-      --arg http_status "$HTTP_STATUS" \
-      --arg mode "$MODE" \
-      --arg tab "${TAB:-}" \
-      --arg cwd "$PWD" \
-      --arg term "${TERM_PROGRAM:-}" \
-      --arg summary_base_url "$SUMMARY_BASE_URL" \
-      --arg summary_model "${TAB_TTS_SUMMARY_MODEL:-gpt-4.1-nano}" \
-      --arg summary_budget "$SUMMARY_BUDGET" \
-      --arg summary_word_range "$SUMMARY_WORD_RANGE" \
-      --arg summary_status "$SUMMARY_STATUS" \
-      --arg summary_reject_reason "$SUMMARY_REJECT_REASON" \
-      --arg fallback_provider "$FALLBACK_PROVIDER" \
-      --argjson hook_start_ms "$HOOK_START_MS" \
-      --argjson stdin_len "${#STDIN_JSON}" \
-      --argjson last_msg_len "${#LAST_MSG}" \
-      --argjson user_msg_len "${#USER_MSG}" \
-      --argjson phrase_chars "${#PHRASE}" \
-      --argjson stdin_ms "$STDIN_MS" \
-      --argjson tab_detect_ms "$TAB_MS" \
-      --argjson message_extract_ms "$MSG_MS" \
-      --argjson hook_sync_ms "$HOOK_SYNC_MS" \
-      --argjson async_delay_ms "$ASYNC_DELAY_MS" \
-      --argjson summary_attempted "$SUMMARY_ATTEMPTED" \
-      --argjson summary_ms "$SUMMARY_MS" \
-      --argjson qwen_server_started "$QWEN_SERVER_STARTED_THIS_RUN" \
-      --argjson qwen_server_wait_ms "$QWEN_SERVER_WAIT_MS" \
-      --argjson phrase_ready_ms "$PHRASE_READY_TOTAL_MS" \
-      --argjson tts_ms "$TTS_MS" \
-      --argjson play_ms "$PLAY_MS" \
-      --argjson total_to_audio_ready_ms "$TOTAL_AUDIO_MS" \
-      --argjson total_to_play_done_ms "$TOTAL_PLAY_MS" \
-      '{ts:$ts,run_id:$run_id,invoker:$invoker,status:$status,provider:$provider,model:$model,source:$source,audio:$audio,http_status:$http_status,mode:$mode,tab:$tab,cwd:$cwd,term:$term,summary_base_url:$summary_base_url,summary_model:$summary_model,summary_budget:$summary_budget,summary_word_range:$summary_word_range,summary_status:$summary_status,summary_reject_reason:$summary_reject_reason,fallback_provider:$fallback_provider,hook_start_ms:$hook_start_ms,stdin_len:$stdin_len,last_msg_len:$last_msg_len,user_msg_len:$user_msg_len,phrase_chars:$phrase_chars,stdin_ms:$stdin_ms,tab_detect_ms:$tab_detect_ms,message_extract_ms:$message_extract_ms,hook_sync_ms:$hook_sync_ms,async_delay_ms:$async_delay_ms,summary_attempted:$summary_attempted,summary_ms:$summary_ms,qwen_server_started:$qwen_server_started,qwen_server_wait_ms:$qwen_server_wait_ms,phrase_ready_ms:$phrase_ready_ms,tts_ms:$tts_ms,play_ms:$play_ms,total_to_audio_ready_ms:$total_to_audio_ready_ms,total_to_play_done_ms:$total_to_play_done_ms}' >> "$TIMING_LOG" 2>/dev/null
-  }
-
-  play_openai_tts() {
-    [ -n "${OPENAI_TTS_KEY:-}" ] || return 1
-    command -v jq >/dev/null || return 1
-    command -v curl >/dev/null || return 1
-    VOICE="${TAB_TTS_VOICE:-nova}"
-    TTS_MODEL="${TAB_TTS_MODEL:-gpt-4o-mini-tts}"
-    INSTRUCTIONS="${TAB_TTS_INSTRUCTIONS:-Speak in a warm, soft, slightly playful and intimate tone. Relaxed and unhurried, like a close friend leaning in.}"
-    log_tts_debug "$TTS_MODEL" "$VOICE"
-    SPOKEN_PHRASE=$(tts_phrase_for_model "$TTS_MODEL" "$VOICE")
-    AUDIO="/tmp/tab-tts-$$-${RANDOM}.mp3"
-    BODY=$(jq -nc \
-      --arg model "$TTS_MODEL" \
-      --arg voice "$VOICE" \
-      --arg input "$SPOKEN_PHRASE" \
-      --arg instructions "$INSTRUCTIONS" \
-      '{model:$model,voice:$voice,input:$input,instructions:$instructions}')
-    TTS_START_MS=$(now_ms)
-    HTTP=$(curl -sS -o "$AUDIO" -w '%{http_code}' \
-      -X POST https://api.openai.com/v1/audio/speech \
-      -H "Authorization: Bearer ${OPENAI_TTS_KEY}" \
-      -H "Content-Type: application/json" \
-      --data "$BODY" 2>>"$LOG")
-    AUDIO_READY_MS=$(now_ms)
-    if [ "$HTTP" = "200" ] && [ -s "$AUDIO" ]; then
-      echo "[$(date)] tts_provider=openai model=$TTS_MODEL voice=$VOICE http=$HTTP" >> "$LOG"
-      log_audio_ready "openai" "$TTS_MODEL" "$VOICE" "$TTS_START_MS" "$AUDIO_READY_MS"
-      afplay "$AUDIO" >>"$LOG" 2>&1
-      PLAY_DONE_MS=$(now_ms)
-      emit_timing "success" "openai" "$TTS_MODEL" "$VOICE" "$AUDIO" "$HTTP" "$TTS_START_MS" "$AUDIO_READY_MS" "$PLAY_DONE_MS"
-      rm -f "$AUDIO"
-      return 0
-    fi
-    echo "[$(date)] OpenAI TTS failed (http=$HTTP)" >>"$LOG"
-    emit_timing "failed" "openai" "$TTS_MODEL" "$VOICE" "$AUDIO" "$HTTP" "$TTS_START_MS" "$AUDIO_READY_MS" "$AUDIO_READY_MS"
-    rm -f "$AUDIO" 2>/dev/null
-    return 1
-  }
-
-  elevenlabs_credit_check_ok() {
-    [ "${ELEVENLABS_CHECK_CREDITS:-1}" = "1" ] || return 0
-    command -v jq >/dev/null || return 0
-    command -v curl >/dev/null || return 0
-    SUBSCRIPTION=$(curl -sS --max-time 8 \
-      -H "xi-api-key: ${ELEVENLABS_API_KEY}" \
-      https://api.elevenlabs.io/v1/user/subscription 2>>"$LOG") || return 0
-    CHARACTER_COUNT=$(printf '%s' "$SUBSCRIPTION" | jq -r '.character_count // empty' 2>/dev/null)
-    CHARACTER_LIMIT=$(printf '%s' "$SUBSCRIPTION" | jq -r '.character_limit // empty' 2>/dev/null)
-    case "$CHARACTER_COUNT" in ""|*[!0-9]*) return 0 ;; esac
-    case "$CHARACTER_LIMIT" in ""|*[!0-9]*) return 0 ;; esac
-    MIN_REMAINING="${ELEVENLABS_MIN_REMAINING_CREDITS:-200}"
-    case "$MIN_REMAINING" in ""|*[!0-9]*) MIN_REMAINING=200 ;; esac
-    REMAINING=$((CHARACTER_LIMIT - CHARACTER_COUNT))
-    NEEDED=$((${#PHRASE} + MIN_REMAINING))
-    echo "[$(date)] elevenlabs_credits remaining=$REMAINING phrase_chars=${#PHRASE} reserve=$MIN_REMAINING" >> "$LOG"
-    [ "$REMAINING" -ge "$NEEDED" ]
-  }
-
-  play_elevenlabs_tts() {
-    [ -n "${ELEVENLABS_API_KEY:-}" ] || return 1
-    command -v jq >/dev/null || return 1
-    command -v curl >/dev/null || return 1
-    elevenlabs_credit_check_ok || {
-      echo "[$(date)] ElevenLabs TTS skipped: low credits" >> "$LOG"
-      return 1
-    }
-    ELEVEN_VOICE_ID="${ELEVENLABS_VOICE_ID:-JBFqnCBsd6RMkjVDRZzb}"
-    ELEVEN_MODEL_ID="${ELEVENLABS_MODEL_ID:-eleven_flash_v2_5}"
-    ELEVEN_OUTPUT_FORMAT="${ELEVENLABS_OUTPUT_FORMAT:-mp3_44100_128}"
-    log_tts_debug "$ELEVEN_MODEL_ID" "$ELEVEN_VOICE_ID"
-    SPOKEN_PHRASE=$(tts_phrase_for_model "$ELEVEN_MODEL_ID" "$ELEVEN_VOICE_ID")
-    AUDIO="/tmp/tab-tts-$$-${RANDOM}.mp3"
-    BODY=$(jq -nc \
-      --arg text "$SPOKEN_PHRASE" \
-      --arg model "$ELEVEN_MODEL_ID" \
-      '{text:$text,model_id:$model}')
-    TTS_START_MS=$(now_ms)
-    HTTP=$(curl -sS -o "$AUDIO" -w '%{http_code}' \
-      -X POST "https://api.elevenlabs.io/v1/text-to-speech/${ELEVEN_VOICE_ID}?output_format=${ELEVEN_OUTPUT_FORMAT}" \
-      -H "xi-api-key: ${ELEVENLABS_API_KEY}" \
-      -H "Accept: audio/mpeg" \
-      -H "Content-Type: application/json" \
-      --data "$BODY" 2>>"$LOG")
-    AUDIO_READY_MS=$(now_ms)
-    if [ "$HTTP" = "200" ] && [ -s "$AUDIO" ]; then
-      echo "[$(date)] tts_provider=elevenlabs model=$ELEVEN_MODEL_ID voice=$ELEVEN_VOICE_ID output=$ELEVEN_OUTPUT_FORMAT http=$HTTP" >> "$LOG"
-      log_audio_ready "elevenlabs" "$ELEVEN_MODEL_ID" "$ELEVEN_VOICE_ID" "$TTS_START_MS" "$AUDIO_READY_MS"
-      afplay "$AUDIO" >>"$LOG" 2>&1
-      PLAY_DONE_MS=$(now_ms)
-      emit_timing "success" "elevenlabs" "$ELEVEN_MODEL_ID" "$ELEVEN_VOICE_ID" "$AUDIO" "$HTTP" "$TTS_START_MS" "$AUDIO_READY_MS" "$PLAY_DONE_MS"
-      rm -f "$AUDIO"
-      return 0
-    fi
-    echo "[$(date)] ElevenLabs TTS failed (http=$HTTP)" >>"$LOG"
-    emit_timing "failed" "elevenlabs" "$ELEVEN_MODEL_ID" "$ELEVEN_VOICE_ID" "$AUDIO" "$HTTP" "$TTS_START_MS" "$AUDIO_READY_MS" "$AUDIO_READY_MS"
-    rm -f "$AUDIO" 2>/dev/null
-    return 1
-  }
-
-  play_qwen_tts() {
-    QWEN_PYTHON="${TAB_TTS_QWEN_PYTHON:-$HOME/dev/voicepack/.venv-qwen/bin/python}"
-    QWEN_RUNNER="${TAB_TTS_QWEN_RUNNER:-$HOME/dev/voicepack/runners/qwen/speak.py}"
-    QWEN_VOICE="${TAB_TTS_QWEN_VOICE:-${TAB_TTS_QWEN_VOICEPACK:-$HOME/dev/voicepack/library/cortana}}"
-    QWEN_DEVICE="${TAB_TTS_QWEN_DEVICE:-}"
-    QWEN_DTYPE="${TAB_TTS_QWEN_DTYPE:-}"
-    QWEN_MODEL="${TAB_TTS_QWEN_MODEL:-}"
-    QWEN_SEED="${TAB_TTS_QWEN_SEED:-}"
-    QWEN_AUTO_SERVER="${TAB_TTS_QWEN_AUTO_SERVER:-1}"
-    QWEN_SERVER_URL="${TAB_TTS_QWEN_SERVER_URL:-}"
-    if [ -z "$QWEN_SERVER_URL" ] && ! tab_tts_falsey "$QWEN_AUTO_SERVER"; then
-      QWEN_SERVER_URL="http://127.0.0.1:8765"
-    fi
-    AUDIO="/tmp/tab-tts-$$-${RANDOM}.wav"
-    QWEN_DEBUG_MODEL="${QWEN_MODEL:-Qwen/Qwen3-TTS-12Hz-1.7B-Base}"
-
-    [ -x "$QWEN_PYTHON" ] || {
-      echo "[$(date)] Qwen TTS unavailable: python not executable at $QWEN_PYTHON" >> "$LOG"
-      return 1
-    }
-    [ -r "$QWEN_RUNNER" ] || {
-      echo "[$(date)] Qwen TTS unavailable: runner not readable at $QWEN_RUNNER" >> "$LOG"
-      return 1
-    }
-    if [ -r "$QWEN_VOICE/voice.json" ]; then
-      QWEN_VOICE_ARGS=(--voice "$QWEN_VOICE")
-    elif [ -r "$QWEN_VOICE/voicepack.json" ]; then
-      QWEN_VOICE_ARGS=(--voicepack "$QWEN_VOICE")
-    else
-      echo "[$(date)] Qwen TTS unavailable: voice metadata missing at $QWEN_VOICE" >> "$LOG"
-      return 1
-    fi
-    if [ -r "$QWEN_VOICE/voice.pt" ]; then
-      :
-    elif [ -r "$QWEN_VOICE/qwen_voice_prompt.pt" ]; then
-      :
-    else
-      echo "[$(date)] Qwen TTS unavailable: voice prompt missing in $QWEN_VOICE" >> "$LOG"
-      return 1
-    fi
-
-    SPOKEN_PHRASE=$(tts_phrase_for_model "$QWEN_DEBUG_MODEL" "$QWEN_VOICE")
-    QWEN_ARGS=(
-      "$QWEN_RUNNER"
-      "${QWEN_VOICE_ARGS[@]}"
-      --text "$SPOKEN_PHRASE"
-      --output "$AUDIO"
-    )
-    [ -n "$QWEN_DEVICE" ] && QWEN_ARGS+=(--device "$QWEN_DEVICE")
-    [ -n "$QWEN_DTYPE" ] && QWEN_ARGS+=(--dtype "$QWEN_DTYPE")
-    [ -n "$QWEN_MODEL" ] && QWEN_ARGS+=(--model "$QWEN_MODEL")
-    [ -n "$QWEN_SEED" ] && QWEN_ARGS+=(--seed "$QWEN_SEED")
-    log_tts_debug "$QWEN_DEBUG_MODEL" "$QWEN_VOICE"
-
-    qwen_server_healthy() {
-      curl -fsS --max-time "${TAB_TTS_QWEN_SERVER_HEALTH_TIMEOUT_SEC:-0.8}" "${QWEN_SERVER_URL%/}/health" >/dev/null 2>&1
-    }
-
-    reclaim_wedged_qwen_server() {
-      # A memory-starved server can keep holding the port without answering
-      # /health. A fresh start then dies with "Address already in use" and the
-      # wedged instance lingers, so every announcement falls through to `say`.
-      # When the port is held but health is failing, kill the squatter so a
-      # clean server can bind. Only ever runs after a failed health check.
-      command -v lsof >/dev/null 2>&1 || return 0
-      local port="$1" pids
-      [ -n "$port" ] || return 0
-      pids=$(lsof -ti "tcp:${port}" -sTCP:LISTEN 2>/dev/null)
-      [ -n "$pids" ] || return 0
-      echo "[$(date)] reclaiming wedged Qwen server on port $port (pids=$(echo $pids | tr '\n' ' '))" >> "$LOG"
-      kill $pids 2>/dev/null
-      for _ in 1 2 3 4 5 6; do
-        lsof -ti "tcp:${port}" -sTCP:LISTEN >/dev/null 2>&1 || return 0
-        sleep 0.5
-      done
-      pids=$(lsof -ti "tcp:${port}" -sTCP:LISTEN 2>/dev/null)
-      [ -n "$pids" ] && kill -9 $pids 2>/dev/null
-      sleep 0.5
-    }
-
-    system_memory_critical() {
-      # True when macOS reports memory pressure at/above the configured level. Used to
-      # DECLINE cold-loading the ~5GB TTS model onto an already-thrashing machine (which
-      # would only deepen swap and make the render time out -> male/`say` fallback). A
-      # warm, already-loaded server is still used; this gates only fresh starts.
-      # Levels: 1 normal, 2 warning, 4 critical. 0/unset disables the guard.
-      local threshold="${TAB_TTS_QWEN_SKIP_PRESSURE_LEVEL:-0}"
-      [ "$threshold" -gt 0 ] 2>/dev/null || return 1
-      local level
-      level=$(sysctl -n kern.memorystatus_vm_pressure_level 2>/dev/null) || return 1
-      [ -n "$level" ] || return 1
-      [ "$level" -ge "$threshold" ] 2>/dev/null
-    }
-
-    start_qwen_server_if_needed() {
-      [ -n "$QWEN_SERVER_URL" ] || return 1
-      command -v curl >/dev/null || return 1
-
-      if qwen_server_healthy; then
-        return 0
-      fi
-
-      if tab_tts_falsey "$QWEN_AUTO_SERVER"; then
-        echo "[$(date)] Qwen warm server not running and auto start is disabled (url=$QWEN_SERVER_URL)" >> "$LOG"
-        return 1
-      fi
-
-      if system_memory_critical; then
-        echo "[$(date)] skipping Qwen cold-start: OS memory pressure >= ${TAB_TTS_QWEN_SKIP_PRESSURE_LEVEL} (1 normal/2 warn/4 crit); using light fallback to avoid worsening swap" >> "$LOG"
-        return 1
-      fi
-
-      QWEN_SERVER_RUNNER="${TAB_TTS_QWEN_SERVER_RUNNER:-$(dirname "$QWEN_RUNNER")/serve.py}"
-      [ -r "$QWEN_SERVER_RUNNER" ] || {
-        echo "[$(date)] Qwen warm server unavailable: server runner not readable at $QWEN_SERVER_RUNNER" >> "$LOG"
-        return 1
-      }
-
-      QWEN_SERVER_ENDPOINT="${QWEN_SERVER_URL#http://}"
-      QWEN_SERVER_ENDPOINT="${QWEN_SERVER_ENDPOINT#https://}"
-      QWEN_SERVER_ENDPOINT="${QWEN_SERVER_ENDPOINT%%/*}"
-      QWEN_SERVER_HOST="${TAB_TTS_QWEN_SERVER_HOST:-${QWEN_SERVER_ENDPOINT%%:*}}"
-      QWEN_SERVER_PORT="${TAB_TTS_QWEN_SERVER_PORT:-${QWEN_SERVER_ENDPOINT##*:}}"
-      [ "$QWEN_SERVER_PORT" = "$QWEN_SERVER_HOST" ] && QWEN_SERVER_PORT=8765
-      [ -n "$QWEN_SERVER_HOST" ] || QWEN_SERVER_HOST="127.0.0.1"
-      QWEN_SERVER_LOG="${TAB_TTS_QWEN_SERVER_LOG:-/tmp/tab-tts-qwen-server.log}"
-      QWEN_SERVER_PID="${TAB_TTS_QWEN_SERVER_PID:-/tmp/tab-tts-qwen-server.pid}"
-      QWEN_SERVER_LOCK="${TAB_TTS_QWEN_SERVER_LOCK:-/tmp/tab-tts-qwen-server.lock}"
-      QWEN_SERVER_IDLE_TIMEOUT="${TAB_TTS_QWEN_SERVER_IDLE_TIMEOUT_SEC:-300}"
-
-      if mkdir "$QWEN_SERVER_LOCK" 2>/dev/null; then
-        if ! qwen_server_healthy; then
-          reclaim_wedged_qwen_server "$QWEN_SERVER_PORT"
-          SERVER_ARGS=(
-            "$QWEN_SERVER_RUNNER"
-            --voice "$QWEN_VOICE"
-            --host "$QWEN_SERVER_HOST"
-            --port "$QWEN_SERVER_PORT"
-            --idle-timeout "$QWEN_SERVER_IDLE_TIMEOUT"
-          )
-          [ -n "$QWEN_DEVICE" ] && SERVER_ARGS+=(--device "$QWEN_DEVICE")
-          [ -n "$QWEN_DTYPE" ] && SERVER_ARGS+=(--dtype "$QWEN_DTYPE")
-          [ -n "$QWEN_MODEL" ] && SERVER_ARGS+=(--model "$QWEN_MODEL")
-          [ -n "$QWEN_SEED" ] && SERVER_ARGS+=(--seed "$QWEN_SEED")
-
-          echo "[$(date)] starting Qwen warm server url=$QWEN_SERVER_URL runner=$QWEN_SERVER_RUNNER log=$QWEN_SERVER_LOG" >> "$LOG"
-          nohup "$QWEN_PYTHON" "${SERVER_ARGS[@]}" >> "$QWEN_SERVER_LOG" 2>&1 &
-          SERVER_PID=$!
-          echo "$SERVER_PID" > "$QWEN_SERVER_PID"
-          QWEN_SERVER_STARTED_THIS_RUN=1
-        fi
-        rmdir "$QWEN_SERVER_LOCK" 2>/dev/null
-      else
-        echo "[$(date)] Qwen warm server start already in progress" >> "$LOG"
-      fi
-
-      WAIT_START_MS=$(now_ms)
-      WAIT_LIMIT="${TAB_TTS_QWEN_AUTO_START_TIMEOUT_SEC:-60}"
-      for _ in $(seq 1 "$WAIT_LIMIT" 2>/dev/null || jot "$WAIT_LIMIT" 2>/dev/null); do
-        if qwen_server_healthy; then
-          WAIT_DONE_MS=$(now_ms)
-          QWEN_SERVER_WAIT_MS=$((WAIT_DONE_MS - WAIT_START_MS))
-          echo "[$(date)] Qwen warm server ready url=$QWEN_SERVER_URL wait_ms=$QWEN_SERVER_WAIT_MS started_this_run=$QWEN_SERVER_STARTED_THIS_RUN" >> "$LOG"
-          return 0
-        fi
-        sleep 1
-      done
-      WAIT_DONE_MS=$(now_ms)
-      QWEN_SERVER_WAIT_MS=$((WAIT_DONE_MS - WAIT_START_MS))
-      echo "[$(date)] Qwen warm server not ready after ${QWEN_SERVER_WAIT_MS}ms, falling back to one-shot runner" >> "$LOG"
-      return 1
-    }
-
-    if [ -n "$QWEN_SERVER_URL" ] && command -v jq >/dev/null && command -v curl >/dev/null && start_qwen_server_if_needed; then
-      RESP_JSON="/tmp/tab-tts-qwen-server-$$-${RANDOM}.json"
-      BODY=$(jq -nc \
-        --arg voice "$QWEN_VOICE" \
-        --arg text "$SPOKEN_PHRASE" \
-        --arg output "$AUDIO" \
-        --arg seed "$QWEN_SEED" \
-        '{voice:$voice,text:$text,output:$output} + (if $seed != "" then {seed:($seed|tonumber)} else {} end)')
-      TTS_START_MS=$(now_ms)
-      HTTP=$(curl -sS --max-time "${TAB_TTS_QWEN_SERVER_TIMEOUT_SEC:-120}" -o "$RESP_JSON" -w '%{http_code}' \
-        -X POST "${QWEN_SERVER_URL%/}/speak" \
-        -H "Content-Type: application/json" \
-        --data "$BODY" 2>>"$LOG")
-      AUDIO_READY_MS=$(now_ms)
-      if [ "$HTTP" = "200" ] && [ -s "$AUDIO" ]; then
-        SERVER_MODEL=$(jq -r '.model // empty' "$RESP_JSON" 2>/dev/null)
-        [ -n "$SERVER_MODEL" ] || SERVER_MODEL="$QWEN_DEBUG_MODEL"
-        echo "[$(date)] tts_provider=qwen-server url=$QWEN_SERVER_URL voice=$QWEN_VOICE audio=$AUDIO" >> "$LOG"
-        log_audio_ready "qwen-server" "$SERVER_MODEL" "$QWEN_VOICE" "$TTS_START_MS" "$AUDIO_READY_MS"
-        afplay "$AUDIO" >>"$LOG" 2>&1
-        PLAY_DONE_MS=$(now_ms)
-        emit_timing "success" "qwen-server" "$SERVER_MODEL" "$QWEN_VOICE" "$AUDIO" "$HTTP" "$TTS_START_MS" "$AUDIO_READY_MS" "$PLAY_DONE_MS"
-        rm -f "$AUDIO" "$RESP_JSON"
-        return 0
-      fi
-      if [ "$HTTP" = "000" ]; then
-        echo "[$(date)] Qwen server TTS timed out or disconnected (url=$QWEN_SERVER_URL), skipping one-shot Qwen fallback" >> "$LOG"
-        emit_timing "failed" "qwen-server" "$QWEN_DEBUG_MODEL" "$QWEN_VOICE" "$AUDIO" "$HTTP" "$TTS_START_MS" "$AUDIO_READY_MS" "$AUDIO_READY_MS"
-        rm -f "$AUDIO" "$RESP_JSON" 2>/dev/null
-        return 1
-      fi
-      echo "[$(date)] Qwen server TTS failed (url=$QWEN_SERVER_URL http=$HTTP), falling back to runner" >> "$LOG"
-      emit_timing "failed" "qwen-server" "$QWEN_DEBUG_MODEL" "$QWEN_VOICE" "$AUDIO" "$HTTP" "$TTS_START_MS" "$AUDIO_READY_MS" "$AUDIO_READY_MS"
-      rm -f "$AUDIO" "$RESP_JSON" 2>/dev/null
-    fi
-
-    TTS_START_MS=$(now_ms)
-    if "$QWEN_PYTHON" "${QWEN_ARGS[@]}" >>"$LOG" 2>&1 && [ -s "$AUDIO" ]; then
-      AUDIO_READY_MS=$(now_ms)
-      echo "[$(date)] tts_provider=qwen voice=$QWEN_VOICE audio=$AUDIO" >> "$LOG"
-      log_audio_ready "qwen" "$QWEN_DEBUG_MODEL" "$QWEN_VOICE" "$TTS_START_MS" "$AUDIO_READY_MS"
-      afplay "$AUDIO" >>"$LOG" 2>&1
-      PLAY_DONE_MS=$(now_ms)
-      emit_timing "success" "qwen" "$QWEN_DEBUG_MODEL" "$QWEN_VOICE" "$AUDIO" "" "$TTS_START_MS" "$AUDIO_READY_MS" "$PLAY_DONE_MS"
-      rm -f "$AUDIO"
-      return 0
-    fi
-    AUDIO_READY_MS=$(now_ms)
-    echo "[$(date)] Qwen TTS failed" >> "$LOG"
-    emit_timing "failed" "qwen" "$QWEN_DEBUG_MODEL" "$QWEN_VOICE" "$AUDIO" "" "$TTS_START_MS" "$AUDIO_READY_MS" "$AUDIO_READY_MS"
-    rm -f "$AUDIO" 2>/dev/null
-    return 1
-  }
-
-  play_say_tts() {
-    log_tts_debug "macos-say" "system-voice"
-    echo "[$(date)] tts_provider=say" >> "$LOG"
-    TTS_START_MS=$(now_ms)
-    AUDIO_READY_MS="$TTS_START_MS"
-    log_audio_ready "say" "macos-say" "system-voice" "$TTS_START_MS" "$AUDIO_READY_MS"
-    # Default the last-resort macOS voice to a female one (Samantha) so a
-    # fallback never surfaces as a jarring male system voice. Override with
-    # TAB_TTS_SAY_VOICE; falls back to the system default if it isn't installed.
-    SAY_VOICE="${TAB_TTS_SAY_VOICE:-Samantha}"
-    SAY_VOICE_ARGS=()
-    if [ -n "$SAY_VOICE" ] && say -v '?' 2>/dev/null | grep -qi "^${SAY_VOICE}[[:space:]]"; then
-      SAY_VOICE_ARGS=(-v "$SAY_VOICE")
-    fi
-    say "${SAY_VOICE_ARGS[@]}" "$(tts_phrase_for_model "macos-say" "system-voice")" >>"$LOG" 2>&1
-    PLAY_DONE_MS=$(now_ms)
-    emit_timing "success" "say" "macos-say" "system-voice" "" "" "$TTS_START_MS" "$AUDIO_READY_MS" "$PLAY_DONE_MS"
-  }
-
-  play_qwen_remote() {
-    # Remote Qwen TTS: magi renders on its GPU and returns WAV bytes; we play locally.
-    # No local model/venv/voice files needed on this Mac.
-    QWEN_SERVER_URL="${TAB_TTS_QWEN_SERVER_URL:-}"
-    [ -n "$QWEN_SERVER_URL" ] || { echo "[$(date)] qwen-remote: TAB_TTS_QWEN_SERVER_URL unset" >> "$LOG"; return 1; }
-    command -v curl >/dev/null || return 1
-    command -v jq >/dev/null || return 1
-    QWEN_REMOTE_MODEL="${TAB_TTS_QWEN_MODEL:-Qwen/Qwen3-TTS-12Hz-1.7B-Base}"
-    log_tts_debug "$QWEN_REMOTE_MODEL" "qwen-remote"
-    SPOKEN_PHRASE=$(tts_phrase_for_model "$QWEN_REMOTE_MODEL" "qwen-remote")
-    AUDIO="/tmp/tab-tts-$$-${RANDOM}.wav"
-    BODY=$(jq -nc --arg text "$SPOKEN_PHRASE" '{text:$text,"return":"audio"}')
-    TTS_START_MS=$(now_ms)
-    HTTP=$(curl -sS --max-time "${TAB_TTS_QWEN_SERVER_TIMEOUT_SEC:-60}" -o "$AUDIO" -w '%{http_code}' \
-      -X POST "${QWEN_SERVER_URL%/}/speak" \
-      -H "Content-Type: application/json" \
-      -H "Accept: audio/wav" \
-      --data "$BODY" 2>>"$LOG")
-    AUDIO_READY_MS=$(now_ms)
-    if [ "$HTTP" = "200" ] && [ -s "$AUDIO" ]; then
-      echo "[$(date)] tts_provider=qwen-remote url=$QWEN_SERVER_URL audio=$AUDIO" >> "$LOG"
-      log_audio_ready "qwen-remote" "$QWEN_REMOTE_MODEL" "qwen-remote" "$TTS_START_MS" "$AUDIO_READY_MS"
-      afplay "$AUDIO" >>"$LOG" 2>&1
-      PLAY_DONE_MS=$(now_ms)
-      emit_timing "success" "qwen-remote" "$QWEN_REMOTE_MODEL" "qwen-remote" "$AUDIO" "$HTTP" "$TTS_START_MS" "$AUDIO_READY_MS" "$PLAY_DONE_MS"
-      rm -f "$AUDIO"
-      return 0
-    fi
-    echo "[$(date)] qwen-remote TTS failed (url=$QWEN_SERVER_URL http=$HTTP)" >> "$LOG"
-    emit_timing "failed" "qwen-remote" "$QWEN_REMOTE_MODEL" "qwen-remote" "$AUDIO" "$HTTP" "$TTS_START_MS" "$AUDIO_READY_MS" "$AUDIO_READY_MS"
-    rm -f "$AUDIO" 2>/dev/null
-    return 1
-  }
-
-  play_tts_provider() {
-    case "$(normalize_tts_provider "$1")" in
-      qwen-remote) play_qwen_remote ;;
-      qwen|qwen3|local-qwen)
-        if is_tts_truthy "${TAB_TTS_QWEN_REMOTE:-0}"; then play_qwen_remote; else play_qwen_tts; fi
-        ;;
-      elevenlabs|eleven-labs) play_elevenlabs_tts ;;
-      openai) play_openai_tts ;;
-      say|macos|system) play_say_tts ;;
-      auto)
-        play_elevenlabs_tts || play_openai_tts || play_say_tts
-        ;;
-      *)
-        echo "[$(date)] Unknown TAB_TTS_PROVIDER=$1, using auto" >> "$LOG"
-        play_elevenlabs_tts || play_openai_tts || play_say_tts
-        ;;
-    esac
-  }
-
-  if ! play_tts_provider "$PRIMARY_PROVIDER"; then
-    if [ "$FALLBACK_PROVIDER" != "$PRIMARY_PROVIDER" ]; then
-      echo "[$(date)] primary TTS provider failed ($PRIMARY_PROVIDER), trying fallback=$FALLBACK_PROVIDER" >> "$LOG"
-      play_tts_provider "$FALLBACK_PROVIDER" || play_say_tts
-    else
-      play_say_tts
-    fi
+      --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" --arg run_id "$RUN_ID" --arg invoker "$INVOKER" \
+      --arg status "$STATUS" --arg provider "dispatcher" --arg http "${HTTP:-}" --arg mode "$MODE" \
+      --arg tab "${TAB:-}" --arg cwd "$PWD" --arg session "$SESSION_KEY" --arg line "$LINE" \
+      --argjson hook_start_ms "$HOOK_START_MS" --argjson hook_sync_ms "$HOOK_SYNC_MS" \
+      --argjson summary_ms "$SUMMARY_MS" --argjson tts_ms "$TTS_MS" --argjson play_ms "$PLAY_MS" \
+      --argjson render_ms "$RENDER_MS" --argjson total_to_play_done_ms "$TOTAL_PLAY_MS" \
+      '{ts:$ts,run_id:$run_id,invoker:$invoker,status:$status,provider:$provider,http_status:$http,mode:$mode,tab:$tab,cwd:$cwd,session:$session,line:$line,hook_start_ms:$hook_start_ms,hook_sync_ms:$hook_sync_ms,summary_ms:$summary_ms,tts_ms:$tts_ms,play_ms:$play_ms,render_ms:$render_ms,total_to_play_done_ms:$total_to_play_done_ms}' >> "$TIMING_LOG" 2>/dev/null
   fi
 ) </dev/null >/dev/null 2>&1 &
 

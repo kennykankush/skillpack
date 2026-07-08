@@ -1,7 +1,7 @@
 {
   "name": "agent-announcer-when-agent-finishes",
-  "version": "0.1.8",
-  "description": "Speaks a contextual handover summary (with Ghostty tab number) when Claude finishes a turn or needs input. Supports local Qwen, ElevenLabs, OpenAI TTS, and macOS say.",
+  "version": "0.1.9",
+  "description": "Speaks a contextual handover summary when Claude finishes a turn or needs input. Thin hook hands raw context to a remote dispatcher (admission control + coalescing queue) that owns the summary LLM and the Qwen 'Cortana' TTS; falls back silently or to macOS say.",
   "author": {
     "name": "kennykankush",
     "url": "https://github.com/kennykankush"
