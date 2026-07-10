@@ -335,25 +335,31 @@ echo "[$(date)] msg_len=${#LAST_MSG} user_msg_len=${#USER_MSG}" >> "$LOG"
       --arg tab "${TAB:-}" --arg cwd "$PWD" --arg session "$SESSION_KEY" --arg mode "$MODE" \
       '{last_msg:$last,user_msg:$user,project:$proj,tab:$tab,cwd:$cwd,session:$session,mode:$mode}')
 
-    AUDIO="/tmp/tab-tts-$$-${RANDOM}.wav"
     HDRS="/tmp/tab-tts-$$-${RANDOM}.hdr"
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
     TTS_START_MS=$(now_ms)
-    HTTP=$(curl -sS --max-time "$CLIENT_TTL" -o "$AUDIO" -D "$HDRS" -w '%{http_code}' \
+    # STREAMING: the dispatcher relays PCM chunks while the voice is still being
+    # generated; stream-play.py starts playback on the first chunk. It also handles
+    # whole-WAV fallback bodies (RIFF sniff) and empty 204/503 bodies -> silence.
+    # HTTP code is read from the saved headers afterward.
+    curl -sN --max-time "$CLIENT_TTL" \
       -X POST "${DISPATCHER%/}/announce" \
-      -H 'Content-Type: application/json' -H 'Accept: audio/wav' \
-      --data "$BODY" 2>>"$LOG")
-    AUDIO_READY_MS=$(now_ms)
+      -H 'Content-Type: application/json' -H 'Accept: audio/*' \
+      -D "$HDRS" --data "$BODY" -o - 2>>"$LOG" \
+      | python3 "$SCRIPT_DIR/stream-play.py" >>"$LOG" 2>&1
+    PLAY_DONE_MS=$(now_ms)
+    AUDIO_READY_MS="$PLAY_DONE_MS"
 
+    HTTP=$(grep -E '^HTTP/' "$HDRS" 2>/dev/null | tail -1 | awk '{print $2}')
     LINE=$(grep -i '^x-line:' "$HDRS" 2>/dev/null | sed 's/^[^:]*: *//;s/\r$//' | head -1)
     SUMMARY_MS=$(grep -i '^x-summary-ms:' "$HDRS" 2>/dev/null | sed 's/^[^:]*: *//;s/\r$//' | head -1)
     RENDER_MS=$(grep -i '^x-render-ms:' "$HDRS" 2>/dev/null | sed 's/^[^:]*: *//;s/\r$//' | head -1)
     case "$SUMMARY_MS" in ""|*[!0-9]*) SUMMARY_MS=0 ;; esac
     case "$RENDER_MS" in ""|*[!0-9]*) RENDER_MS=0 ;; esac
 
-    if [ "$HTTP" = "200" ] && [ -s "$AUDIO" ]; then
-      echo "[$(date)] dispatcher spoke: \"$LINE\" (summary_ms=$SUMMARY_MS render_ms=$RENDER_MS)" >> "$LOG"
-      afplay "$AUDIO" >>"$LOG" 2>&1
-      PLAY_DONE_MS=$(now_ms); STATUS="success"
+    if [ "$HTTP" = "200" ]; then
+      echo "[$(date)] dispatcher streamed: \"$LINE\" (summary_ms=$SUMMARY_MS)" >> "$LOG"
+      STATUS="success"
     elif [ "$HTTP" = "204" ] || [ "$HTTP" = "503" ]; then
       # 204 = nothing worth speaking (coalesced/superseded/tab-only); 503 = shed under load.
       # Either way we stay SILENT — no "Done.", no robotic `say`.
@@ -370,7 +376,7 @@ echo "[$(date)] msg_len=${#LAST_MSG} user_msg_len=${#USER_MSG}" >> "$LOG"
           ;;
       esac
     fi
-    rm -f "$AUDIO" "$HDRS" 2>/dev/null
+    rm -f "$HDRS" 2>/dev/null
   else
     echo "[$(date)] dispatcher not configured (set TAB_TTS_DISPATCHER_URL or TAB_TTS_QWEN_SERVER_URL)" >> "$LOG"
   fi
