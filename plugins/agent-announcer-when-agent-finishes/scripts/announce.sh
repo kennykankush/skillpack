@@ -106,9 +106,12 @@ for _ in 1 2 3 4 5 6 7 8 9 10; do
   _pid="$_pp"
 done
 
-# ---- detect tab SYNC (~500ms worst case) ----
+# ---- detect tab SYNC ----
+# OFF by default (TAB_TTS_TAB_DETECT=1 to re-enable): the osascript Ghostty lookup
+# was costing ~1.5s on EVERY announcement — 62% of time-to-first-word — while
+# returning empty. With it off, first word lands ~1s after the agent finishes.
 TAB=""
-if [ "${TERM_PROGRAM:-}" = "ghostty" ]; then
+if ! tab_tts_falsey "${TAB_TTS_TAB_DETECT:-0}" && [ "${TERM_PROGRAM:-}" = "ghostty" ]; then
   TAB=$(osascript 2>>"$LOG" <<APPLESCRIPT
 on run
   set targetCwd to "$PWD"
