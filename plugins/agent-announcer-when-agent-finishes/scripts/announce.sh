@@ -298,7 +298,19 @@ if [ "$MODE" = "summary" ] && [ -n "$STDIN_JSON" ] && command -v jq >/dev/null; 
           | $all[($u + 1):] as $turn
           | ($turn | map(select(.type=="assistant" and (.message.content | type == "array"))
                      | .message.content[] | select(.type=="tool_use"))) as $uses
+          | ($turn
+             | map(select(.type=="user")
+                   | (.message.content // [])
+                   | (if type == "string" then [] else . end)
+                   | .[] | select(.type=="tool_result")
+                   | (.content // "")
+                   | (if type=="string" then .
+                      elif type=="array" then (map(select(.type=="text") | .text // "") | join("\n"))
+                      else "" end))
+             | join("\n") | split("\n") | map(select(length > 0))) as $lines
+          | ($lines | map(select(test("(?i)error|fail(ed|ure)?|exception|traceback|denied|warning|passed|refused"))) | .[0:6] | map(.[0:120])) as $hits
           | {
+              evidence: ((if ($hits | length) > 0 then $hits else ($lines | .[-2:] | map(.[0:120])) end) | join(" ; ")),
               text: ($turn
                 | map(select(.type=="assistant" and (.message.content | type == "array")) | entrytext)
                 | map(select(. != "")) | join(" ... ")),
@@ -314,6 +326,7 @@ if [ "$MODE" = "summary" ] && [ -n "$STDIN_JSON" ] && command -v jq >/dev/null; 
         [ -n "$LAST_MSG" ] || LAST_MSG=$(printf '%s' "$TURN_JSON" | jq -r '.fallback_text // ""' 2>/dev/null)
         USER_MSG=$(printf '%s' "$TURN_JSON" | jq -r '.user // ""' 2>/dev/null)
         TOOLS=$(printf '%s' "$TURN_JSON" | jq -r '.tools // ""' 2>/dev/null)
+        EVIDENCE=$(printf '%s' "$TURN_JSON" | jq -r '.evidence // ""' 2>/dev/null)
       fi
       ;;
     codex|codex-permission)
@@ -326,6 +339,7 @@ if [ "$MODE" = "summary" ] && [ -n "$STDIN_JSON" ] && command -v jq >/dev/null; 
   LAST_MSG=$(printf '%s' "$LAST_MSG" | head -c 4000)
   USER_MSG=$(printf '%s' "$USER_MSG" | head -c 500)
   TOOLS=$(printf '%s' "$TOOLS" | head -c 200)
+  EVIDENCE=$(printf '%s' "${EVIDENCE:-}" | head -c 600)
 fi
 MSG_DONE_MS=$(now_ms)
 echo "[$(date)] turn_len=${#LAST_MSG} user_msg_len=${#USER_MSG} tools=[$TOOLS]" >> "$LOG"
@@ -351,9 +365,9 @@ echo "[$(date)] turn_len=${#LAST_MSG} user_msg_len=${#USER_MSG} tools=[$TOOLS]" 
   if [ -n "$DISPATCHER" ] && command -v jq >/dev/null && command -v curl >/dev/null; then
     BODY=$(jq -nc \
       --arg last "$LAST_MSG" --arg user "$USER_MSG" --arg proj "${PWD##*/}" \
-      --arg tools "${TOOLS:-}" \
+      --arg tools "${TOOLS:-}" --arg evidence "${EVIDENCE:-}" \
       --arg tab "${TAB:-}" --arg cwd "$PWD" --arg session "$SESSION_KEY" --arg mode "$MODE" \
-      '{last_msg:$last,user_msg:$user,project:$proj,tools:$tools,tab:$tab,cwd:$cwd,session:$session,mode:$mode}')
+      '{last_msg:$last,user_msg:$user,project:$proj,tools:$tools,evidence:$evidence,tab:$tab,cwd:$cwd,session:$session,mode:$mode}')
 
     HDRS="/tmp/tab-tts-$$-${RANDOM}.hdr"
     SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"

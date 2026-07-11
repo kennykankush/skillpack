@@ -1,6 +1,6 @@
 {
   "name": "agent-announcer-when-agent-finishes",
-  "version": "0.3.0+codex.20260711210000",
+  "version": "0.3.1+codex.20260712014500",
   "description": "Speaks a contextual handover summary (with Ghostty tab number) when Codex finishes a turn or requests permission.",
   "author": {
     "name": "kennykankush",
