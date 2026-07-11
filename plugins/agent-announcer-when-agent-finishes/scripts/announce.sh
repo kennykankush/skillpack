@@ -260,46 +260,60 @@ codex_user_msg_from_session() {
   done
 }
 
-# ---- extract last assistant message SYNC (needs stdin still around) ----
+# ---- extract the WHOLE TURN SYNC (needs stdin still around) ----
+# Everything the assistant said since the user's last real message, plus a digest of
+# tool activity — so the writer summarizes what the turn ACCOMPLISHED, not just the
+# sign-off paragraph. Falls back to the last assistant text if the slice is empty.
 LAST_MSG=""
 USER_MSG=""
+TOOLS=""
 if [ "$MODE" = "summary" ] && [ -n "$STDIN_JSON" ] && command -v jq >/dev/null; then
   case "$INVOKER" in
     claude-stop|claude-notification)
       TRANSCRIPT=$(printf '%s' "$STDIN_JSON" | jq -r '.transcript_path // empty' 2>/dev/null)
       if [ -n "$TRANSCRIPT" ] && [ -r "$TRANSCRIPT" ]; then
-        # Last assistant entry WITH text — not just the last entry. Turns that end
-        # tool-heavy leave a tool_use-only entry last (no text -> silent announcement).
-        LAST_MSG=$(jq -sr '
-          map(select(.type=="assistant" and (.message.content | type == "array")))
-          | map((.message.content // []) | map(select(.type=="text") | .text) | join(" "))
-          | map(select(. != ""))
-          | last // ""
-        ' "$TRANSCRIPT" 2>/dev/null)
-        # Find the last user message that contains real human-typed text,
-        # skipping tool_result wrappers, system-reminders, and slash-command
-        # output blocks (all of which appear as type=user in Claude's transcript).
-        USER_MSG=$(jq -sr '
-          map(select(.type=="user"))
-          | map(
-              (.message.content // [])
-              | (if type == "string" then [{type:"text", text:.}] else . end)
-              | map(select(
-                  .type == "text"
-                  and ((.text // "") | startswith("<system-reminder>") | not)
-                  and ((.text // "") | startswith("<command-") | not)
-                  and ((.text // "") | startswith("<local-command-") | not)
-                  and ((.text // "") | startswith("<bash-input>") | not)
-                  and ((.text // "") | startswith("<bash-stdout>") | not)
-                  and ((.text // "") | startswith("<bash-stderr>") | not)
-                  and ((.text // "") | startswith("Caveat:") | not)
-                ))
-              | map(.text)
-              | join(" ")
-            )
-          | map(select(. != "" and . != null))
-          | last // ""
-        ' "$TRANSCRIPT" 2>/dev/null)
+        TURN_JSON=$(jq -sc '
+          def entrytext:
+            (.message.content // [])
+            | (if type == "string" then [{type:"text", text:.}] else . end)
+            | map(select(.type=="text") | .text // "")
+            | join(" ");
+          def is_real_user:
+            .type == "user" and
+            ((.message.content // [])
+             | (if type == "string" then [{type:"text", text:.}] else . end)
+             | map(select(
+                 .type == "text"
+                 and ((.text // "") | startswith("<system-reminder>") | not)
+                 and ((.text // "") | startswith("<command-") | not)
+                 and ((.text // "") | startswith("<local-command-") | not)
+                 and ((.text // "") | startswith("<bash-input>") | not)
+                 and ((.text // "") | startswith("<bash-stdout>") | not)
+                 and ((.text // "") | startswith("<bash-stderr>") | not)
+                 and ((.text // "") | startswith("Caveat:") | not)
+               ))
+             | map(.text) | join(" ") | . != "");
+          . as $all
+          | ([range(0; length) as $i | select($all[$i] | is_real_user) | $i] | last // -1) as $u
+          | $all[($u + 1):] as $turn
+          | ($turn | map(select(.type=="assistant" and (.message.content | type == "array"))
+                     | .message.content[] | select(.type=="tool_use"))) as $uses
+          | {
+              text: ($turn
+                | map(select(.type=="assistant" and (.message.content | type == "array")) | entrytext)
+                | map(select(. != "")) | join(" ... ")),
+              fallback_text: ($all
+                | map(select(.type=="assistant" and (.message.content | type == "array")) | entrytext)
+                | map(select(. != "")) | last // ""),
+              user: (if $u >= 0 then ($all[$u] | entrytext) else "" end),
+              tools: ((($uses | group_by(.name) | map("\(.[0].name) x\(length)") | join(", ")) +
+                       (($uses | map(.input.file_path? // empty | split("/") | last) | unique | .[0:5]) as $f
+                        | if ($f | length) > 0 then " | files: " + ($f | join(", ")) else "" end)))
+            }' "$TRANSCRIPT" 2>/dev/null)
+        LAST_MSG=$(printf '%s' "$TURN_JSON" | jq -r '.text // ""' 2>/dev/null)
+        [ -n "$LAST_MSG" ] || LAST_MSG=$(printf '%s' "$TURN_JSON" | jq -r '.fallback_text // ""' 2>/dev/null)
+        USER_MSG=$(printf '%s' "$TURN_JSON" | jq -r '.user // ""' 2>/dev/null)
+        TOOLS=$(printf '%s' "$TURN_JSON" | jq -r '.tools // ""' 2>/dev/null)
       fi
       ;;
     codex|codex-permission)
@@ -308,12 +322,13 @@ if [ "$MODE" = "summary" ] && [ -n "$STDIN_JSON" ] && command -v jq >/dev/null; 
       [ -n "$USER_MSG" ] || USER_MSG=$(codex_user_msg_from_session)
       ;;
   esac
-  # Trim to 2500 chars to keep summary call cheap & fast
-  LAST_MSG=$(printf '%s' "$LAST_MSG" | head -c 2500)
+  # Caps keep the 1.7b writer's prefill fast
+  LAST_MSG=$(printf '%s' "$LAST_MSG" | head -c 4000)
   USER_MSG=$(printf '%s' "$USER_MSG" | head -c 500)
+  TOOLS=$(printf '%s' "$TOOLS" | head -c 200)
 fi
 MSG_DONE_MS=$(now_ms)
-echo "[$(date)] msg_len=${#LAST_MSG} user_msg_len=${#USER_MSG}" >> "$LOG"
+echo "[$(date)] turn_len=${#LAST_MSG} user_msg_len=${#USER_MSG} tools=[$TOOLS]" >> "$LOG"
 
 # ---- async: hand the raw context to the dispatcher on magi, play what comes back ----
 # The dispatcher (dashboard.py :8080 /announce) now owns the writer (summary LLM) and the
@@ -336,8 +351,9 @@ echo "[$(date)] msg_len=${#LAST_MSG} user_msg_len=${#USER_MSG}" >> "$LOG"
   if [ -n "$DISPATCHER" ] && command -v jq >/dev/null && command -v curl >/dev/null; then
     BODY=$(jq -nc \
       --arg last "$LAST_MSG" --arg user "$USER_MSG" --arg proj "${PWD##*/}" \
+      --arg tools "${TOOLS:-}" \
       --arg tab "${TAB:-}" --arg cwd "$PWD" --arg session "$SESSION_KEY" --arg mode "$MODE" \
-      '{last_msg:$last,user_msg:$user,project:$proj,tab:$tab,cwd:$cwd,session:$session,mode:$mode}')
+      '{last_msg:$last,user_msg:$user,project:$proj,tools:$tools,tab:$tab,cwd:$cwd,session:$session,mode:$mode}')
 
     HDRS="/tmp/tab-tts-$$-${RANDOM}.hdr"
     SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
