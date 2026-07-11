@@ -268,12 +268,13 @@ if [ "$MODE" = "summary" ] && [ -n "$STDIN_JSON" ] && command -v jq >/dev/null; 
     claude-stop|claude-notification)
       TRANSCRIPT=$(printf '%s' "$STDIN_JSON" | jq -r '.transcript_path // empty' 2>/dev/null)
       if [ -n "$TRANSCRIPT" ] && [ -r "$TRANSCRIPT" ]; then
+        # Last assistant entry WITH text — not just the last entry. Turns that end
+        # tool-heavy leave a tool_use-only entry last (no text -> silent announcement).
         LAST_MSG=$(jq -sr '
           map(select(.type=="assistant" and (.message.content | type == "array")))
-          | last
-          | (.message.content // [])
-          | map(select(.type=="text") | .text)
-          | join(" ")
+          | map((.message.content // []) | map(select(.type=="text") | .text) | join(" "))
+          | map(select(. != ""))
+          | last // ""
         ' "$TRANSCRIPT" 2>/dev/null)
         # Find the last user message that contains real human-typed text,
         # skipping tool_result wrappers, system-reminders, and slash-command
