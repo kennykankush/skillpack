@@ -335,14 +335,15 @@ if [ "$MODE" = "summary" ] && [ -n "$STDIN_JSON" ] && command -v jq >/dev/null; 
       [ -n "$USER_MSG" ] || USER_MSG=$(codex_user_msg_from_session)
       ;;
   esac
-  # Caps keep the 1.7b writer's prefill fast. For overlong turns keep the head for
-  # context but PRIORITIZE THE TAIL - the end of a turn is its outcome.
-  if [ "${#LAST_MSG}" -gt 4000 ]; then
-    LAST_MSG="$(printf '%s' "$LAST_MSG" | head -c 1200) ... $(printf '%s' "$LAST_MSG" | tail -c 2800)"
+  # Prefill is parallel, so input size barely affects latency (measured: 200 vs 7000
+  # chars ~= same ~0.25s). Cap generously at ~8k, and for overlong turns keep the head
+  # for context but PRIORITIZE THE TAIL - the end of a turn is its outcome.
+  if [ "${#LAST_MSG}" -gt 8000 ]; then
+    LAST_MSG="$(printf '%s' "$LAST_MSG" | head -c 2000) ... $(printf '%s' "$LAST_MSG" | tail -c 6000)"
   fi
   USER_MSG=$(printf '%s' "$USER_MSG" | head -c 500)
   TOOLS=$(printf '%s' "$TOOLS" | head -c 200)
-  EVIDENCE=$(printf '%s' "${EVIDENCE:-}" | head -c 600)
+  EVIDENCE=$(printf '%s' "${EVIDENCE:-}" | head -c 1200)
 fi
 MSG_DONE_MS=$(now_ms)
 echo "[$(date)] turn_len=${#LAST_MSG} user_msg_len=${#USER_MSG} tools=[$TOOLS]" >> "$LOG"
