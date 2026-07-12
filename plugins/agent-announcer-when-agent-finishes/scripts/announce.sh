@@ -335,8 +335,11 @@ if [ "$MODE" = "summary" ] && [ -n "$STDIN_JSON" ] && command -v jq >/dev/null; 
       [ -n "$USER_MSG" ] || USER_MSG=$(codex_user_msg_from_session)
       ;;
   esac
-  # Caps keep the 1.7b writer's prefill fast
-  LAST_MSG=$(printf '%s' "$LAST_MSG" | head -c 4000)
+  # Caps keep the 1.7b writer's prefill fast. For overlong turns keep the head for
+  # context but PRIORITIZE THE TAIL - the end of a turn is its outcome.
+  if [ "${#LAST_MSG}" -gt 4000 ]; then
+    LAST_MSG="$(printf '%s' "$LAST_MSG" | head -c 1200) ... $(printf '%s' "$LAST_MSG" | tail -c 2800)"
+  fi
   USER_MSG=$(printf '%s' "$USER_MSG" | head -c 500)
   TOOLS=$(printf '%s' "$TOOLS" | head -c 200)
   EVIDENCE=$(printf '%s' "${EVIDENCE:-}" | head -c 600)
