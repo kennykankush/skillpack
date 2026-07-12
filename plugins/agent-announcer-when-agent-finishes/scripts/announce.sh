@@ -335,11 +335,11 @@ if [ "$MODE" = "summary" ] && [ -n "$STDIN_JSON" ] && command -v jq >/dev/null; 
       [ -n "$USER_MSG" ] || USER_MSG=$(codex_user_msg_from_session)
       ;;
   esac
-  # Prefill is parallel, so input size barely affects latency (measured: 200 vs 7000
-  # chars ~= same ~0.25s). Cap generously at ~8k, and for overlong turns keep the head
-  # for context but PRIORITIZE THE TAIL - the end of a turn is its outcome.
-  if [ "${#LAST_MSG}" -gt 8000 ]; then
-    LAST_MSG="$(printf '%s' "$LAST_MSG" | head -c 2000) ... $(printf '%s' "$LAST_MSG" | tail -c 6000)"
+  # Input size is latency-free (parallel prefill) BUT more text degrades the small
+  # writer - it stops summarizing and starts continuing the document (echoing prompt
+  # labels). So cap TIGHT for focus, tail-biased (the end of a turn is its outcome).
+  if [ "${#LAST_MSG}" -gt 3000 ]; then
+    LAST_MSG="$(printf '%s' "$LAST_MSG" | head -c 900) ... $(printf '%s' "$LAST_MSG" | tail -c 2100)"
   fi
   USER_MSG=$(printf '%s' "$USER_MSG" | head -c 500)
   TOOLS=$(printf '%s' "$TOOLS" | head -c 200)
