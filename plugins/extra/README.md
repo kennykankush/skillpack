@@ -33,13 +33,31 @@ Use it when you want to answer:
   systems I built? (three-tier attribution honesty)
 - what are the ready-to-paste, receipt-backed lines for my resume or case studies?
 
-Three gears: **harvest** (a source census, then one tracer per evidence layer -
-version-control exports at full granularity, session diaries, day-trails, repo atlases -
-raw receipts exported so every number stays recomputable), **analysis** (master timeline
-first, chapters derived bottom-up from the data, tallies from receipts, the small-things
-catalog), **presentation** (the five-layer book: Verdict, Chapters, Total Ledger, Tally,
-Skills/Roles/Words). An adversarial critic pass in both directions - omissions AND
-overclaims - is the quality gate; without it the book is a draft.
+Three gears: **harvest** (a source census by artifact type, then one tracer per evidence
+layer - version-control exports at full granularity, session diaries, day-trails, repo
+atlases, media/marketing trees - plus a dedicated **character lane** over contemporaneous
+sources; raw receipts exported so every number stays recomputable), **analysis** (master
+timeline first, chapters derived bottom-up from the data, tallies from receipts, the
+small-things catalog, the discretionary pass, the character synthesis), **presentation**
+(two artifacts, see below). An adversarial critic pass in both directions - omissions AND
+overclaims - is the quality gate; without it the output is a draft.
+
+It ships **two documents**, because they answer different questions:
+
+- `TESTAMENT.md` - the ledger. Five layers: Verdict, Chapters, Total Ledger, Tally,
+  Skills/Roles/Words. Scannable and boring on purpose; read by someone verifying a claim.
+- `REVIEW.md` - the essay. An assessment: the arc, the discretionary record and its pattern,
+  how the person works (including a testimony section drawn from contemporaneous sources),
+  hard skills in honest bands, industry-ladder leveling, the delta from start to end, real
+  criticism with fixes, prepared answers to the hard questions, the counterfactual, and
+  positioning. Read by the subject, or by them preparing for an interview.
+
+The character lane is the part people skip and the part that makes the rest mean anything:
+contributions come out of how a person thinks, so the sweep mines contemporaneous
+observation (memory-scriber reflective sections, work journals, retros) for recurring
+traits, taste-as-specification, verbatim quotes including the unflattering ones, and honest
+notes. Testament is the withdrawal against everything `memory-scriber` and `trail-scriber`
+deposited.
 
 Testament is the withdrawal against the scribing ecosystem's deposits: `memory-scriber`
 entries and `trail-scriber` vaults are its richest sources when they exist, and it

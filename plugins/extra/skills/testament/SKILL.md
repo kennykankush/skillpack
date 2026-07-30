@@ -1,6 +1,6 @@
 ---
 name: testament
-description: Reconstruct the evidence-backed totality of what someone did over an era (an internship, a year, a project) and write it as a layered, critic-verified testament with receipts. Use when the user asks for a contribution sweep, "what did I actually do", the whole bandwidth of their work, a promo/review/portfolio evidence pack, or invokes /testament <subject> [window].
+description: Reconstruct the evidence-backed totality of what someone did over an era (an internship, a year, a project) AND how they worked while doing it, then write two critic-verified artifacts - a layered testament with receipts, and a review essay that reads the person behind the record. Use when the user asks for a contribution sweep, "what did I actually do", the whole bandwidth of their work, a promo/review/portfolio evidence pack, a self-review, or invokes /testament <subject> [window].
 ---
 
 # Testament - The Contribution Sweep
@@ -57,6 +57,10 @@ in this environment for this subject. Generic taxonomy to probe:
   campaign creative, strategy briefs - often OUTSIDE the code repo entirely
 - **Deployed/visual artifacts**: shipped sites, screenshots, design files
 - **Spillover**: tools, skills, or products the era generated that outlived the job
+- **Contemporaneous observation (the character layer)**: AI-pair session memories, work
+  journals, retros, 1:1 notes, chat logs - anything written ABOUT the subject WHILE the work
+  was happening. This is the only source that is testimony rather than inference, and it is
+  the one most often skipped. See the dedicated lane below.
 
 **CENSUS BY ARTIFACT TYPE, NEVER BY NAME MATCH.** This is the single most expensive failure this
 skill can make. Filtering sources with a project-name keyword (`grep "acme|widget"`) silently drops
@@ -94,6 +98,30 @@ so every number in the final book is independently recomputable forever. If an e
 truncates or a query 502s, chunk by date windows with retries and a tolerant merge -
 silent partial coverage is the failure, not the retry count.
 
+**THE CHARACTER LANE (run this as its own tracer, always).** Artifact sources answer *what
+was produced*. They cannot answer *how the person thinks*, and the contributions came out of
+the thinking, so a testament without this layer explains nothing. If any contemporaneous
+source exists, give it a dedicated tracer briefed to extract, with refs:
+
+- **Recurring traits** - prioritize anything observed 3+ times across different months;
+  recurrence over time is the strongest signal available and single instances are noise.
+- **Taste as a specification** - what the subject consistently rejects, what they reach for,
+  their vocabulary for quality, how a correction is phrased. Their words, quoted.
+- **Working method from the inside** - how they brief, correct, escalate, verify; when they
+  trust versus check; what they do when the work is wrong.
+- **Verbatim quotes** - up to ~25, and REQUIRE the unflattering and frustrated ones
+  alongside the delighted ones. A quote set that only flatters is evidence of a bad sweep.
+- **Evolution** - was the person different at the end than the beginning? Stage it.
+- **Explicit preferences** - any rules they stated about how they want to be worked with,
+  and what those rules reveal.
+- **Honest notes** - frustrations, thrash, blind spots, things they got wrong. A character
+  portrait without these is worthless and the subject will not trust the rest of it.
+
+Read EVERY file in the source, not only the ones with obvious headers; the observations
+scatter through reflective prose. Note the privacy line: these sources were written for the
+subject, so the harvest is for their eyes and their own artifacts, never published onward
+without them choosing to.
+
 ## Phase 2 - ANALYSIS (make it true)
 
 1. **Master timeline first.** Merge all tracers' dated events into one chronology.
@@ -113,12 +141,36 @@ silent partial coverage is the failure, not the retry count.
 5. **The small-things catalog.** Deliberately sweep for the easily-forgotten: one-line
    fixes with big impact, bugs diagnosed, tools built, workflows invented, docs written,
    process contributions. Totality means these get rows too.
+6. **The discretionary pass.** Separately from what was done, ask what was *not required*:
+   work nobody assigned, easy paths refused, standards exceeded, ownership past the role
+   boundary, work whose beneficiary is someone else, personal cost, craft nobody would have
+   missed, professional courage. Then name the PATTERN in it, because the pattern is the
+   finding (e.g. "the discretionary effort presents as refusal, not addition"). Pair it with
+   an honest "this was actually assigned" list so the claim stays clean.
+7. **The character synthesis.** Turn the character lane into 4-6 named traits with evidence,
+   and connect them to the record: this is where you show that the contributions came out of
+   how the person thinks. If a trait cannot be tied to something they produced, cut it.
 
-## Phase 3 - PRESENTATION (the layered book)
+## Phase 3 - PRESENTATION (two artifacts, not one)
 
-One master document (default `TESTAMENT.md`) plus `evidence/` (the harvest reports) plus
-`receipts/` (the raw exports), and a README stating the downstream-use rules (tier
-discipline for anyone transposing claims into resumes).
+A testament produces **two documents**, because they answer different questions and one
+cannot do both jobs. Ship both unless the user says otherwise:
+
+```
+TESTAMENT.md    the LEDGER  - what was done, counted, sourced, verifiable
+REVIEW.md       the ESSAY   - who was doing it, how they think, what it meant
+evidence/       the harvest reports (incl. the character + discretionary sweeps)
+receipts/       raw exports, so every number stays recomputable
+README.md       downstream-use rules (tier discipline for anyone quoting this)
+```
+
+The split matters. The ledger is read by someone verifying a claim; it should be scannable,
+tabular, and boring on purpose. The essay is read by the subject, by a hiring manager, or by
+the subject *preparing to be interviewed*; it must have a point of view, and it must be
+honest enough that the praise in it is credible. **Write the ledger first** - the essay is a
+reading OF the ledger, and writing it first produces flattery instead of assessment.
+
+### Artifact 1 - TESTAMENT.md, the layered book
 
 The book's five layers - totality AND extraction in one artifact:
 
@@ -134,6 +186,45 @@ The book's five layers - totality AND extraction in one artifact:
   ready-to-paste claim lines - every line receipt-backed and tier-safe. Droppable when the
   audience is not job-hunting.
 
+### Artifact 2 - REVIEW.md, the essay
+
+Prose, not tables. An assessment a thoughtful mentor would write after watching the whole
+era. Sections that earn their place (adapt, do not mechanically fill):
+
+- **The short answer** - the subject's real question, answered in the first paragraph.
+- **What happened, as a story** - the arc, synthesized; quote the subject where their own
+  words beat yours.
+- **Above and beyond** - the discretionary record, grouped by KIND, closing with the named
+  pattern and an honest "and what this is not".
+- **Turning points** - the handful of moments that set the trajectory. Keep these distinct
+  from the discretionary record; they are different questions and conflating them
+  understates the person.
+- **How they work** - the method, and separately **the view from the other side of the
+  table**: what contemporaneous sources observed at the time. Label it as testimony, because
+  that is what makes it different from everything else in the document.
+- **What they are good at** - strengths, each anchored to an instance.
+- **Hard skills, honestly leveled** - in bands (strong / solid with context / real but
+  bounded). Bands beat a flat list because they teach the reader how to weight the claim.
+- **Soft skills as the evidence shows them** - including any double-edged findings.
+- **The leveling** - where this sits against an industry ladder, per domain, with what is
+  missing for the next rung. Nobody can self-assess this; it is often the most useful table.
+- **The delta** - who they were at the start versus the end, staged. A review that does not
+  measure change has not reviewed anything.
+- **What the record also shows** - the honest criticism. Habits, not character. Each one
+  with the evidence and a concrete fix. If this section is thin, the review is a fan letter.
+- **The hard questions** - the objections this record invites, each with a prepared honest
+  answer. For AI-assisted work the unavoidable one is "didn't the AI just do this?", and the
+  answer is always the specific judgments no model made.
+- **The counterfactual** - what does not exist if this person was never there. Sharpest
+  impact lens available.
+- **The 360** - how different observers would each describe them.
+- **Positioning** - where to aim this, what NOT to claim, which few artifacts to lead with.
+- **What to carry forward** - keep / start / stop, in the subject's own terms.
+
+Voice rules for the essay: second person if it is for the subject, third if it is for a
+file. No scores or grades. Never praise without an instance attached. Put at least one
+finding in that the subject probably cannot see about themselves, and put it last.
+
 ## Quality Gate (falsifiable - the critic IS the gate)
 
 A testament is finished ONLY when all four hold; otherwise it is a draft - redo:
@@ -146,6 +237,9 @@ A testament is finished ONLY when all four hold; otherwise it is a draft - redo:
    or explicitly waived with a reason. The critic must be a fresh pass over book-vs-
    harvests, not the author rereading their own draft.
 4. The named gaps in the era are stated in the book, not smoothed over.
+5. If any contemporaneous source existed, the character lane ran, and REVIEW.md contains
+   both a testimony-labelled section and at least one honest criticism with a concrete fix.
+   An essay with no criticism in it has failed its gate regardless of how good it reads.
 
 ## Worked instances (calibration, not the menu)
 
@@ -171,6 +265,12 @@ every time; never default to an instance's domain.
   critic, the teammates-never-absorbed rule, and receipts for every number. When in doubt,
   the hedged claim is the correct claim. Note: a good critic also catches UNDER-selling -
   honesty cuts both ways.
+- **The essay has its own failure mode: the fan letter.** The review is the document most
+  likely to drift into praise, because it is prose and the subject is reading it. Defenses:
+  every strength carries an instance, the honest-criticism section is mandatory and specific,
+  the leveling names what is missing, and the discretionary claims carry their "this was
+  actually assigned" counter-list. If the subject reads it and feels only flattered rather
+  than also seen, it failed.
 - The second failure mode is the highlight reel: the small-things catalog and the
   bottom-up chronology exist precisely to defeat it.
 - **The third is the invisible track.** A tally built from one system (usually version control)
@@ -187,7 +287,11 @@ every time; never default to an instance's domain.
 
 Testament is a downstream consumer of the scribing ecosystem: **memory-scriber** entries
 and **trail-scriber** vaults are deposits; testament is the withdrawal. The richer the
-scribing habit, the fuller the testament. It also reads (never writes) repo `MAP.md`
+scribing habit, the fuller the testament. Note specifically that memory-scriber's reflective
+middle sections (the "who they are", "how we work together", "their taste signals" style
+observations) are the single best source for the character lane, because they are
+contemporaneous testimony rather than reconstruction - and they are invisible to any harvest
+that greps for project names. Read those files whole. It also reads (never writes) repo `MAP.md`
 atlases produced by devour-style study modes. If the subject's environment lacks these,
 the census simply finds fewer layers - say so in the book's provenance note.
 
