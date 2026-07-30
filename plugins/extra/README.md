@@ -19,6 +19,37 @@ Use it when you want to answer:
 
 The workflow is evidence-first and interpretive. Commands can locate candidate conversations, dates, roots, and session ids, but the final notes come from reading the user's messages and discerning the actual agenda.
 
+### `testament`
+
+The contribution sweep: reconstructs the evidence-backed totality of what someone did
+over an era (an internship, a year, a project) and writes it as one layered,
+critic-verified book with receipts.
+
+Use it when you want to answer:
+
+- what did I actually do, in totality, with no stones unturned?
+- can I prove it - to a recruiter, a promo committee, or future me?
+- which of it was certainly mine vs shipped through shared accounts vs produced by
+  systems I built? (three-tier attribution honesty)
+- what are the ready-to-paste, receipt-backed lines for my resume or case studies?
+
+Three gears: **harvest** (a source census, then one tracer per evidence layer -
+version-control exports at full granularity, session diaries, day-trails, repo atlases -
+raw receipts exported so every number stays recomputable), **analysis** (master timeline
+first, chapters derived bottom-up from the data, tallies from receipts, the small-things
+catalog), **presentation** (the five-layer book: Verdict, Chapters, Total Ledger, Tally,
+Skills/Roles/Words). An adversarial critic pass in both directions - omissions AND
+overclaims - is the quality gate; without it the book is a draft.
+
+Testament is the withdrawal against the scribing ecosystem's deposits: `memory-scriber`
+entries and `trail-scriber` vaults are its richest sources when they exist, and it
+degrades gracefully to whatever layers the census actually finds.
+
+```text
+/extra:testament fantopy internship
+$extra:testament 2026
+```
+
 ## Modes
 
 Normal mode handles an explicit date or range:

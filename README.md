@@ -155,6 +155,7 @@ Full plugin docs: [`plugins/videos/README.md`](plugins/videos/README.md)
 Personal workflows that are durable enough to package but do not belong in Workbench.
 
 - [`extra:trail-scriber`](plugins/extra/skills/trail-scriber/SKILL.md) - Reconstructs day-by-day work trails from Codex and Claude conversation evidence into Obsidian-friendly day, agenda, domain, and conversation notes.
+- [`extra:testament`](plugins/extra/skills/testament/SKILL.md) - The contribution sweep: reconstructs the evidence-backed totality of what someone did over an era (harvest, analysis, presentation; tiered attribution; adversarial critic gate) into one layered book with receipts.
 
 Full plugin docs: [`plugins/extra/README.md`](plugins/extra/README.md)
 
