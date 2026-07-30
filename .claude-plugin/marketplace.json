@@ -32,7 +32,7 @@
     {
       "name": "extra",
       "description": "Small personal workflows that are useful enough to package but do not belong in Workbench.",
-      "version": "0.2.0",
+      "version": "0.2.1",
       "author": {
         "name": "kennykankush",
         "url": "https://github.com/kennykankush"
