@@ -164,15 +164,50 @@ receipts/       raw exports, so every number stays recomputable
 README.md       downstream-use rules (tier discipline for anyone quoting this)
 ```
 
-The split matters. The ledger is read by someone verifying a claim; it should be scannable,
-tabular, and boring on purpose. The essay is read by the subject, by a hiring manager, or by
-the subject *preparing to be interviewed*; it must have a point of view, and it must be
-honest enough that the praise in it is credible. **Write the ledger first** - the essay is a
-reading OF the ledger, and writing it first produces flattery instead of assessment.
+### The two registers - do not let them bleed
+
+The split is not organizational, it is a difference in VOICE, and each voice is doing a job
+the other cannot do.
+
+**TESTAMENT.md speaks in the evidentiary register.** Think audit report, or a lawyer laying
+out a case: black and white, claim followed by receipt, quantities with their source column,
+attribution tiers stated on the face of the document, tables wherever a table will carry it.
+Deliberately unemotional. No adjective survives that cannot be sourced; "significant" and
+"impressive" are not findings, "+169,508 lines across 747 files, per the PR enrichment" is.
+Ambiguity is disclosed rather than smoothed - gaps named as gaps, heuristics labelled as
+heuristics, a "this was actually assigned" counter-list beside the discretionary claims. The
+test is adversarial: a hostile reader should be able to walk every number back to a file and
+fail to catch you out.
+
+**Laying that surface area down is a deliverable in its own right, not scaffolding for the
+essay.** Say this plainly to the subject, because they will underrate it. Most people have
+never seen the complete map of what they did; the map has standing on its own as the thing
+that survives scrutiny, settles a promotion case, or gets read by someone in five years who
+needs to know what happened. Even if the essay is never written, the audit is the permanent
+record. Build it to that standard.
+
+**REVIEW.md speaks in plain English.** This is where everything the ledger cannot hold goes:
+the contemporaneous observation, the testimony, the character evidence, the meaning. Full
+sentences, a point of view, the subject's own words quoted where they beat yours. It is the
+document that answers *who was doing this and how do they think*, and it is the only place
+the evidence gets to become a judgment. The register is a thoughtful mentor writing after
+watching the whole era, not a report generator.
+
+**The bleed to avoid, in both directions.** Do not put feeling in the ledger: it corrodes the
+one property that makes the ledger useful, which is that it looks like it has no opinion. Do
+not put unsourced numbers or fresh claims in the essay: every figure it uses must already
+exist in the ledger, because the essay's authority is entirely borrowed from the ledger's
+verifiability. When you find yourself wanting to argue a point in the ledger, that is the
+essay asking to be written. When you find yourself wanting to cite a new statistic in the
+essay, that is the ledger asking to be updated first.
+
+**Write the ledger first.** Always. The essay is a reading OF the ledger, and writing it
+first produces flattery instead of assessment - you will reach for evidence that fits a
+conclusion you already drafted. Ledger, then critic pass, then essay.
 
 ### Artifact 1 - TESTAMENT.md, the layered book
 
-The book's five layers - totality AND extraction in one artifact:
+*Evidentiary register throughout.* Five layers - totality AND extraction in one artifact:
 
 - **Layer 0 - The Verdict**: one page of headline numbers with sources; ends with a plain
   judgment the evidence supports.
@@ -188,8 +223,11 @@ The book's five layers - totality AND extraction in one artifact:
 
 ### Artifact 2 - REVIEW.md, the essay
 
-Prose, not tables. An assessment a thoughtful mentor would write after watching the whole
-era. Sections that earn their place (adapt, do not mechanically fill):
+*Plain English throughout.* Prose, not tables. This is where the contemporaneous
+observation, gathered from every form of conversation and record, finally lands as a
+portrait of a person rather than a list of outputs. An assessment a thoughtful mentor would
+write after watching the whole era. Sections that earn their place (adapt, do not
+mechanically fill):
 
 - **The short answer** - the subject's real question, answered in the first paragraph.
 - **What happened, as a story** - the arc, synthesized; quote the subject where their own
@@ -240,6 +278,9 @@ A testament is finished ONLY when all four hold; otherwise it is a draft - redo:
 5. If any contemporaneous source existed, the character lane ran, and REVIEW.md contains
    both a testimony-labelled section and at least one honest criticism with a concrete fix.
    An essay with no criticism in it has failed its gate regardless of how good it reads.
+6. The registers held: no unsourced adjective or feeling in the ledger, no figure in the
+   essay that is absent from the ledger. Spot-check three numbers from the essay against
+   the ledger and three claims from the ledger against `receipts/`; any miss is a redo.
 
 ## Worked instances (calibration, not the menu)
 
@@ -302,4 +343,9 @@ the census simply finds fewer layers - say so in the book's provenance note.
 - Do not impose a template arc on the chapters - the chronology is the boss.
 - Do not ship without the critic pass; do not let the author grade their own work.
 - Do not summarize away the raw receipts - they are the point.
+- Do not treat the ledger as a rough draft of the essay. It is the permanent record, it is
+  the thing that survives an adversarial reader, and for many subjects it is the more
+  valuable of the two documents.
+- Do not write the essay in the ledger's voice or the ledger in the essay's. A ledger with
+  opinions cannot be trusted; an essay with no voice will not be read.
 - Do not recite this skill's internal method labels at the user; deliver the book.
