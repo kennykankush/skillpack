@@ -53,7 +53,19 @@ in this environment for this subject. Generic taxonomy to probe:
 - **Repo knowledge artifacts**: architecture atlases (MAP.md), session reports, docs the
   subject wrote, test/verification campaign records
 - **Comms**: chat exports, handoff documents, announcements
-- **Deployed/visual artifacts**: shipped sites, screenshots, videos, design files
+- **Media & marketing production**: video projects, storyboards, render pipelines, brand kits,
+  campaign creative, strategy briefs - often OUTSIDE the code repo entirely
+- **Deployed/visual artifacts**: shipped sites, screenshots, design files
+- **Spillover**: tools, skills, or products the era generated that outlived the job
+
+**CENSUS BY ARTIFACT TYPE, NEVER BY NAME MATCH.** This is the single most expensive failure this
+skill can make. Filtering sources with a project-name keyword (`grep "acme|widget"`) silently drops
+every body of work filed under a different naming convention - and the work most likely to be
+misnamed is the work furthest from the code (media, brand, marketing, research, tooling). Walk the
+subject's directories and vaults by TYPE and inspect what is actually there; only then filter by
+subject. If a whole category (video/design/marketing/data) has no findings, that is a red flag to
+re-census, not a conclusion. Corroborating signal: ask the subject "what am I missing?" once the
+draft exists - the categories they name back are usually the ones the filter ate.
 
 **Known home layers (personal installation - PROBE for existence, never assume):**
 
@@ -161,6 +173,10 @@ every time; never default to an instance's domain.
   honesty cuts both ways.
 - The second failure mode is the highlight reel: the small-things catalog and the
   bottom-up chronology exist precisely to defeat it.
+- **The third is the invisible track.** A tally built from one system (usually version control)
+  reads as complete while missing entire categories of labour that leave no commits - production,
+  design, research, ops, verification. State plainly in the book which sources CAN'T see which
+  kinds of work, so a thin section reads as a coverage limit rather than a light month.
 - Read-only toward all evidence sources. Never mutate diaries, trails, or repos while
   harvesting.
 - Nothing is published anywhere external; output lands in local files only.
