@@ -42,10 +42,11 @@ small-things catalog, the discretionary pass, the character synthesis), **presen
 (two artifacts, see below). An adversarial critic pass in both directions - omissions AND
 overclaims - is the quality gate; without it the output is a draft.
 
-It ships **two documents in two deliberate registers**, because they answer different
-questions and one voice cannot do both jobs:
+It ships **`CONTRIBUTIONS.md` + `REVIEW.md` + `contributions-evidence/`, in three deliberate
+registers**, because they answer different questions and one voice cannot do all three jobs
+(the files are named for what they are, never for the skill):
 
-- `TESTAMENT.md` - the ledger, in the **evidentiary register**: audit-report voice, claim
+- `CONTRIBUTIONS.md` - the ledger, in the **evidentiary register**: audit-report voice, claim
   followed by receipt, attribution tiers on the face of the document, no adjective that
   cannot be sourced, gaps disclosed rather than smoothed. Five layers: Verdict, Chapters,
   Total Ledger, Tally, Skills/Roles/Words. Built so a hostile reader can walk every number
@@ -53,7 +54,10 @@ questions and one voice cannot do both jobs:
   in its own right, not scaffolding for the essay.
 - `REVIEW.md` - the essay, in **plain English**: where contemporaneous observation from
   every form of conversation and record lands as a portrait of a person rather than a list
-  of outputs. An assessment: the arc, the discretionary record and its pattern,
+  of outputs.
+- `contributions-evidence/` - the sweeps, in the **harvest register**: field reports, dated
+  tables, a source ref per row, verbatim texture, and honest sections on what could not be
+  found. The working papers that make the ledger checkable rather than merely assertive. An assessment: the arc, the discretionary record and its pattern,
   how the person works (including a testimony section drawn from contemporaneous sources),
   hard skills in honest bands, industry-ladder leveling, the delta from start to end, real
   criticism with fixes, prepared answers to the hard questions, the counterfactual, and

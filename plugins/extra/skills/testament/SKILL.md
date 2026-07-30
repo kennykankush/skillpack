@@ -87,7 +87,7 @@ itself.
 - filters to the subject + window only
 - extracts DATED events - every finding carries a date and a source ref (chronology is
   the spine everything else hangs on)
-- writes a standalone harvest report file (these become the evidence folder)
+- writes a standalone report file (these become `contributions-evidence/`)
 - is told the identity map and the honesty rules (no inflation, teammates excluded)
 
 **The granularity audit (maximum surface area).** Before trusting any export, ask: which
@@ -157,19 +157,23 @@ A testament produces **two documents**, because they answer different questions 
 cannot do both jobs. Ship both unless the user says otherwise:
 
 ```
-TESTAMENT.md    the LEDGER  - what was done, counted, sourced, verifiable
-REVIEW.md       the ESSAY   - who was doing it, how they think, what it meant
-evidence/       the harvest reports (incl. the character + discretionary sweeps)
-receipts/       raw exports, so every number stays recomputable
-README.md       downstream-use rules (tier discipline for anyone quoting this)
+CONTRIBUTIONS.md         the LEDGER   - what was done, counted, sourced, verifiable
+REVIEW.md                the ESSAY    - who was doing it, how they think, what it meant
+contributions-evidence/  the SWEEPS   - one report per source, incl. the character
+                                        and discretionary lanes
+receipts/                raw exports, so every number stays recomputable forever
+README.md                downstream-use rules (tier discipline for anyone quoting this)
 ```
 
-### The two registers - do not let them bleed
+Name the files for what they are, never for the skill. "Testament" is the process; nobody
+opening the folder in three years should have to know that.
+
+### The three registers - do not let them bleed
 
 The split is not organizational, it is a difference in VOICE, and each voice is doing a job
-the other cannot do.
+the others cannot do.
 
-**TESTAMENT.md speaks in the evidentiary register.** Think audit report, or a lawyer laying
+**CONTRIBUTIONS.md speaks in the evidentiary register.** Think audit report, or a lawyer laying
 out a case: black and white, claim followed by receipt, quantities with their source column,
 attribution tiers stated on the face of the document, tables wherever a table will carry it.
 Deliberately unemotional. No adjective survives that cannot be sourced; "significant" and
@@ -193,7 +197,18 @@ document that answers *who was doing this and how do they think*, and it is the 
 the evidence gets to become a judgment. The register is a thoughtful mentor writing after
 watching the whole era, not a report generator.
 
-**The bleed to avoid, in both directions.** Do not put feeling in the ledger: it corrodes the
+**contributions-evidence/ speaks in the harvest register.** Between the other two, and worth
+getting right because subjects often like these files as much as the polished ones. Each
+sweep is a field report: dated tables, one row per finding, a source ref on every row, and
+its own honest sections for what could NOT be found and where the sweep's own method was
+weak. No synthesis, no argument, no ranking unless the brief asked for one - a sweep that
+starts interpreting is doing the ledger's job badly. Preserve raw texture: verbatim quotes,
+exact filenames, the ugly numbers. These are the working papers behind the audit, and they
+are what makes the ledger checkable rather than merely assertive. They also carry the
+correction trail: when a later pass finds a sweep was wrong, fix it in place with a visible
+note rather than silently, so the evidence chain stays honest about itself.
+
+**The bleed to avoid, in all directions.** Do not put feeling in the ledger: it corrodes the
 one property that makes the ledger useful, which is that it looks like it has no opinion. Do
 not put unsourced numbers or fresh claims in the essay: every figure it uses must already
 exist in the ledger, because the essay's authority is entirely borrowed from the ledger's
@@ -205,7 +220,7 @@ essay, that is the ledger asking to be updated first.
 first produces flattery instead of assessment - you will reach for evidence that fits a
 conclusion you already drafted. Ledger, then critic pass, then essay.
 
-### Artifact 1 - TESTAMENT.md, the layered book
+### Artifact 1 - CONTRIBUTIONS.md, the layered book
 
 *Evidentiary register throughout.* Five layers - totality AND extraction in one artifact:
 
