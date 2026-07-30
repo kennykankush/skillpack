@@ -59,9 +59,8 @@ traits, taste-as-specification, verbatim quotes including the unflattering ones,
 notes. Testament is the withdrawal against everything `memory-scriber` and `trail-scriber`
 deposited.
 
-Testament is the withdrawal against the scribing ecosystem's deposits: `memory-scriber`
-entries and `trail-scriber` vaults are its richest sources when they exist, and it
-degrades gracefully to whatever layers the census actually finds.
+It degrades gracefully: on a machine without those vaults, the census simply finds fewer
+layers and the output says so.
 
 ```text
 /extra:testament fantopy internship
