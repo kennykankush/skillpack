@@ -240,3 +240,15 @@ skills/research-report/
 - **Never put files outside `research/<umbrella>/<title>/`** (no top-level scratch files).
 - **Never commit research** — `/research` is gitignored automatically.
 - **Always use existing umbrella domains** unless the user explicitly adds a new one.
+
+## Totality Mode — the omni pointer
+
+When the topic is totality-shaped ("the totality of X", "map the full surface area",
+"what am I blindspotted on", "everything X encompasses"), load the sibling `totality`
+skill and let its doctrine set the report's spine: the enumerated tree IS the
+deliverable (wings/branches/leaves with live/dormant/niche statuses), anchored against
+official exhaustive taxonomies (diffed, not vibed), with the niche shelf, the residual
+bucket, and the audit line as mandatory sections, ending in selective-action guidance —
+never an implied infinite todo. Kernel in a pinch: ANCHOR, ROTATE generators,
+ORANGE-RULE recursion, NICHE shelf, SHOW the tree. Official mode presses the map as the
+report; scan mode returns the tree inline.

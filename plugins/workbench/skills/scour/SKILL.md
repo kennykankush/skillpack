@@ -153,3 +153,15 @@ confident verdict. That failure-to-reach is itself the most important thing to s
   bedrock instead.
 - Do not skip the currency check — "outdated but confidently stated" is exactly what scour
   is for.
+
+## Totality Mode — the omni pointer
+
+Trigger words inside a scour ask: "totality", "full surface area", "exhaustively",
+"everything I'm missing", "MECE", "all of it". When the reach is totality-shaped, a
+normal verify/discover is the wrong ceremony alone — load the sibling `totality` skill
+and run the reach under its doctrine. The five-move kernel (enough for a pinch, never a
+substitute): ANCHOR against an official exhaustive taxonomy (scouring for the anchor IS
+this skill's job inside totality), ROTATE generators, expand every example via the
+ORANGE RULE recursively, stock the NICHE shelf, SHOW the whole tree with an audit and a
+residual bucket. Scour stays the fetch engine underneath: totality's anchors obey the
+constitutional rule — no claim without a fetched source.

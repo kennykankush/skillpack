@@ -71,11 +71,11 @@ The failure mode is research sprawl. A topic starts with a useful question and e
 
 The fix is `workbench:research-report`: one research engine with two outputs. Scan mode answers inline when the question is lightweight. Official mode converges to exactly `notes.md` and `report.html` under `research/<umbrella>/<title>/`. The shape matters because the end state stays inspectable.
 
-### #3: Taste gets lost between feeling and implementation
+### #3: Intent gets lost between intuition and execution
 
-The failure mode is vague feedback. "This feels off" becomes random CSS churn, generic polish, or a prompt that describes the desired mood without telling an engineer what to change.
+The failure mode is shallow prompt expansion. "This feels off" or "I want something like this" becomes generic polish, decorative detail, or a confident specification built on assumptions the user never made.
 
-The fix is `workbench:max-prompt` for UI/product feedback and the `videos` pack for motion work. `max-prompt` translates instinct into mechanism, ownership, constraints, implementation direction, and verification. `videos` separates narrative, visual contract, storyboard generation, frame QA, batching, and motion handoff so taste does not collapse into a single generation prompt.
+The fix is `workbench:max-prompt`: a domain-adaptive intent translator for software, architecture, operations, research, writing, product/UI, and creative work. It recovers the real outcome, classifies the situation, separates evidence from assumption, and turns the idea into a justified execution contract with boundaries and verification. The `videos` pack remains the specialist workflow for motion work, separating narrative, visual contract, storyboard generation, frame QA, batching, and motion handoff so taste does not collapse into a single generation prompt.
 
 ### #4: Live product work needs evidence, not confidence
 
@@ -119,11 +119,12 @@ Everyday meta-work for coding agents.
 - [`workbench:vision`](plugins/workbench/skills/vision/SKILL.md) - Keeps a project's `VISION.md` written and alive: birth (handoff from exploration), backfill (repos with no vision doc), refresh (drifted intent). The vision comes from the visionary - evidence drafts, the user's voice decides.
 - [`workbench:research-report`](plugins/workbench/skills/research-report/SKILL.md) - Deep research with scan mode for inline answers and official mode for `notes.md` plus rendered `report.html`.
 - [`workbench:memory-scriber`](plugins/workbench/skills/memory-scriber/SKILL.md) - Captures the residue of a meaningful session into the active host's memory directory.
-- [`workbench:max-prompt`](plugins/workbench/skills/max-prompt/SKILL.md) - Converts fuzzy feedback, screenshots, taste, or frustration into an implementation-ready coding-agent prompt.
+- [`workbench:max-prompt`](plugins/workbench/skills/max-prompt/SKILL.md) - Converts vague intent in any domain into a grounded, situationally correct, execution-ready prompt without inventing certainty.
 - [`workbench:skill-advisor`](plugins/workbench/skills/skill-advisor/SKILL.md) - Recommends from already-installed skills without installing anything.
 - [`workbench:skill-distiller`](plugins/workbench/skills/skill-distiller/SKILL.md) - Generalizes a successful workflow into a reusable `SKILL.md`.
 - [`workbench:isomorph`](plugins/workbench/skills/isomorph/SKILL.md) - Systemic-thinking mode that maps a system onto its mature twin in another domain to surface required invariants and blindspots.
 - [`workbench:scour`](plugins/workbench/skills/scour/SKILL.md) - Reality-check hotline: mid-conversation, go to the internet and ground a confident narrative against how the world actually does it (verify) or find the pattern when stuck (discover). Currency-aware, conversational, never answers from memory.
+- [`workbench:totality`](plugins/workbench/skills/totality/SKILL.md) - Exhaustive-surface cartographer: map the COMPLETE surface of any object with provable coverage - anchor against official taxonomies, rotate generators, expand every example recursively (the Orange Rule), stock the niche shelf, show the whole tree with an audit and residual. The pack's OMNI; scour and research-report carry pointers to it.
 - `skill-manager` - Claude Code agent for discovering, installing, updating, and cleaning up skills across multiple mechanisms.
 
 Full plugin docs: [`plugins/workbench/README.md`](plugins/workbench/README.md)

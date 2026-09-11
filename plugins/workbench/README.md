@@ -14,7 +14,7 @@ From the `skillpack` repo:
 codex plugin marketplace add .
 ```
 
-Restart Codex, open `/plugins`, install `workbench`, and start a new thread. Codex invokes the workflows as bundled skills: `$workbench:devour`, `$workbench:bedrock`, `$workbench:gauntlet`, `$workbench:potential`, `$workbench:vision`, `$workbench:isomorph`, `$workbench:scour`, `$workbench:research-report`, `$workbench:skill-advisor`, `$workbench:skill-distiller`, `$workbench:memory-scriber`, and `$workbench:max-prompt`.
+Restart Codex, open `/plugins`, install `workbench`, and start a new thread. Codex invokes the workflows as bundled skills: `$workbench:devour`, `$workbench:bedrock`, `$workbench:gauntlet`, `$workbench:potential`, `$workbench:vision`, `$workbench:isomorph`, `$workbench:scour`, `$workbench:totality`, `$workbench:research-report`, `$workbench:skill-advisor`, `$workbench:skill-distiller`, `$workbench:memory-scriber`, and `$workbench:max-prompt`.
 
 ### Claude Code
 
@@ -45,6 +45,8 @@ Claude Code loads the plugin skills as portable workflows. Invoke `devour` in pl
 **`isomorph`** — Reason about a whole system by mapping it onto a mature, structurally-similar domain that already paid for its mistakes, then read that domain's laws back onto the system as invariants and blindspots. A thinking mode, not a file-producing workflow — with one exception: when the user adopts a twin as the project's design bible, it's recorded into `VISION.md` as the system shape, where bedrock audits against its laws, potential consults it for wishes, and devour labels the map in its language.
 
 **`scour`** — The reality-check hotline. Mid-conversation, leave the closed room and go to the internet to ground what was just said. Two faces: verify (a confident narrative was just produced — pull the load-bearing claims and check each against real fetched sources: confirmed / wrong / oversimplified / outdated / no-consensus) and discover (stuck or starting fresh — find the dominant pattern and the gotchas). The evidence twin of isomorph; currency-aware (catches "true at training, the world moved"). Fast and conversational — never writes files, never answers from memory. Promotes to research-report when a reach cracks open something worth keeping.
+
+**`totality`** — The exhaustive-surface cartographer. Maps the COMPLETE surface of any object (a resume, a domain, a dataset, a market, a decision space) with provable coverage instead of vibes: ANCHOR against official exhaustive taxonomies (diff, don't vibe — "a category with no entry is a bug"), ROTATE enumeration generators, expand every example into its full basket recursively (the Orange Rule: examples are seeds, never boundaries), stock the mandatory NICHE shelf (the overlooked is where the alpha lives), and SHOW the whole tree with statuses, an audit line, and an honest residual bucket. Three gears (quick / standard / ham). Guards its own failure modes: the infinite map (map maximally, act selectively) and fake MECE. The OMNI of the pack's type-object pattern — scour and research-report carry Totality Mode pointers to it; scour is its anchor-fetch engine.
 
 ### Research
 
@@ -83,7 +85,7 @@ Discover mode researches new skills from marketplaces and GitHub, then hands the
 
 ### Prompting
 
-**`max-prompt`** — Turns fuzzy UI feedback, screenshots, taste, frustration, or half-formed product instinct into an implementation-ready prompt for a coding agent. It translates the feeling into mechanism, ownership, constraints, implementation direction, and verification behavior.
+**`max-prompt`** — Turns vague intent into a grounded, execution-ready prompt for the right agent or tool. It adapts to software, architecture, operations, research, writing, product/UI, and creative work; recovers the real outcome, separates evidence from assumption, selects the relevant domain mechanics, and defines boundaries plus verification. Its central guard is against ornate wrongness: a beautifully detailed prompt built on invented certainty.
 
 ## How they fit together
 
@@ -93,7 +95,7 @@ skill-distiller → "turn what just worked into a skill"
 skill-manager   → "install what I'm missing"
 memory-scriber  → "preserve what I learned today"
 research-report → "go deep on something I want to know"
-max-prompt      → "turn this feeling into a buildable prompt"
+max-prompt      → "turn this partial intent into the right executable brief"
 devour          → "study this codebase until you can change it safely"
 bedrock         → "prove the foundations still hold after all that building"
 gauntlet        → "run the whole product through its trials — drive it as god+user and verify the truth"
@@ -101,6 +103,7 @@ potential       → "see what the building wants to become"
 vision          → "keep what the building is for written down and alive"
 isomorph        → "find the mature twin of this system and inherit its laws"
 scour           → "open the window — check what we just said against the real world"
+totality        → "map the COMPLETE surface of this — provably, anchored, every seed expanded"
 ```
 
 Personal infrastructure for working with AI agents sustainably — not random utilities.
@@ -121,7 +124,7 @@ Personal infrastructure for working with AI agents sustainably — not random ut
 - `$workbench:skill-advisor <task>` — recommend from the installed toolkit
 - `$workbench:skill-distiller` — distill a workflow into a reusable skill
 - `$workbench:memory-scriber` — capture the current session
-- `$workbench:max-prompt` — translate vague feedback into an implementation prompt
+- `$workbench:max-prompt` — translate vague intent into a grounded prompt for the situation
 
 ### Claude Code
 

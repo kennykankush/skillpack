@@ -1,7 +1,7 @@
 {
   "name": "workbench",
-  "version": "0.9.0+codex.20260701054054",
-  "description": "Portable agent workbench: codebase mastery, foundation audits, end-to-end simulation sweeps, potential reading, vision keeping, systemic thinking, reality-checking, research, skill recommendations, skill distillation, memory capture, and prompt translation.",
+  "version": "0.10.0+codex.20260811214733",
+  "description": "Portable agent workbench: codebase mastery, foundation audits, end-to-end simulation sweeps, potential reading, vision keeping, systemic thinking, reality-checking, exhaustive surface mapping, research, skill recommendations, skill distillation, memory capture, and prompt translation.",
   "author": {
     "name": "kennykankush",
     "url": "https://github.com/kennykankush"
@@ -22,7 +22,7 @@
   "interface": {
     "displayName": "Workbench",
     "shortDescription": "Portable codebase mastery, research, memory, prompting, skill-advice, and skill-distillation workflows.",
-    "longDescription": "A portable workbench for Codex and other coding agents: codebase mastery mode, deep research reports, quick scans, installed-skill recommendations, workflow-to-skill distillation, prompt translation, and session memory capture. Codex loads these as bundled skills; other runtimes can expose their own adapters.",
+    "longDescription": "A portable workbench for Codex and other coding agents: codebase mastery mode, deep research reports, quick scans, exhaustive surface maps, installed-skill recommendations, workflow-to-skill distillation, prompt translation, and session memory capture. Codex loads these as bundled skills; other runtimes can expose their own adapters.",
     "developerName": "kennykankush",
     "category": "Productivity",
     "capabilities": [
@@ -39,10 +39,11 @@
       "Run potential - what does this codebase want to become?",
       "Backfill this project's VISION.md.",
       "Scour the web - are we on the right page about this?",
+      "Map the totality of this - the complete surface, provably covered.",
       "Run a quick research scan on this topic.",
       "Recommend the best installed skill for this task.",
       "Distill this workflow into a reusable skill.",
-      "Turn this feedback into a coding-agent prompt."
+      "Turn this partial idea into a grounded prompt for the right agent or tool."
     ],
     "brandColor": "#10A37F"
   }
