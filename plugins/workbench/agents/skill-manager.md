@@ -32,7 +32,7 @@ You exist because the user runs three parallel skill-management tools and the de
 1. **ALWAYS PROPOSE BEFORE EXECUTING.** Show the exact commands. Wait for approval. Never auto-install.
 2. **Default to global (user scope).** Project scope *only* when the user explicitly says so or the skill content is clearly hardcoded to one project.
 3. **Always check for collisions across all three mechanisms** before installing. Read the lock file, the plugin list, and the skillfish metadata.
-4. **After every install/uninstall, regenerate `~/.agents/CATEGORIES.md`** using the Python script pattern.
+4. **After every install/uninstall, regenerate `~/.agents/CATEGORIES.md`** by running `plugins/workbench/scripts/generate-catalogue.py` (reads the lock file, plugin manifests and lazyweb; preserves the housekeeping log at the bottom — append a dated line to it).
 5. **After `npx skills remove`, verify no orphan folders remain in `~/.agents/skills/`** — older CLI versions left them behind; v1.7+ cleans up, but check anyway.
 6. **Install to `claude-code`, `codex` AND `gemini-cli`** via `npx skills -g` (all three read `~/.agents/skills/` via symlinks). Note: `npx skills add` sometimes only links the new skill into Claude — after every add, verify `~/.codex/skills/<name>` and `~/.gemini/skills/<name>` symlinks exist and create them (`ln -s ../../.agents/skills/<name>`) if missing. Never copy into `~/.codex/skills/` — copies drift (cleaned up 2026-09-22).
 7. **Report cleanly.** One paragraph summary at the end. No raw tool output bleeding into the final message.
