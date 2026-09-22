@@ -18,18 +18,28 @@ HOME = pathlib.Path.home()
 AGENTS = HOME / ".agents"
 CLAUDE = HOME / ".claude"
 
-# Ordered: first matching pattern wins, so put specific before generic.
+# Frontend is filed by STAGE OF THE JOB, not by topic — "when do I reach for this"
+# is the question that keeps a large toolkit legible. Ordered: first match wins,
+# so specific patterns go before generic ones.
 CATEGORIES = [
-    ("🎨 FRONTEND DESIGN", r"frontend-design|design-taste|high-end|redesign-existing|baseline-ui|improve-ui|create-design-md|web-design-guidelines|ui-skills-root|fluid-responsive|impeccable|dataviz|ui-design:(?!mobile|react-native)"),
-    ("✨ ANIMATION / MOTION", r"motion|emil|gsap|lottie|animate"),
-    ("⚛️ REACT / PERF / A11Y", r"vercel-|fixing-|accessib|web-quality|core-web-vitals|performance|^seo$|best-practices"),
-    ("🔍 VERIFY / TEST", r"webapp-testing|playwright|browser"),
+    ("🎨 FRONTEND ① DECIDE — aesthetic direction, before any code",
+     r"frontend-design|design-taste|high-end-visual|create-design-md|ui-skills-root"),
+    ("🎨 FRONTEND ② BUILD — component craft and feel",
+     r"emil-design|impeccable|component-design|design-system-patterns|composition-patterns"),
+    ("🎨 FRONTEND ③ MOVE — motion and animation",
+     r"motion|gsap|lottie|animate|interaction-design"),
+    ("🎨 FRONTEND ④ FIX — upgrade what already exists",
+     r"redesign-existing|improve-ui|baseline-ui|fluid-responsive|responsive-design"),
+    ("🎨 FRONTEND ⑤ VERIFY — prove it is actually good",
+     r"webapp-testing|playwright|browser|web-design-guidelines|web-quality|core-web-vitals|^seo$|best-practices|fixing-|accessib|vercel-|performance|dataviz"),
+    ("✍️ WORDS — copy that does not read as AI",
+     r"writing-guidelines|avoid-ai-writing|ai-writing|voice-preserving|false-positive|preservation-verifier|file-edit-in-place"),
     ("📊 DIAGRAMS", r"diagram"),
-    ("✍️ WRITING / COPY", r"writing-guidelines|avoid-ai-writing|ai-writing|voice-preserving|false-positive|preservation-verifier|file-edit-in-place"),
     ("🛡️ EVALS / SECURITY", r"promptfoo|security|redteam"),
-    ("📱 MOBILE", r"mobile|react-native|ios|swift"),
+    ("📱 MOBILE / NATIVE", r"mobile|react-native|ios|swift"),
     ("🔎 LAZYWEB", r"lazyweb"),
-    ("🧠 META / SYSTEM", r"workbench:|agents:|extra:|find-skills|codex:|lsp"),
+    ("🧠 MINE — workbench, agents, extra", r"workbench:|agents:|extra:"),
+    ("🔧 INFRA", r"find-skills|codex:|lsp"),
     ("❓ OTHER", r"."),
 ]
 
