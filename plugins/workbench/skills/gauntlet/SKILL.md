@@ -1,6 +1,12 @@
 ---
 name: gauntlet
-description: Run a system through its trials. Drive a realistic, goal-driven user journey end-to-end as the spine, and at every action the user takes, sweep-test the REAL subsystem behind it — a surface pass (breadth across the whole journey that also triages each touchpoint into a risk-ranked hit-list) funnelling into a deep pass (depth on the risky stations: a varied + adversarial population, breadth × volume, independent verification). It proves both that the user's experience held AND that the machinery is sound. Skeptical flaw-hunting stance, safe and reversible. Use when the user says "gauntlet this flow/journey", "sweep-test the whole pipeline end to end", "simulate a user and stress the machinery behind each step", "is X sound front to back", "god+user sweep", or "run the gauntlet on payments/scoring/onboarding". A fusion of deterministic simulation testing, agent playtesting, synthetic user journeys, and the test-oracle problem — bedrock's bigger sibling.
+description: >-
+  Run a realistic user journey end to end and sweep-test the real subsystems behind it.
+  Triage the whole journey, then test the risky stations with varied inputs, volume,
+  and independent verification in an isolated reversible environment. Retain useful
+  findings and reproductions; separate observed behavior from inferred user experience.
+  Use when the user says gauntlet this flow, sweep-test the pipeline, simulate a user and
+  stress the machinery, is X sound front to back, or run the gauntlet on a journey.
 ---
 
 # Gauntlet — Run the System Through Its Trials
@@ -49,9 +55,10 @@ off or decline, see the next section.
 
 Hand off, don't force it:
 
-- **Mapping to understand** (not prove) → `devour`. **Grounding one claim** by running one
-  thing → `bedrock`. **Checking how the world does it** → `scour`. **Tests the user will
-  keep** → a normal unit/E2E suite, not a one-shot reversible sweep.
+- **Mapping to understand** → `devour`. **Resolving one consequential assumption** →
+  `probe` or a direct check. **Structural auditing** → `bedrock`. **Checking how the world
+  does it** → `scour`. **Writing a routine test suite** → normal unit/E2E work. A gauntlet
+  can retain reproducible cases discovered during its sweep without becoming a test-suite project.
 
 Decline outright (or build the missing scaffolding *only with explicit consent*):
 
@@ -73,7 +80,8 @@ Decline outright (or build the missing scaffolding *only with explicit consent*)
    reversed, gauntlet **refuses** — or builds the missing scaffolding, but only with the
    user's explicit consent.
 4. **Rule out your own harness before crying wolf.** Every "failure" is classified
-   real-vs-artifact. A bug in the simulation rig is not a bug in the system.
+   as a confirmed defect, a harness artifact, or an unconfirmed result with the missing
+   check named. A bug in the simulation rig is not a bug in the system.
 
 ## The kitchen's laws — invariants you actively assert
 
@@ -93,6 +101,11 @@ Decline outright (or build the missing scaffolding *only with explicit consent*)
 Confirm the system and the journey(s) to run. Flip to a sandbox/sim mode (or stand up an
 isolated copy). **Snapshot** so every mutation is reversible. If you cannot isolate +
 reverse, stop here per Constitution #3.
+
+Read relevant existing intent, map, findings, and tests. Record the source revision,
+dirty scope, test environment, and owned state to restore. Choose the existing home for
+run evidence and announce retained artifacts. Restoration applies to the isolated test
+state and owned temporary resources; it must preserve user changes and retained evidence.
 
 ### Phase 1 — Map the gauntlet
 Discover the **simulation surface** (devour-style, but aimed only at simulability):
@@ -120,16 +133,47 @@ include the boundary cases of the domain's rules), drive the real subsystem thro
 verify** with the strongest oracle the subsystem affords (see toolkit). Degrade honestly.
 
 ### Phase 4 — Diary
-Narrate **one actor's lived journey** to a `user.md` — first person, goal-driven. This is
-the experience truth a number-check cannot see: dead-ends, silent failures, cold plates.
+Narrate **one actor's journey** to a `user.md`, labeled as an agent-driven or human-observed
+run. Use the project's existing run-evidence directory, or `audit/gauntlet/<run-id>/`
+with a unique date-and-scope identifier. Keep observed behavior separate from inferred
+experience: "the spinner remained after the error" is an observation; "a buyer may tap
+again" is an inference. First-person narration must not invent human feelings or feedback.
+This record catches dead-ends and silent failures that a number-check can miss.
 
 ### Phase 5 — Classify & report
 Tie every flaw to the **journey step → subsystem → oracle that caught it.** Classify
 real-vs-artifact. State coverage **honestly**: which roads you walked, which you skipped,
 and how strong the oracle was at each station.
 
+For a confirmed defect, record the expected and actual behavior, the relevant command,
+inputs or seed, environment, and evidence pointer. If a suspected problem cannot be
+reproduced or the harness is not ruled out, keep it unconfirmed and name the missing check.
+Do not force an uncertain result into a confirmed-bug or harness-artifact verdict.
+
 ### Phase 6 — Restore
-Revert to the pre-gauntlet snapshot. Leave the system as you found it.
+Restore the isolated test state and release owned temporary resources. Verify cleanup;
+never use a broad working-tree reset or revert concurrent user edits. Retained findings,
+diary, and useful reproductions follow the next phase and are excluded from test-state cleanup.
+
+### Phase 7 — Preserve the protection
+
+- **Findings:** update the project's existing finding ledger, commonly `AUDIT.md`, using
+  its IDs and conventions. Reuse an existing entry for the same defect and attach this
+  run's evidence. With no ledger, keep findings beside the diary in `findings.md`; do not
+  create a competing repo-wide ledger or imply a bedrock audit occurred.
+- **Reproductions:** retain a small, self-contained case for each confirmed defect in
+  the existing test/repro home. If bedrock's `audit/repros/` exists, use its convention;
+  otherwise keep the case with this run. Include safe setup, inputs/seed, expected versus
+  actual results, and cleanup. Do not retain the whole temporary sweep harness by default.
+- **Regression tests:** reuse an existing test that already captures the defect. Where
+  worthwhile and in scope, promote the minimal case into the normal suite. Keep unresolved
+  cases in the repro area with their status; avoid breaking routine CI merely to store
+  a known failing reproduction. A request to fix continues into separately authorized
+  implementation, and a closed finding must cite the passing regression evidence.
+- **Handoff:** report retained paths, open findings, and coverage. Follow
+  [WORKFLOWS.md](../../WORKFLOWS.md) for already-authorized next work. For a standalone
+  sweep, finish with its evidence. If the user requested chat-only or no retained files,
+  honor that and provide repeatable commands and findings inline, noting the persistence limit.
 
 Steerable intensity: default is *surface-all + auto-deep the top-N risky stations*.
 "deep sweep payments" jumps straight to Phase 3 on a named station. "just surface it" is
@@ -173,12 +217,14 @@ Deep:
   → <N/N reconciled> | <findings>
 
 Findings:
-- <step → subsystem> · <REAL bug | artifact> · <severity/blast-radius> · <oracle that caught it>
+- <ID; step → subsystem> · <confirmed bug | harness artifact | unconfirmed>
+  <expected vs actual; repro/evidence; severity/blast-radius; independent check>
 
-Diary: <path to user.md — the experience truth, 1 line>
+Diary: <path or inline — observed behavior and inferred experience labeled separately>
+Retained: <ledger entries; repro/test paths; existing coverage reused>
 
 Coverage: roads walked <…> | skipped <…> | weakest oracle <…>
-Restored: <yes/no>
+Restored: <test state and owned resources; outstanding cleanup if any>
 ```
 
 ## Quality Gate
@@ -190,15 +236,20 @@ A run is good only if:
    journey actually produced.
 3. Deep stations were verified by a **real independent oracle**, and the verdict **names
    the oracle and its strength**. No oracle → labelled a load test, not a proof.
-4. Every finding is **classified real-vs-artifact**, with the harness ruled out.
+4. Every confirmed defect has the harness ruled out and a reproducible case. Unconfirmed
+   findings say what remains unresolved; harness artifacts are labeled separately.
 5. Coverage is stated **honestly** — what was swept, what wasn't, where the oracle was weak.
+6. The diary distinguishes observations from inferred experience, and retained findings
+   and repros have clear homes without duplicating the project's existing ledger.
 
 If you could not get an independent oracle anywhere, say "I stressed it but could not
 prove it" — that is the honest output, not a green check.
 
-**Redo trigger:** if any finding shipped unclassified (real-vs-artifact), or any deep
-station's verdict didn't name its oracle and strength, or the system wasn't restored —
-the run isn't done. Go back and finish it; never present a partial sweep as a complete one.
+**Redo trigger:** if a confirmed defect lacks reproducible evidence, experience inference
+is presented as observation, a deep verdict omits its oracle and limits, or owned test
+state was not restored, correct the affected record or finish cleanup. If a check cannot
+be completed, report that limit and downgrade the claim; never present a partial sweep
+as a complete one or rerun the whole journey just to satisfy report formatting.
 
 ## What Not To Do
 
@@ -213,6 +264,8 @@ harness. Every rule below exists to prevent exactly that.
 - Do not run against anything you can't isolate and reverse.
 - Do not skip the diary — the silent failure it catches is the one the numbers miss.
 - Do not deep-sweep everything; let the surface pass earn the depth.
+- Do not discard a useful reproduction during restore or overwrite an existing diary.
+- Do not count inferred user frustration as observed human research.
 
 ## Worked instances — two, maximally different
 

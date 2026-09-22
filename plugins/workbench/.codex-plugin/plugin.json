@@ -1,7 +1,7 @@
 {
   "name": "workbench",
-  "version": "0.10.0+codex.20260811214733",
-  "description": "Portable agent workbench: codebase mastery, foundation audits, end-to-end simulation sweeps, potential reading, vision keeping, systemic thinking, reality-checking, exhaustive surface mapping, research, skill recommendations, skill distillation, memory capture, and prompt translation.",
+  "version": "0.11.0",
+  "description": "Portable agent workbench: codebase study and refresh, opportunity discovery, reasoned decisions, bounded experiments, vision, research, structural audits, journey sweeps, memory, and skill tooling. Independent skills connect through modular workflow recipes.",
   "author": {
     "name": "kennykankush",
     "url": "https://github.com/kennykankush"
@@ -21,8 +21,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Workbench",
-    "shortDescription": "Portable codebase mastery, research, memory, prompting, skill-advice, and skill-distillation workflows.",
-    "longDescription": "A portable workbench for Codex and other coding agents: codebase mastery mode, deep research reports, quick scans, exhaustive surface maps, installed-skill recommendations, workflow-to-skill distillation, prompt translation, and session memory capture. Codex loads these as bundled skills; other runtimes can expose their own adapters.",
+    "shortDescription": "Modular workflows to understand, explore, decide, experiment, verify, and preserve useful context.",
+    "longDescription": "A portable workbench for Codex and other coding agents: codebase study and refresh, grounded opportunities, reasoned decisions, bounded experiments, research, structural audits, journey sweeps, and context preservation. Skills work independently or follow recipes that carry evidence and authorization between stages.",
     "developerName": "kennykankush",
     "category": "Productivity",
     "capabilities": [
@@ -34,9 +34,12 @@
     "termsOfServiceURL": "https://github.com/kennykankush/skillpack/blob/main/LICENSE",
     "defaultPrompt": [
       "DEVOUR this codebase before we change it.",
+      "Refresh the map and explain what changed since the last study.",
       "Run a bedrock audit on the foundations.",
       "Run the gauntlet on this user flow - sweep-test the machinery behind each step.",
       "Run potential - what does this codebase want to become?",
+      "Compare these directions and recommend which one deserves our time.",
+      "Run the smallest experiment that could settle this assumption.",
       "Backfill this project's VISION.md.",
       "Scour the web - are we on the right page about this?",
       "Map the totality of this - the complete surface, provably covered.",

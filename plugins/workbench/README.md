@@ -1,8 +1,8 @@
 # workbench
 
-Everyday agent workbench. Six areas, thirteen tools, one posture: opinionated, disciplined, no mess.
+Everyday agent workbench. Six areas, fifteen skills, and a Claude-side lifecycle agent. Each skill works on its own; the [workflow recipes](WORKFLOWS.md) connect them around a shared outcome.
 
-The workflow layer is meant to be portable. Codex, Claude Code, and future hosts can expose different invocation surfaces, but the codebase mastery, foundation audit, simulation sweeps, potential reading, vision keeping, systemic thinking, reality-checking, research, memory, prompt translation, skill-advice, and skill-distillation behaviors should remain the same.
+The workflow layer is meant to be portable. Codex, Claude Code, and future hosts can expose different invocation surfaces, while sharing the methods for understanding a system, finding opportunities, choosing a direction, testing an assumption, building, verifying, and preserving what matters.
 
 ## Install
 
@@ -14,7 +14,7 @@ From the `skillpack` repo:
 codex plugin marketplace add .
 ```
 
-Restart Codex, open `/plugins`, install `workbench`, and start a new thread. Codex invokes the workflows as bundled skills: `$workbench:devour`, `$workbench:bedrock`, `$workbench:gauntlet`, `$workbench:potential`, `$workbench:vision`, `$workbench:isomorph`, `$workbench:scour`, `$workbench:totality`, `$workbench:research-report`, `$workbench:skill-advisor`, `$workbench:skill-distiller`, `$workbench:memory-scriber`, and `$workbench:max-prompt`.
+Restart Codex, open `/plugins`, install `workbench`, and start a new thread. Codex invokes the workflows as bundled skills: `$workbench:devour`, `$workbench:bedrock`, `$workbench:gauntlet`, `$workbench:potential`, `$workbench:decide`, `$workbench:probe`, `$workbench:vision`, `$workbench:isomorph`, `$workbench:scour`, `$workbench:totality`, `$workbench:research-report`, `$workbench:skill-advisor`, `$workbench:skill-distiller`, `$workbench:memory-scriber`, and `$workbench:max-prompt`.
 
 ### Claude Code
 
@@ -32,15 +32,25 @@ Claude Code loads the plugin skills as portable workflows. Invoke `devour` in pl
 
 **`devour`** — Codebase study and discovery mode. It builds a working atlas of the repo before implementation: surface census, system topology, runtime routes, temporal map, blast-radius map, live probes, safe extension points, and unknowns. The point is not to read many files; the point is to gain enough grounded system intuition to know where and when a change will matter. The atlas persists to `MAP.md` at the repo root — later devours, bedrock, and potential read it instead of starting from zero.
 
+`devour refresh` reconciles that atlas with committed, staged, unstaged, and relevant untracked changes. It records revision and scope, corrects invalidated conclusions, and distinguishes newly verified areas from inherited understanding. A missing baseline is a reason to recheck the affected scope, not invent a change history.
+
 **`bedrock`** — Foundation audit mode. After heavy build sprints, an adversarial inspector walks the building: stress-tests load-bearing logic to bank-grade (atomicity, double-fire, races, swallowed failures), limit-tests feature flows by actually running them, and files findings backed by runnable repros. Maintains an `AUDIT.md` ledger at repo root — every run opens with a regression sweep of past findings. Two modes: report (default) and report-then-fix.
 
 **`gauntlet`** — Bedrock's bigger sibling: run the whole product through its trials. Drive a realistic, goal-driven user journey end to end as the spine, and at every action sweep-test the *real* subsystem behind it — a surface pass (breadth across the journey that triages each touchpoint into a risk-ranked hit-list) funnelling into a deep pass (depth on the risky stations: a varied + adversarial population, breadth × volume, independent verification). It proves both that the user's experience held and that the machinery is sound — skeptical, flaw-hunting, the strongest independent oracle each subsystem affords, run safely and reversibly (snapshot → sweep → restore). A fusion of deterministic simulation testing, agent playtesting, synthetic user journeys, and the test-oracle problem; bedrock runs code to ground a claim, gauntlet drives a whole stateful lifecycle as god + user and verifies the truth it computes.
 
+The sweep retains useful findings and reproductions in the project's existing homes, reuses regression tests where available, and restores only its owned test state. The diary labels observed behavior separately from inferred user experience; an agent-driven journey does not count as human research.
+
 **`potential`** — Bedrock's generative counterpart: the developer across the street who reads the structure and sees what it wants to become. Surfaces features the building already implies (squeeze, birth, combine, expose, generalize), each cited to real beams and graded by honest distance (already-built / one-beam / new-wing). Two modes: open ("what does this want to become?") and wish ("I wish it could X" — the structure answers). Conversational like isomorph; never implements, never writes files.
+
+Each serious opportunity also names who benefits, ongoing ownership and operating burden, opportunity cost, and a smaller alternative. Structural distance and usefulness are assessed separately. `decide` can compare the resulting candidates when the user wants a recommendation.
 
 **`vision`** — Keeps what the building is *for* on file: one `VISION.md` at the repo root holding the verbatim spark, the experience promise, non-goals, taste principles, and current direction. Three moments: birth (carry a warroom exploration's distilled intent into a new repo), backfill (projects already alive with no vision doc), refresh (the doc drifted from current intent). Constitutional rule: the vision comes from the visionary — evidence drafts, the user's voice decides. Devour, bedrock, and potential all read it.
 
 ### Thinking
+
+**`decide`** — Turns credible options and evidence into a reasoned recommendation. Identifies the criteria that matter to the user, compares tradeoffs, challenges the leading option, and states what would change the decision. Distinguishes a recommendation from a choice the user made or delegated. Conversational by default; works independently or between exploration and authorized implementation.
+
+**`probe`** — Resolves a consequential uncertainty with the smallest useful experiment. Defines outcomes, evidence, limits, authority, and cleanup before execution. Returns a supported, contradicted, or inconclusive result within its actual scope, then carries that evidence back to the decision. Technical feasibility, correctness, usability, and demand require different evidence. If execution is unavailable, it returns an explicitly unrun plan.
 
 **`isomorph`** — Reason about a whole system by mapping it onto a mature, structurally-similar domain that already paid for its mistakes, then read that domain's laws back onto the system as invariants and blindspots. A thinking mode, not a file-producing workflow — with one exception: when the user adopts a twin as the project's design bible, it's recorded into `VISION.md` as the system shape, where bedrock audits against its laws, potential consults it for wishes, and devour labels the map in its language.
 
@@ -89,24 +99,27 @@ Discover mode researches new skills from marketplaces and GitHub, then hands the
 
 ## How they fit together
 
-```
-skill-advisor   → "what do I have for this?"
-skill-distiller → "turn what just worked into a skill"
-skill-manager   → "install what I'm missing"
-memory-scriber  → "preserve what I learned today"
-research-report → "go deep on something I want to know"
-max-prompt      → "turn this partial intent into the right executable brief"
-devour          → "study this codebase until you can change it safely"
-bedrock         → "prove the foundations still hold after all that building"
-gauntlet        → "run the whole product through its trials — drive it as god+user and verify the truth"
-potential       → "see what the building wants to become"
-vision          → "keep what the building is for written down and alive"
-isomorph        → "find the mature twin of this system and inherit its laws"
-scour           → "open the window — check what we just said against the real world"
-totality        → "map the COMPLETE surface of this — provably, anchored, every seed expanded"
+```text
+devour → potential → decide → implementation → verification
+                       ↕
+                     probe
 ```
 
-Personal infrastructure for working with AI agents sustainably — not random utilities.
+This is one route for an existing product. Enter at the unresolved stage, skip stages
+already satisfied by current evidence, and use only the skills needed for the task.
+`vision` maintains intent, `scour` checks external understanding, `isomorph` explores
+structure, and `totality` expands coverage when completeness matters. `max-prompt`
+packages a handoff to another recipient; normal implementation can continue directly.
+
+[WORKFLOWS.md](WORKFLOWS.md) contains three recipes: find and build an opportunity,
+shape a new idea, and harden an existing product. Each defines entry conditions,
+handoffs, skip rules, and useful final state. They share a compact record of the
+outcome, evidence, decision, unknowns, and authorized next action. Standalone skill
+requests still stop at their own output.
+
+`skill-advisor` helps choose from the installed toolkit. `memory-scriber` preserves
+session learning when requested, and `skill-distiller` captures a method that proved
+useful. Neither preservation step is mandatory after ordinary work.
 
 ## Invocation Surfaces
 
@@ -115,12 +128,16 @@ Personal infrastructure for working with AI agents sustainably — not random ut
 - `$workbench:research-report official <topic>` — full research pipeline
 - `$workbench:research-report scan <topic>` — quick research scan, no files
 - `$workbench:devour <repo/task>` — codebase mastery mode before implementation
+- `$workbench:devour refresh [area]` — reconcile an existing map with changes and evidence
 - `$workbench:bedrock [area] [fix]` — foundation audit; add `fix` for report-then-fix
 - `$workbench:gauntlet <flow/system>` — drive a user journey end to end and sweep-test the machinery behind each step
 - `$workbench:potential [wish]` — what the building wants to become; pass a wish for wish mode
+- `$workbench:decide <choice>` — compare options, recommend a direction, and state when to revisit
+- `$workbench:probe <assumption>` — run a bounded experiment, or say "plan only" to design it
 - `$workbench:vision [backfill|refresh]` — write or revive the repo's VISION.md
 - `$workbench:isomorph <system>` — map the system onto its mature twin
 - `$workbench:scour [claim|problem]` — reality-check the conversation against the web
+- `$workbench:totality <object>` — map the requested surface against explicit anchors
 - `$workbench:skill-advisor <task>` — recommend from the installed toolkit
 - `$workbench:skill-distiller` — distill a workflow into a reusable skill
 - `$workbench:memory-scriber` — capture the current session
@@ -152,4 +169,4 @@ research/<umbrella>/<title>/
 
 ## License
 
-[MIT](../../LICENSE)
+[MIT](../../README.md#license).

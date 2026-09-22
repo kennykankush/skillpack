@@ -113,9 +113,12 @@ The shared posture across this repo:
 
 Everyday meta-work for coding agents.
 
-- [`workbench:devour`](plugins/workbench/skills/devour/SKILL.md) - Codebase mastery mode before risky implementation, refactors, migrations, debugging, or onboarding. Persists its atlas to `MAP.md` at the repo root.
+- [`workbench:devour`](plugins/workbench/skills/devour/SKILL.md) - Codebase mastery and refresh modes. Persists `MAP.md` with revision, scope, and verification provenance; refresh reconciles changes without relabeling inherited understanding as newly checked.
 - [`workbench:bedrock`](plugins/workbench/skills/bedrock/SKILL.md) - Foundation audit mode: adversarial inspection of load-bearing logic to bank-grade, limit-tested feature flows, runnable repros, and a persistent `AUDIT.md` ledger. Report or report-then-fix.
-- [`workbench:potential`](plugins/workbench/skills/potential/SKILL.md) - Generative counterpart to bedrock: reads the structure and surfaces what it wants to become, every vision cited to real beams and graded by honest distance. Open mode or wish mode; never implements, never writes files.
+- [`workbench:gauntlet`](plugins/workbench/skills/gauntlet/SKILL.md) - Drives real user journeys and verifies the subsystems behind them. Retains useful findings and reproductions, separates observed behavior from inferred experience, and restores owned test state.
+- [`workbench:potential`](plugins/workbench/skills/potential/SKILL.md) - Reads the structure for opportunities, then assesses benefit, ongoing burden, opportunity cost, and smaller alternatives. Open or wish mode; structural distance and usefulness stay distinct.
+- [`workbench:decide`](plugins/workbench/skills/decide/SKILL.md) - Compares credible options against the user's criteria, recommends a direction, and records the accepted downside and conditions for revisiting the choice.
+- [`workbench:probe`](plugins/workbench/skills/probe/SKILL.md) - Resolves a consequential assumption through a bounded experiment with declared outcomes, evidence, limits, and cleanup; returns the result to the decision.
 - [`workbench:vision`](plugins/workbench/skills/vision/SKILL.md) - Keeps a project's `VISION.md` written and alive: birth (handoff from exploration), backfill (repos with no vision doc), refresh (drifted intent). The vision comes from the visionary - evidence drafts, the user's voice decides.
 - [`workbench:research-report`](plugins/workbench/skills/research-report/SKILL.md) - Deep research with scan mode for inline answers and official mode for `notes.md` plus rendered `report.html`.
 - [`workbench:memory-scriber`](plugins/workbench/skills/memory-scriber/SKILL.md) - Captures the residue of a meaningful session into the active host's memory directory.
@@ -127,7 +130,7 @@ Everyday meta-work for coding agents.
 - [`workbench:totality`](plugins/workbench/skills/totality/SKILL.md) - Exhaustive-surface cartographer: map the COMPLETE surface of any object with provable coverage - anchor against official taxonomies, rotate generators, expand every example recursively (the Orange Rule), stock the niche shelf, show the whole tree with an audit and residual. The pack's OMNI; scour and research-report carry pointers to it.
 - `skill-manager` - Claude Code agent for discovering, installing, updating, and cleaning up skills across multiple mechanisms.
 
-Full plugin docs: [`plugins/workbench/README.md`](plugins/workbench/README.md)
+Full plugin docs: [`plugins/workbench/README.md`](plugins/workbench/README.md). Modular chains and handoffs: [`plugins/workbench/WORKFLOWS.md`](plugins/workbench/WORKFLOWS.md).
 
 ### Agents
 

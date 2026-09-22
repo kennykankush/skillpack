@@ -1,6 +1,15 @@
 ---
 name: totality
-description: The exhaustive-surface cartographer. Map the COMPLETE surface of any object — a resume, a domain, a dataset, a market, a decision space, a codebase's concerns — with PROVABLE coverage instead of vibes. Anchor against official exhaustive taxonomies, rotate enumeration generators, expand every example into its full basket recursively (the Orange Rule), hunt the underrepresented niche, and SHOW the whole tree with an audit. Use when the user says "/totality of X", "the totality of X", "map the full surface area", "what am I blindspotted on", "everything X encompasses", "give me ALL of it, exhaustively", or keeps saying "but what else is missing" after a normal answer. Companion: scour fetches unknown anchors; research-report carries totality-shaped deep dives.
+description: >-
+  The exhaustive-surface cartographer. Map the COMPLETE surface of any object — a resume,
+  a domain, a dataset, a market, a decision space, a codebase's concerns — with PROVABLE
+  coverage instead of vibes. Anchor against official exhaustive taxonomies, rotate
+  enumeration generators, expand every example into its full basket recursively (the
+  Orange Rule), hunt the underrepresented niche, and SHOW the whole tree with an audit.
+  Use when the user says "/totality of X", "the totality of X", "map the full surface area",
+  "what am I blindspotted on", "everything X encompasses", "give me ALL of it, exhaustively",
+  or keeps saying "but what else is missing" after a normal answer. Companion: scour
+  fetches unknown anchors; research-report carries totality-shaped deep dives.
 ---
 
 # Totality — The Cartographer Who Proves the Map Is Whole

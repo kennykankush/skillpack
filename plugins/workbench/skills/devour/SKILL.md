@@ -1,6 +1,6 @@
 ---
 name: devour
-description: Enter codebase mastery mode before implementation. Use when the user asks to DEVOUR a repo or codebase, learn everything, deeply onboard, map architecture, trace runtime flows, understand blast radius, or build intuition about where and when things happen in a system. Persists its atlas to MAP.md at the repo root so later runs, bedrock, and potential start from the map instead of zero.
+description: Enter codebase mastery mode before implementation, or refresh an existing map after changes. Use when the user asks to DEVOUR a repo, deeply onboard, map architecture, trace runtime flows, understand blast radius, refresh MAP.md, or establish what changed since the last study. Persists its atlas to MAP.md with revision, scope, and verification provenance so later runs can reuse valid understanding without claiming stale areas were rechecked.
 ---
 
 # Devour - Codebase Mastery Mode
@@ -18,6 +18,8 @@ Use this skill when the user asks for any of these:
 - "map this system before we change it"
 - "onboard yourself to this repo"
 - "figure out the architecture and blast radius"
+- "devour refresh" / "refresh the map"
+- "what changed since we last understood this system?"
 
 There is also a two-brain variant, triggered by `devour collab` (e.g. `/devour collab`,
 `$devour collab`, optionally scoped: `devour collab src/api`). It runs one Claude and one
@@ -25,6 +27,18 @@ Codex over the same code and makes them cross-examine each other. See **Collab M
 Everything in this skill is the solo path unless that section says otherwise.
 
 Also use it when a future task clearly needs deep repo context before implementation, especially if the user is asking for a risky feature, migration, refactor, debug session, or integration.
+
+## Study or refresh
+
+- **Study:** establish understanding when no adequate map exists. Follow the workflow
+  below, scoped to the user's question or the repo they requested.
+- **Refresh:** reconcile an existing map with current reality. Use the refresh workflow
+  below when asked, or when prior understanding exists and only its changes need study.
+- A small concrete task with adequate context needs ordinary targeted reading. Do not
+  launch devour just because the task touches a repo.
+
+Both modes preserve the same operating boundary. `refresh` does not enable collab;
+the two-brain option still requires the user's explicit `collab` request.
 
 ## Host-Agnostic Contract
 
@@ -81,6 +95,39 @@ Before deep study:
 4. Identify workspace shape: monorepo, app folders, packages, services, generated folders, vendored dependencies, docs, and scripts.
 5. Read top-level orientation files first: README, AGENTS, CLAUDE, VISION.md (the project's stated intent, when present), package manifests, build files, env examples, docs indexes, and architecture notes.
 6. Ask at most one concise question only if the goal or safety boundary is genuinely ambiguous.
+
+## Refresh workflow
+
+1. **Recover the baseline.** Read the map's provenance and scope. Resolve its recorded
+   revision when available and check whether the repository history permits comparison.
+   If provenance is missing or the revision is unavailable, say so. Use map history and
+   source references to orient a fresh scoped verification; never infer a precise baseline
+   from the file's modification time or treat an arbitrary recent commit as the last study.
+2. **Inventory the delta.** Inspect committed changes from the usable baseline to current
+   HEAD, plus staged, unstaged, and relevant untracked source files. Record current dirty
+   scope separately. A recorded dirty baseline is not fully recoverable from its HEAD;
+   recheck those claims directly unless the prior evidence was retained. Never reset,
+   stash, or switch branches to make the comparison easier.
+3. **Trace changed consequences.** Revisit affected entrypoints, callers, writes, consumers,
+   lifecycle, tests, and configuration. Include external/runtime drift where it matters;
+   an unchanged source file does not prove unchanged deployed behavior. Follow dependencies
+   beyond the named area when they affect the question, and explain why scope widened.
+4. **Reconcile claims.** Distinguish newly verified understanding, invalidated conclusions,
+   inherited claims not rechecked, and unresolved questions. Replace incorrect map entries
+   with current evidence or mark them stale. Preserve valid out-of-scope sections with
+   their previous provenance; do not stamp the whole atlas as freshly verified.
+5. **Probe selectively.** Run bounded safe checks that settle the changed claims. Record
+   what failed or could not be checked. No full test/build ritual is required merely
+   because this is a refresh.
+6. **Return the delta and update the map.** Explain what changed, which conclusions no
+   longer hold, what is now verified, what remains inherited or unknown, and what that
+   means for the next task. Persist within the existing MAP.md unless the user asked
+   for chat-only output. Stop when the scoped change question is answered or the remaining
+   gaps are precisely identified; a fundamental topology change may justify a wider study.
+
+Refresh uses the relevant parts of the study workflow below; it does not automatically
+repeat the whole census. Hand the updated evidence into an authorized next task using
+[WORKFLOWS.md](../../WORKFLOWS.md), or end with the delta for a standalone request.
 
 ## Workflow
 
@@ -193,6 +240,10 @@ Repo Identity
 - languages/frameworks/package managers
 - real root and major apps/packages
 
+Provenance
+- study/refresh date, source HEAD or non-git baseline, dirty scope, studied areas
+- per-area last verification where coverage differs; runtime environment when probed
+
 Terrain Map
 - major subsystems and where they live
 - important boundaries and shared layers
@@ -236,7 +287,12 @@ Rules for `MAP.md`:
 
 - One file, readable in one sitting. Weight budget is law: compress, collapse stale
   detail, never spawn a second map file.
-- Stamp each update with the date and the scope of what was actually studied.
+- Stamp each update with mode, date, source revision (HEAD before writing MAP.md, when
+  available), studied scope, and relevant dirty paths. For non-git sources, record
+  available source identifiers and the baseline limitation; never invent a commit.
+- Keep provenance per area when verification dates differ. A file-level update date is
+  not evidence that inherited sections were rechecked. Distinguish code inspection from
+  runtime observation, and identify the environment and date for runtime claims.
 - If `VISION.md` declares an adopted system twin ("this is built as a hospital"), label
   the atlas in both languages where it helps — `sessions/ = the wards` — so the map
   speaks the building's own metaphor.
@@ -342,6 +398,11 @@ Before saying the repo has been devoured, check whether you can answer:
 - If a schema, route, component, helper, or config file changes, what else must be inspected?
 - Which commands verify the important paths?
 - What did live probes prove, and what did they fail to prove?
+
+For a refresh, apply these questions to the changed scope and affected dependencies.
+Also verify that the output identifies the baseline, invalidated conclusions, current
+evidence, and inherited areas not rechecked. If provenance is missing or a stale claim
+was presented as verified, correct the map before declaring the refresh complete.
 
 If you cannot answer these with evidence, say the codebase is partially devoured and list the next probes.
 

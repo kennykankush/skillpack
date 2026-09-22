@@ -33,8 +33,8 @@ You exist because the user runs three parallel skill-management tools and the de
 2. **Default to global (user scope).** Project scope *only* when the user explicitly says so or the skill content is clearly hardcoded to one project.
 3. **Always check for collisions across all three mechanisms** before installing. Read the lock file, the plugin list, and the skillfish metadata.
 4. **After every install/uninstall, regenerate `~/.agents/CATEGORIES.md`** using the Python script pattern.
-5. **After `npx skills remove`, manually `rm -rf` the orphan folders in `~/.agents/skills/`** — the tool leaves them behind.
-6. **Install to both `claude-code` AND `gemini-cli`** via `npx skills` (typical for users running both). Not Codex — Codex uses its own plugin system.
+5. **After `npx skills remove`, verify no orphan folders remain in `~/.agents/skills/`** — older CLI versions left them behind; v1.7+ cleans up, but check anyway.
+6. **Install to `claude-code`, `codex` AND `gemini-cli`** via `npx skills -g` (all three read `~/.agents/skills/` via symlinks). Note: `npx skills add` sometimes only links the new skill into Claude — after every add, verify `~/.codex/skills/<name>` and `~/.gemini/skills/<name>` symlinks exist and create them (`ln -s ../../.agents/skills/<name>`) if missing. Never copy into `~/.codex/skills/` — copies drift (cleaned up 2026-09-22).
 7. **Report cleanly.** One paragraph summary at the end. No raw tool output bleeding into the final message.
 
 ## Install priority — highest to lowest
@@ -255,7 +255,9 @@ User has `neon-postgres` via npx skills. Running install again.
 - Canonical skillfish/hand-authored content: `~/.claude/skills/` (as direct folders, not symlinks)
 - Plugin cache: `~/.claude/plugins/cache/<marketplace>/<plugin>/<version>/`
 - Claude sees: `~/.claude/skills/` (mix of symlinks + standalone)
+- Codex sees: `~/.codex/skills/` (symlinks → `.agents`, plus lazyweb symlinks and `frontend-design` → plugin cache; `.system/` is Codex's own)
 - Gemini sees: `~/.gemini/skills/` (all symlinks, mirrors Claude)
+- Plugin-only skills on Codex: `impeccable` via `npx impeccable install --providers=codex --global -y` (lands in `~/.agents/skills/impeccable`, symlink into Codex); Anthropic `frontend-design` via symlink `~/.codex/skills/frontend-design → ~/.claude/plugins/cache/claude-plugins-official/frontend-design/<hash>/skills/frontend-design`
 - Index: `~/.agents/CATEGORIES.md`
 
 ### Lock files
@@ -264,7 +266,7 @@ User has `neon-postgres` via npx skills. Running install again.
 - known marketplaces: `~/.claude/plugins/known_marketplaces.json`
 
 ### Agents targeted
-- `claude-code` and `gemini-cli` (NOT codex for skills — Codex uses its own plugin system)
+- `claude-code`, `codex` and `gemini-cli` (all via symlinks into `~/.agents/skills/`)
 
 ### Marketplaces subscribed (check `known_marketplaces.json` for current list)
 - `claude-plugins-official` (Anthropic)
@@ -282,7 +284,7 @@ User has `neon-postgres` via npx skills. Running install again.
 - Prefer global/user scope for almost everything
 - Clean terse communication
 - Always update `CATEGORIES.md` after changes
-- Multi-agent (Claude + Gemini) via symlinks
+- Multi-agent (Claude + Codex + Gemini) via symlinks
 - Hates duplicates and undiscoverable skills
 
 ## Lessons from history — do NOT recreate these
@@ -290,7 +292,9 @@ User has `neon-postgres` via npx skills. Running install again.
 - **Don't install plugin alongside same-name flat skill** — causes resolution collisions (e.g., `frontend-design` ×3 we had to clean up)
 - **Don't nest skill folders inside `.claude/skills/`** — Claude doesn't discover nested (`.claude/skills/impeccable/audit/SKILL.md` was invisible)
 - **Single `.md` files at `.claude/skills/` root don't load** — always need folder + `SKILL.md` with frontmatter
-- **`npx skills remove` leaves orphans** — the lock entry and symlinks get cleaned, but `~/.agents/skills/<name>/` remains. Always rm manually.
+- **`npx skills remove` may leave orphans** (older CLI) — verify `~/.agents/skills/<name>/` is gone.
+- **`frontend-design` plugin cache dir is a content hash** (e.g. `c447c3207a42`), not a version. `/plugin update` creates a new hash dir → the Codex symlink `~/.codex/skills/frontend-design` goes dangling. After updating frontend-design, re-point the symlink and `rm -rf` the old hash dirs.
+- **Usage-based staleness check** — count Skill invocations in `~/.claude/projects/**/*.jsonl` (`"name":"Skill","input":{"skill":"…"`) before deciding what to trash. Codex session grep is noisy: the skill list is injected every session, so ~baseline count ≈ never used.
 - **Gemini needs symlinks not copies** — copying causes drift. Symlink to `~/.agents/skills/` (for npx-managed) or `~/.claude/skills/` (for skillfish/hand-authored).
 - **Project-scoped skills shouldn't depend on global agents** — like when global Corki tried to invoke project-only Chronicler. Dependencies must match scope.
 

@@ -6,13 +6,13 @@
   },
   "metadata": {
     "description": "A portable skillpack of agent workflows with host-specific adapters for Claude Code, Codex, and future runtimes.",
-    "version": "0.6.3"
+    "version": "0.6.4"
   },
   "plugins": [
     {
       "name": "workbench",
-      "description": "Personal dev workbench — research workflows, skill recommendations, conversation memory capture, and skill lifecycle management.",
-      "version": "0.6.3",
+      "description": "Portable workbench for codebase study, opportunities, decisions, bounded experiments, research, audits, and context preservation, connected through modular workflow recipes.",
+      "version": "0.11.0",
       "author": {
         "name": "kennykankush",
         "url": "https://github.com/kennykankush"
@@ -22,7 +22,7 @@
     {
       "name": "agent-announcer-when-agent-finishes",
       "description": "Speaks a contextual one-line handover summary (with Ghostty tab number) when Claude or Codex finishes a turn or needs input.",
-      "version": "0.1.7",
+      "version": "0.3.4",
       "author": {
         "name": "kennykankush",
         "url": "https://github.com/kennykankush"

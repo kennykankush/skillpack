@@ -1,6 +1,6 @@
 ---
 name: potential
-description: See what a codebase wants to become. The generative counterpart to a foundation audit - read the existing structure and surface the features it already implies, the capacity it isn't using, and the doors it hasn't opened. Two modes - open ("what does this want to become?") and wish (the user brings "I wish it could X" and the structure answers whether and how it can grant it). Use when the user asks what could this become, squeeze the potential of this feature, what features want to be born, what's latent here, run potential, or starts a sentence with "I wish it could". A conversational thinking mode like isomorph - it never implements and never writes files.
+description: See what a codebase wants to become and which opportunities deserve attention. Ground possibilities in existing structure, assess who benefits, ongoing burden, opportunity cost, and smaller alternatives. Two modes - open (what could this become) and wish (whether and how the structure can grant a wish). Use when the user asks what is latent, what features could emerge, whether a capability is being used fully, or says run potential. Conversational; never implements or writes files within this mode.
 ---
 
 # Potential — See What the Building Wants to Become
@@ -21,8 +21,8 @@ Potential is the deliberate step back across the street.
 structure that carries it — "you already built X and Y; Z is implied, and the building
 already does most of it." If an idea could have been generated without reading this
 codebase — *add dark mode, add export, add AI* — it is a PM listicle item, not a
-potential, and it dies before the report. The visionary's ideas are cheap because the
-building already paid for them.
+potential, and it dies before the report. Existing structure earns an idea a closer
+look; usefulness and the cost of keeping it alive still need their own evidence.
 
 ## Activation
 
@@ -57,9 +57,12 @@ shape the answer before grading what the structure can carry:
   something adjacent and better. Reshaping the wish is a first-class outcome, not a
   failure to answer.
 
-In both modes the output stays a wish. Potential never implements, never opens a fix
-phase, and never writes files — it is a thinking mode, like `isomorph`. If the user wants
-a vision kept somewhere, that is their call to make afterwards, not the skill's.
+In both modes the output is a grounded opportunity. Potential itself never implements
+or writes files. A standalone request ends with those opportunities. When the user
+chooses one and authorizes building, leave this mode and carry the evidence into that
+work without requiring another invocation. Use `decide` if a consequential choice
+remains, or `probe` for an assumption that must be tested first; neither is mandatory.
+For longer journeys, use [WORKFLOWS.md](../../WORKFLOWS.md).
 
 ## Host-Agnostic Contract
 
@@ -71,8 +74,9 @@ name. Cite structure in plain file/flow terms any host could follow.
 
 - **Across the street, not at the whiteboard.** Visions come from reading the structure,
   not from brainstorming over it.
-- **Few and deep beats many and shallow.** A portfolio is three to five visions, each
-  carrying its evidence. Twenty shallow wishes is the listicle failure wearing a coat.
+- **Few and deep beats many and shallow.** An open portfolio usually has three to five
+  visions, fewer when the evidence supports fewer. Wish mode addresses the wish without
+  padding it into a portfolio. Each opportunity carries its evidence.
 - **The vision is the client.** Read what the building is *trying to be* (README,
   CLAUDE.md / AGENTS.md, stated intent) before dreaming. A potential either serves that
   vision or is honestly flagged as *extending* it — never silently redirecting it.
@@ -117,7 +121,7 @@ Every vision cites its beams as file or flow references a stranger could check.
 
 Every vision carries an honest distance grade:
 
-- **already-built** — the machinery exists; only the door is missing. Days, not weeks.
+- **already-built** — the machinery exists; the missing work is exposing it safely.
 - **one-beam** — one real addition and the existing structure carries the rest.
 - **new-wing** — a genuine project, but the foundation demonstrably supports it. Said
   plainly, never disguised as one-beam.
@@ -125,14 +129,39 @@ Every vision carries an honest distance grade:
 Plus vision-fit: **serves** the stated vision, or **extends** it (flagged, so the user
 decides whether the building's ambition grows).
 
+These grades describe structural distance. They are not calendar estimates, evidence of
+demand, or permission to ignore rollout, integration, support, and operating costs.
+
+## Does the opportunity deserve to exist?
+
+For each serious opportunity, answer briefly:
+
+- **Beneficiary and situation:** who would use it, at what moment, and what improves?
+  Cite existing user evidence when available; otherwise label the benefit as a hypothesis.
+- **Ongoing burden:** who would maintain or operate it, what new failure paths appear,
+  and which support, data, compatibility, or service costs continue after the build?
+  Mark ownership and costs unknown when they have not been established.
+- **Opportunity cost:** what known priority would be delayed or complicated? If priorities
+  are unknown, say so rather than inventing a roadmap.
+- **Smaller alternative:** could exposing an existing control, improving a default, or
+  narrowing the audience deliver most of the benefit? Keeping the current behavior can
+  also be reasonable.
+
+Give a provisional judgment: **worth exploring**, **conditional on evidence**, or
+**leave dormant**, with the reason. Keep an interesting but unproven opportunity visible
+without presenting it as a recommendation to build. Deep comparison and commitment belong
+to `decide`; potential supplies the candidates and the evidence that makes them credible.
+
 ## The Back-and-Forth — this is the texture
 
 Like `isomorph`, a correct run feels like two people standing across the street from the
 same building, pointing. Never a one-shot dump.
 
-- **Open mode:** present the portfolio — each vision in a few lines: *the vision, the
-  beams that carry it (cited), the cost grade, the fit*. Then stop and let the user
-  point.
+- **Open mode:** present a few earned opportunities: *benefit and evidence, supporting
+  structure, distance and fit, ongoing burden, opportunity cost, smaller alternative,
+  provisional judgment*. Keep each concise; a small table can carry the comparison.
+  For exploration alone, stop and let the user point. For an already-authorized workflow,
+  pass the findings to the next stage with the user's priorities intact.
 - **Deepen on demand:** when the user points at one, go deep — which structures carry
   it, what is genuinely missing, what it would unlock *next* (potentials compound), and
   the first beam to place if they ever build it.
@@ -148,20 +177,26 @@ A run is good only if:
 
 1. Every vision cites real structure (file/flow references) — the constitutional rule
    held.
-2. The portfolio is small and deep — three to five, each one earned.
+2. Open mode returns a small, grounded portfolio; wish mode directly addresses the wish.
 3. Every grade is honest — no new-wing dressed as one-beam.
 4. In wish mode, the wish got a real answer: grantable / not grantable / sharper wish.
 5. Nothing was implemented and no files were written.
 6. Vision-fit was checked against what the building is trying to be.
+7. Each serious opportunity names a beneficiary, ongoing burden, opportunity cost, and
+   smaller alternative, with missing evidence explicitly marked.
+8. Feasibility and value have separate judgments; no time estimate or user demand was
+   inferred merely because supporting code exists.
 
-A pretty idea with no beams under it is decoration. Cut it or find its evidence.
+A pretty idea with no beams under it is decoration. Cut it or find its evidence. If
+technical proximity is the only argument for pursuing it, redo the value assessment.
 
 ## What Not To Do
 
 - Do not produce PM listicles or market-shaped features ungrounded in this building.
 - Do not present twenty shallow wishes; present a few that are earned.
 - Do not inflate proximity — distance honesty is what makes the portfolio trustworthy.
-- Do not drift into building it. The skill ends at the vision, every time.
+- Do not build inside potential. Finish its opportunity assessment, then transition
+  only when implementation is already authorized.
 - Do not write files. The output lives in the conversation; keeping it is the user's call.
 - Do not override the building's stated vision with your own taste — extensions are
   flagged, never smuggled.
