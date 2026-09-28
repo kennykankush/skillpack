@@ -28,7 +28,10 @@ It is the action-twin of the family's study skills. `devour` maps a codebase to
 understand it; `bedrock` runs code to ground a claim in reality; **gauntlet drives a whole
 stateful system's lifecycle as god and user at once, then adversarially verifies the
 truth it computes.** It borrows `devour`'s discovery to find the levers and `scour`'s
-"falsify, don't confirm" stance to pull the trigger.
+"falsify, don't confirm" stance to pull the trigger. Its live twin is `hats:birdwatch`:
+the same spine and stations, but a person drives and the agent keeps its hands off. Hand
+a station to birdwatch when how it *feels* needs a real person; take a hot station back
+from birdwatch when it needs a full sweep.
 
 Lineage, so it isn't hand-waving: a fusion of **deterministic simulation testing**
 (FoundationDB/Antithesis — drive the world, assert invariants), **agent-based
@@ -176,6 +179,9 @@ diary, and useful reproductions follow the next phase and are excluded from test
   honor that and provide repeatable commands and findings inline, noting the persistence limit.
 
 Steerable intensity: default is *surface-all + auto-deep the top-N risky stations*.
+This is what gauntlet's totality means: every station the journey touches gets at least a
+surface pass, and depth goes where the surface pass shows risk. Deep-sweeping everything is
+not the promise.
 "deep sweep payments" jumps straight to Phase 3 on a named station. "just surface it" is
 a fast Phase 2 confidence check.
 

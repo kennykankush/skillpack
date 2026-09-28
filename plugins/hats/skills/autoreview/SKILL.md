@@ -84,7 +84,7 @@ Committed single change:
 or with the helper:
 
 ```bash
-plugins/agents/skills/autoreview/scripts/autoreview --mode commit --commit HEAD
+plugins/hats/skills/autoreview/scripts/autoreview --mode commit --commit HEAD
 ```
 
 Use commit review for already-landed or already-pushed work on `main`. Reviewing
@@ -141,7 +141,7 @@ Run the helper directly so target selection, engine choice, structured validatio
 Skillpack source helper, from this repo root:
 
 ```bash
-plugins/agents/skills/autoreview/scripts/autoreview --help
+plugins/hats/skills/autoreview/scripts/autoreview --help
 ```
 
 Installed skill helper, from the installed `autoreview` skill directory:

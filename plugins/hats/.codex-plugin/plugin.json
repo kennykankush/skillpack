@@ -1,0 +1,47 @@
+{
+  "name": "hats",
+  "version": "0.2.1+codex.20260928122426",
+  "description": "Operating roles for the assistant you're already using: an overseer for agent work, a live QA companion, and a review closeout.",
+  "author": {
+    "name": "kennykankush",
+    "url": "https://github.com/kennykankush"
+  },
+  "homepage": "https://github.com/kennykankush/skillpack/tree/main/plugins/hats",
+  "repository": "https://github.com/kennykankush/skillpack",
+  "license": "MIT",
+  "keywords": [
+    "hats",
+    "roles",
+    "overseer",
+    "agent-coordination",
+    "review",
+    "autoreview",
+    "watcher",
+    "qa",
+    "observability",
+    "codex",
+    "claude"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Hats",
+    "shortDescription": "Operating roles for the assistant you are already using.",
+    "longDescription": "Portable operating roles. Overseer is a control tower for agent work: it gets ready on the whole project, watches other coding agents, checks their claims, relays the user's decisions without ever granting approvals, and keeps a watch log so the next overseer inherits the context. Birdwatch is the live QA companion: the user drives a flow while it verifies UI against API, DB and logs and records findings in the user's words. Autoreview runs a structured code-review closeout and verifies findings before fixes.",
+    "developerName": "kennykankush",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/kennykankush/skillpack",
+    "termsOfServiceURL": "https://github.com/kennykankush/skillpack/blob/main/LICENSE",
+    "defaultPrompt": [
+      "Oversee the other agents on this project and keep me briefed.",
+      "Check whether the agent's latest work is valid.",
+      "Tell the agent my decision and confirm it acknowledged.",
+      "Use birdwatch while I test this app.",
+      "Run autoreview on this branch before final."
+    ],
+    "brandColor": "#4C7D7A"
+  }
+}
