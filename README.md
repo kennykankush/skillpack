@@ -24,8 +24,9 @@ Common invocations:
 $workbench:devour
 $workbench:research-report
 $workbench:max-prompt
-$agents:birdwatch
-$agents:autoreview
+$hats:overseer
+$hats:birdwatch
+$hats:autoreview
 $videos:storyboard
 $extra:trail-scriber
 ```
@@ -81,7 +82,7 @@ The fix is `workbench:max-prompt`: a domain-adaptive intent translator for softw
 
 The failure mode is guessing from stale memory. A user tests an app, the agent summarizes vibes, and nobody checks the logs, API, DB rows, browser state, branch state, PR state, or issue state that would prove what happened.
 
-The fix is `agents:birdwatch`: a live watcher posture for product/dev sweeps. It observes first, records discrepancies, separates user-visible friction from backend/data bugs, and avoids destructive actions unless explicitly asked. For code closeout, `agents:autoreview` runs a structured review helper, verifies accepted findings against the real code path, applies narrow fixes only when appropriate, and reruns until no actionable findings remain.
+The fix is `hats:birdwatch`: a live QA companion for product/dev sweeps, the live twin of `workbench:gauntlet`. The user drives, it verifies the UI against logs, API and DB, records discrepancies in the user's words, and avoids destructive actions unless explicitly asked. When the work is done by other agents rather than a person, `hats:overseer` is the control tower: it gets ready on the whole project, checks each agent's claims against evidence, relays the user's decisions without granting approvals, and keeps a watch log the next overseer inherits. For code closeout, `hats:autoreview` runs a structured review helper, verifies accepted findings against the real code path, applies narrow fixes only when appropriate, and reruns until no actionable findings remain.
 
 ### #5: Agent skills become a scattered toolbox
 
@@ -132,14 +133,15 @@ Everyday meta-work for coding agents.
 
 Full plugin docs: [`plugins/workbench/README.md`](plugins/workbench/README.md). Modular chains and handoffs: [`plugins/workbench/WORKFLOWS.md`](plugins/workbench/WORKFLOWS.md).
 
-### Agents
+### Hats
 
-Reusable operating modes for live work and closeout.
+Operating roles for the assistant you're already using.
 
-- [`agents:birdwatch`](plugins/agents/skills/birdwatch/SKILL.md) - Evidence-backed watcher mode while a user tests a product flow, API, DB state, logs, issues, or PR behavior.
-- [`agents:autoreview`](plugins/agents/skills/autoreview/SKILL.md) - Structured code-review closeout for local changes, branch diffs, or commits, with verified findings and focused fixes.
+- [`hats:overseer`](plugins/hats/skills/overseer/SKILL.md) - Control tower for agent work: gets ready on the whole project, watches other coding agents, verifies their claims, relays the user's decisions, keeps a decision queue and a watch log.
+- [`hats:birdwatch`](plugins/hats/skills/birdwatch/SKILL.md) - Live QA companion, gauntlet's live twin: the user drives a flow while it verifies UI against API, DB and logs and records findings in the user's words.
+- [`hats:autoreview`](plugins/hats/skills/autoreview/SKILL.md) - Structured code-review closeout for local changes, branch diffs, or commits, with verified findings and focused fixes.
 
-Full plugin docs: [`plugins/agents/README.md`](plugins/agents/README.md)
+Full plugin docs: [`plugins/hats/README.md`](plugins/hats/README.md)
 
 ### Videos
 
