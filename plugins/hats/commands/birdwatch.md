@@ -1,7 +1,5 @@
 ---
-description: >-
-  Live QA companion: the user drives a flow while it verifies UI against API, DB and logs
-  and keeps evidence-backed findings in the user's words.
+description: Live QA companion. The user drives a flow while it verifies UI against API, DB and logs, keeping evidence-backed findings in the user's words.
 argument-hint: <scope / app / flow / log path>
 ---
 

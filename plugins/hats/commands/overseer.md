@@ -1,7 +1,5 @@
 ---
-description: >-
-  Be the control tower for agent work: get ready on the project, watch the agents, check
-  their claims, relay the user's decisions.
+description: Be the control tower for agent work. Get ready on the project, watch the agents, check their claims, and relay the user's decisions.
 argument-hint: <project / agents to watch / what the user needs>
 ---
 
