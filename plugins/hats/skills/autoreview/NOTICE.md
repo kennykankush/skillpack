@@ -4,9 +4,10 @@ This skill is vendored from the OpenClaw Agent Skills repository:
 
 https://github.com/openclaw/agent-skills/tree/main/skills/autoreview
 
-Source snapshot:
+Source snapshot (resynced 2026-09-29 from `origin/main`; the previous snapshot
+`7b6ca5b2078af2746d1c4424fe90211901b997ae` dated 2026-05-27 was four months stale):
 
-`7b6ca5b2078af2746d1c4424fe90211901b997ae`
+`d5cbe626989195044e97545b3acb7c99b06a6103`
 
 Upstream license notice:
 
