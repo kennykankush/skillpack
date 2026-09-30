@@ -1,0 +1,15 @@
+{
+  "title": "Goal: <what done means, in one line>",
+  "tz": "Europe/London",
+  "planStart": "2026-01-15T22:00",
+  "deadline": "2026-01-16T09:00",
+  "priorHours": 1.0,
+  "note": "The baseline is fixed when the plan is set; planned finishes never change. Actual finishes are recorded with progress.py --done N. Scope found later is added with progress.py --add NAME --est HOURS.",
+  "checkpoints": [
+    {"n": 1, "name": "Merge the feature branch", "estHours": 0.5, "planned": "2026-01-15T22:30", "actual": null},
+    {"n": 2, "name": "Fix the flaky shutdown path", "estHours": 1.0, "planned": "2026-01-15T23:30", "actual": null},
+    {"n": 3, "name": "Nothing reads clean without evidence", "estHours": 3.0, "planned": "2026-01-16T02:30", "actual": null},
+    {"n": 4, "name": "Final readiness run on every shipped platform", "estHours": 1.0, "planned": "2026-01-16T03:30", "actual": null},
+    {"n": 5, "name": "Continuous integration live", "estHours": 0.5, "planned": null, "actual": null, "gated": "the user's password step"}
+  ]
+}
