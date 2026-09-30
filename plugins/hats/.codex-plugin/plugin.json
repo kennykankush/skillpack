@@ -1,6 +1,6 @@
 {
   "name": "hats",
-  "version": "0.4.0+codex.20260930015433",
+  "version": "0.4.1+codex.20260930021116",
   "description": "Operating roles for the assistant you're already using: an overseer for agent work, a live QA companion, and a review closeout.",
   "author": {
     "name": "kennykankush",
