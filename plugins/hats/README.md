@@ -17,9 +17,11 @@ Use it when you want the assistant to:
 - get ready on the whole project first: rules, docs, roadmap, handovers, recent commits, each agent's latest state
 - show a situation card with how fresh each fact is
 - watch other coding agents and check their claims before repeating them
-- relay your decisions to an agent, without ever approving anything on your behalf
+- relay your decisions to an agent, never approving anything you have not delegated in writing
+- approve routine asks for you once you delegate them in writing, keeping a reserved list (spend, publishing, your own hands, security posture, unrecoverable deletions, client data, scope) that always comes back to you
+- show progress as a checkpoint bar, with planned against actual times and two forecasts (at the observed speed, and a cautious one), updated at every checkpoint
 - keep a decision queue of what is waiting on you
-- keep a watch log in the project, so the next overseer starts where this one stopped
+- keep a clock-stamped watch log in the project, so the next overseer starts where this one stopped
 
 ### `birdwatch`
 
