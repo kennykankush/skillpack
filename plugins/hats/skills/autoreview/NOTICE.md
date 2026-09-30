@@ -4,10 +4,13 @@ This skill is vendored from the OpenClaw Agent Skills repository:
 
 https://github.com/openclaw/agent-skills/tree/main/skills/autoreview
 
-Source snapshot (resynced 2026-09-29 from `origin/main`; the previous snapshot
-`7b6ca5b2078af2746d1c4424fe90211901b997ae` dated 2026-05-27 was four months stale):
+Source snapshot (resynced 2026-09-30 from `origin/main`, to take in the fix for
+absolute in-repository finding paths, upstream issue #297 and PR #298):
 
-`d5cbe626989195044e97545b3acb7c99b06a6103`
+`d4c9557ffb294af1c27d4c74fa66fba71b8a1d0c`
+
+Earlier snapshots: `d5cbe626989195044e97545b3acb7c99b06a6103` (resynced 2026-09-29) and
+`7b6ca5b2078af2746d1c4424fe90211901b997ae` (dated 2026-05-27).
 
 Upstream license notice:
 
