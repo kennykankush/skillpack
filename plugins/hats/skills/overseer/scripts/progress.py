@@ -134,7 +134,7 @@ def main():
     if args.add:
         if args.est is None:
             raise SystemExit("--add needs --est HOURS.")
-        entry = {"n": max(c["n"] for c in cps) + 1, "name": f"(added {now:%H:%M}) {args.add}",
+        entry = {"n": max(c["n"] for c in cps) + 1, "name": args.add, "added": now.strftime(FMT),
                  "estHours": args.est, "planned": None, "actual": None, "addedAfterPlan": True}
         index = len(cps)
         if args.after is not None:
@@ -153,8 +153,10 @@ def main():
         lock.close()
 
     hm = lambda d: d.strftime("%H:%M") if d.date() == now.date() else d.strftime("%d %b %H:%M")
+    # A checkpoint handed to another agenda ("movedTo") counts in neither this bar nor this forecast.
+    cps = [c for c in cps if c.get("actual") or not c.get("movedTo")]
     done = [c for c in cps if c.get("actual")]
-    filled = round(20 * len(done) / len(cps))
+    filled = round(20 * len(done) / max(len(cps), 1))
     print(tracker.get("title") or tracker.get("agenda") or "Progress")
     print(f"  [{'#' * filled}{'-' * (20 - filled)}]  {len(done)} of {len(cps)} checkpoints")
 
