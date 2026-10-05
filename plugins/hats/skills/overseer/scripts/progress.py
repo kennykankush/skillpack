@@ -13,11 +13,17 @@ and a forecast recalculated from the observed speed.
     progress.py TRACKER.json --done N --by NAME record N done by NAME (unverified)
     progress.py TRACKER.json --verified N --by NAME
                                                 record that NAME checked N independently
+    progress.py TRACKER.json --pause "WHY" --by NAME
+                                                start a pause; the next --doing ends it
 
 A checkpoint the builder ticks with --by stays "awaiting check" until another session
 records --verified: a claim and a confirmation are different facts, and a reader of the
 tracker (the agendas pane) shows which is which. Writers take a lock on TRACKER.lock and
 replace the file whole, so two sessions updating one tracker cannot lose each other's change.
+
+Working time is wall time minus the tracker's recorded "pauses" ({from, to, why}): a usage
+limit, a night, a hold for the user. Speed and the pane's "worked" figure both subtract them,
+so a four-day stop does not read as four days of slow work.
 
 Times are local wall-clock times without a zone. Set TZ (or the tracker's "tz", an IANA
 name such as "Europe/London") so "now" and every recorded time come from the clock,
@@ -70,11 +76,12 @@ def main():
     ap.add_argument("--checkpoint", type=int, help="the checkpoint --doing belongs to")
     ap.add_argument("--idle", action="store_true", help="clear --by's \"now\" line")
     ap.add_argument("--verified", type=int, help="record checkpoint N as independently checked")
+    ap.add_argument("--pause", help="start a pause with this reason; the next --doing ends it")
     args = ap.parse_args()
-    if (args.doing or args.idle or args.verified is not None) and not args.by:
-        raise SystemExit("--doing, --idle and --verified need --by NAME.")
+    if (args.doing or args.idle or args.pause or args.verified is not None) and not args.by:
+        raise SystemExit("--doing, --idle, --pause and --verified need --by NAME.")
 
-    writes = args.done is not None or args.add or args.doing or args.idle or args.verified is not None
+    writes = args.done is not None or args.add or args.doing or args.idle or args.pause or args.verified is not None
     lock = open(args.tracker + ".lock", "a") if writes else None
     if lock:
         fcntl.flock(lock, fcntl.LOCK_EX)
@@ -104,14 +111,26 @@ def main():
         target["verified"] = now.strftime(FMT)
         target["verifiedBy"] = args.by
         changed = True
+    pauses = tracker.setdefault("pauses", [])
+    open_pause = next((x for x in pauses if not x.get("to")), None)
     if args.doing:
+        if open_pause:
+            open_pause["to"] = now.strftime(FMT)
         tracker["now"] = {"by": args.by, "doing": args.doing, "updated": now.strftime(FMT)}
         if args.checkpoint is not None:
             tracker["now"]["checkpoint"] = args.checkpoint
         changed = True
+    if args.pause or args.idle:
+        if not open_pause:
+            pauses.append({"from": now.strftime(FMT), "why": args.pause or "idle", "by": args.by})
+        if args.pause:
+            tracker["now"] = {"by": args.by, "doing": f"paused: {args.pause}", "updated": now.strftime(FMT), "paused": True}
+        changed = True
     if args.idle and (tracker.get("now") or {}).get("by") == args.by:
         tracker.pop("now", None)
         changed = True
+    if not pauses:
+        tracker.pop("pauses", None)
     if args.add:
         if args.est is None:
             raise SystemExit("--add needs --est HOURS.")
@@ -140,12 +159,23 @@ def main():
     print(f"  [{'#' * filled}{'-' * (20 - filled)}]  {len(done)} of {len(cps)} checkpoints")
 
     start, prior = parse(tracker["planStart"]), float(tracker.get("priorHours", 1.0))
+    spans = [(parse(x["from"]), parse(x.get("to")) or now) for x in tracker.get("pauses", []) if x.get("from")]
+
+    def paused_within(a, b):
+        # Overlapping pauses count once: a hold recorded inside a usage limit is not subtracted twice.
+        total, reach = 0.0, a
+        for s, e in sorted((max(s, a), min(e, b)) for s, e in spans):
+            s = max(s, reach)
+            if e > s:
+                total += (e - s).total_seconds()
+                reach = e
+        return total / 3600
     est_sum = act_sum = 0.0
     prev = start
     measured = 0
     for c in sorted((c for c in done if not c.get("preplan")), key=lambda c: parse(c["actual"])):
         finished = parse(c["actual"])
-        took = max((finished - prev).total_seconds() / 3600, 0.0)
+        took = max((finished - prev).total_seconds() / 3600 - paused_within(prev, finished), 0.0)
         prev = max(prev, finished)
         est_sum += c["estHours"]
         act_sum += took
