@@ -7,6 +7,17 @@ and a forecast recalculated from the observed speed.
     progress.py TRACKER.json --add "NAME" --est HOURS [--after N]
                                                 add a checkpoint found after the plan
     progress.py TRACKER.json --now YYYY-MM-DDTHH:MM   print as of a given time
+    progress.py TRACKER.json --doing "TEXT" --by NAME [--checkpoint N]
+                                                say what NAME is working on now
+    progress.py TRACKER.json --idle --by NAME   clear NAME's "now" line
+    progress.py TRACKER.json --done N --by NAME record N done by NAME (unverified)
+    progress.py TRACKER.json --verified N --by NAME
+                                                record that NAME checked N independently
+
+A checkpoint the builder ticks with --by stays "awaiting check" until another session
+records --verified: a claim and a confirmation are different facts, and a reader of the
+tracker (the agendas pane) shows which is which. Writers take a lock on TRACKER.lock and
+replace the file whole, so two sessions updating one tracker cannot lose each other's change.
 
 Times are local wall-clock times without a zone. Set TZ (or the tracker's "tz", an IANA
 name such as "Europe/London") so "now" and every recorded time come from the clock,
@@ -19,8 +30,10 @@ one at the plan's own speed. Gated checkpoints (waiting on the user) are listed 
 left out of both.
 """
 import argparse
+import fcntl
 import json
 import os
+import tempfile
 from datetime import datetime, timedelta
 
 FMT = "%Y-%m-%dT%H:%M"
@@ -52,8 +65,20 @@ def main():
     ap.add_argument("--add", help="name of a checkpoint found after the plan")
     ap.add_argument("--est", type=float, help="estimated hours for --add")
     ap.add_argument("--after", type=int, help="insert the added checkpoint after checkpoint N")
+    ap.add_argument("--by", help="who is writing: a session name such as EXEUCTION")
+    ap.add_argument("--doing", help="what --by is working on now, shown live by the agendas pane")
+    ap.add_argument("--checkpoint", type=int, help="the checkpoint --doing belongs to")
+    ap.add_argument("--idle", action="store_true", help="clear --by's \"now\" line")
+    ap.add_argument("--verified", type=int, help="record checkpoint N as independently checked")
     args = ap.parse_args()
+    if (args.doing or args.idle or args.verified is not None) and not args.by:
+        raise SystemExit("--doing, --idle and --verified need --by NAME.")
 
+    writes = args.done is not None or args.add or args.doing or args.idle or args.verified is not None
+    lock = open(args.tracker + ".lock", "a") if writes else None
+    if lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+    # Read under the lock, so a write never starts from a copy another session has since replaced.
     with open(args.tracker) as f:
         tracker = json.load(f)
     now = now_for(tracker, args.now)
@@ -65,6 +90,27 @@ def main():
         if target is None:
             raise SystemExit(f"No checkpoint {args.done} in the tracker.")
         target["actual"] = now.strftime(FMT)
+        if args.by:
+            target["doneBy"] = args.by
+        changed = True
+    if args.verified is not None:
+        target = next((c for c in cps if c["n"] == args.verified), None)
+        if target is None:
+            raise SystemExit(f"No checkpoint {args.verified} in the tracker.")
+        if not target.get("actual"):
+            raise SystemExit(f"Checkpoint {args.verified} is not done yet; there is nothing to verify.")
+        if target.get("doneBy") == args.by:
+            raise SystemExit(f"{args.by} ticked checkpoint {args.verified}; it cannot also verify it.")
+        target["verified"] = now.strftime(FMT)
+        target["verifiedBy"] = args.by
+        changed = True
+    if args.doing:
+        tracker["now"] = {"by": args.by, "doing": args.doing, "updated": now.strftime(FMT)}
+        if args.checkpoint is not None:
+            tracker["now"]["checkpoint"] = args.checkpoint
+        changed = True
+    if args.idle and (tracker.get("now") or {}).get("by") == args.by:
+        tracker.pop("now", None)
         changed = True
     if args.add:
         if args.est is None:
@@ -77,9 +123,15 @@ def main():
         cps.insert(index, entry)
         changed = True
     if changed:
-        with open(args.tracker, "w") as f:
+        folder = os.path.dirname(os.path.abspath(args.tracker))
+        fd, tmp = tempfile.mkstemp(prefix=".tracker-", suffix=".json", dir=folder)
+        with os.fdopen(fd, "w") as f:
             json.dump(tracker, f, indent=2)
             f.write("\n")
+        os.replace(tmp, args.tracker)
+    if lock:
+        fcntl.flock(lock, fcntl.LOCK_UN)
+        lock.close()
 
     hm = lambda d: d.strftime("%H:%M") if d.date() == now.date() else d.strftime("%d %b %H:%M")
     done = [c for c in cps if c.get("actual")]
@@ -107,7 +159,7 @@ def main():
     speed = (est_sum + prior) / (act_sum + prior)
 
     cursor = max(now, prev)
-    remaining = [c for c in cps if not c.get("actual") and not c.get("gated")]
+    remaining = [c for c in cps if not c.get("actual") and not (c.get("gated") or c.get("gate"))]
     if measured:
         print(f"  Speed: {speed:.2f}x the plan's, from {measured} checkpoint(s) since {hm(start)}")
     else:
@@ -133,8 +185,9 @@ def main():
                 by += t <= deadline
             print(f"  By {hm(deadline)}: {by} of {len(cps)} checkpoints")
     for c in cps:
-        if c.get("gated") and not c.get("actual"):
-            print(f"  #{c['n']:>2} {c['name']}: waiting on {c['gated']}")
+        gate = c.get("gated") or c.get("gate")
+        if gate and not c.get("actual"):
+            print(f"  #{c['n']:>2} {c['name']}: waiting on {gate}")
 
 
 if __name__ == "__main__":
