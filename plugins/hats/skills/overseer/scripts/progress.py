@@ -188,7 +188,7 @@ def main():
         else:
             when = f"added after the plan, done {hm(finished)} ("
         print(f"  #{c['n']:>2} {c['name']}: {when}took {took * 60:.0f} min vs {c['estHours'] * 60:.0f} estimated)")
-    speed = (est_sum + prior) / (act_sum + prior)
+    speed = (est_sum + prior) / (act_sum + prior) if (act_sum + prior) > 0 else 1.0
 
     cursor = max(now, prev)
     remaining = [c for c in cps if not c.get("actual") and not (c.get("gated") or c.get("gate"))]
