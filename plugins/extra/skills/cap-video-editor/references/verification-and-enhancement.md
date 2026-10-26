@@ -39,6 +39,8 @@ ffmpeg -v error -i candidate.mp4 -map 0:a:0 \
 
 Matching decoded hashes establish exact PCM identity for those decodes. Different lossy encoders can produce different samples from the same source; if hashes differ, inspect time offset, waveform agreement, levels, and audible content rather than declaring either identity or corruption from the hash alone. Do not claim a listening check from an audio fingerprint.
 
+When narration was added, cross-correlate the export's audio with the narration stem. The offset should be zero, which also confirms that captions aligned on the stem fit the export. A transcript of the final mix is a useful content check, but a recognizer can add words on music-only stretches, such as an invented sign-off, or garble a phrase after a long pause in long-form mode. Before treating either as an audio fault, transcribe the suspect window on its own and compare its level with the narration stem.
+
 ## Replace only the authorized target
 
 Retain the previous export and the original project configuration. Render and validate a candidate at a separate path. Before replacing the target, confirm it has not changed since the backup. Use an atomic same-filesystem replacement where supported.

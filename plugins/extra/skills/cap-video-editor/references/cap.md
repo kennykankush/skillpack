@@ -21,6 +21,8 @@ Prefer a working native CLI for previews and exports when its capabilities match
 
 A `.cap` project can be a directory containing `project-config.json`, `recording-meta.json`, media, cursor events, imported audio, screenshots, and other assets. Copy the complete directory. Copying only the configuration can break relative paths or omit the user's replacement narration.
 
+A freshly finished recording can also hold crash-recovery state, such as a `.recovery-*` folder and a `.recovery.lock` file, that names the original project path. Leave that state with the original rather than copying it into a working project.
+
 Before editing, retain these facts:
 
 - The authoritative project path and configuration hash
@@ -55,6 +57,10 @@ The source range is `[start, end)`. Determine how this version maps audio, zooms
 
 Imported audio can have its own output placement, `trimStart`, volume, and enabled state. An opening imported from MP3 can replace only the first portion of an older WAV. The current project arrangement decides which voice is authoritative.
 
+In one inspected implementation, the project-level audio mute silences only the recording's own microphone and system tracks, while imported timeline audio keeps playing. That suits a recording whose system track is only a noise floor under new narration. Confirm the behavior in a rendered file before relying on it.
+
+A segment's `timescale` is its playback speed: output duration is `(end - start) / timescale`. One inspected build accepted any value from 0.01 upward, although its editor offers only preset speeds. A slowed static screen is invisible apart from the cursor, which makes it a clean way to give narration more room. A speed change still starts a new segment, and segments matter for captions (see [the caption reference](captions.md)).
+
 ## Use fixed manual zoom targets
 
 Manual zoom positions in one inspected schema use normalized coordinates:
@@ -70,7 +76,11 @@ Manual zoom positions in one inspected schema use normalized coordinates:
 
 This illustrates the mode shape, not a complete project patch. Preserve required fields and validate against the installed schema. Confirm the zoom's time domain using a preview at a known event. A mouse recording or synthetic click track is unnecessary when this version supports a fixed manual mode.
 
-Place zooms around moments that benefit from readable detail. Keep the target away from a crop edge unless the result stays visible throughout the transition. Normalize the point against the correct source or crop coordinate system; do not guess from the output canvas.
+Place zooms around moments that benefit from readable detail. Keep the target away from a crop edge unless the result stays visible throughout the transition. Confirm which coordinate system the manual point uses before computing one.
+
+In one inspected build, the point is a position in travel space over the whole output canvas, background padding included. A value of 0 pins the zoomed view flush to the left or top edge, 1 to the right or bottom, and 0.5 centers it. At amount `a`, the visible region starts at `c * (a - 1) / a` of the canvas and spans `1 / a`. To frame a region starting at fraction `s`, use `c = s * a / (a - 1)`. Keep the region inside the recording's rectangle on the canvas, or a band of background shows at the frame edge. Verify each target with a preview frame.
+
+If a zoom ends just before a large screen change and the next one starts just after it, the picture zooms out and straight back in. When the content of both moments sits in a similar region, one continuous zoom framed for both is usually calmer.
 
 Treat scale and translation as one framing decision. A transition should approach the chosen point without overshooting, reversing, or chasing cursor samples. Avoid adjacent zooms that retarget while the previous transition is still settling unless that motion is intentional.
 

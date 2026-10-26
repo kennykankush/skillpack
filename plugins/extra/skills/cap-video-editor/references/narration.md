@@ -33,24 +33,44 @@ The middle explains purpose and consequence:
 
 > Selecting one report keeps the request focused. The response groups its main themes and includes page references we can open for context.
 
-A concluding sentence states the overarching point:
+The closing section states what the feature is for, at a higher altitude than any step:
 
-> The overview helps us choose where to read next, while the references give us a route back to the original material.
+> So that's file and folder summaries. A reviewer can see what a whole collection covers before reading it, and every point still leads back to the page it came from.
 
 These are calibration examples, not required product copy. Do not insert a feature, source reference, or verification step that the inspected recording does not show.
 
-## Avoid a cursor transcript
+## Pair what is on screen with why it matters
 
-Choose narration that answers a viewer's question:
+Give every beat the same cadence. First name the visible action or result briefly, so the viewer knows where to look. Then give its purpose or consequence. At section turns, add the bigger picture: how this step serves the task, or what it changes for the audience.
 
-| Cursor transcript | Explanation anchored to the same action |
+Either half alone fails. A cursor transcript describes movement without meaning. A purpose statement with no visible action behind it loses the viewer, who cannot tell which part of the screen is being explained.
+
+| Cursor transcript | What is on screen, with why it matters |
 | --- | --- |
 | “Now I move here and click this report.” | “Selecting one report keeps the summary focused on that document.” |
 | “The spinner is loading. We wait.” | Cut the long wait; use a short remaining gap to explain the request's scope. |
 | “I click the blue link.” | “Opening the reference lets us compare the summary with its source page.” |
 | “Scroll down, then scroll down again.” | “The response separates the documents, making it easier to choose what to review next.” |
+| “Two files appear in the list.” | “Both new files appear in the list already, so nobody has to upload them by hand.” |
 
 Teach exact controls when the audience needs them. A training lesson may need “Choose Multiply so the shading preserves the sketch underneath.” It still explains the reason, instead of enumerating movements with no learning purpose.
+
+## Close on the feature's purpose
+
+Write the closing as its own section of about 10 to 20 seconds, not a sentence squeezed into the final second.
+
+- Open with a wrap-up line that names the feature, such as “So that's folder sync.”
+- Then state, at a high level, what the feature is for: the problem it removes and what it changes for the audience.
+- Leave out mechanics, button names, and step order. The video has already shown them.
+
+| Step recap (too granular for a closing) | Purpose (closing altitude) |
+| --- | --- |
+| “A file is saved into the folder, a sync sends it up, and the next answer uses it.” | “So that's folder sync: the assistant answers from the latest documents, and nobody changes how they work to keep it current.” |
+| “We selected a report, opened a citation, and checked the cited page.” | “So that's source-linked summaries: an overview you can act on, because every point leads back to its page.” |
+
+A purpose statement is still a claim, and it must be true of what the product does. Keep it formal and free of slogans.
+
+Make room for the closing in the edit. If the footage ends before the closing does, hold or slow the final static screen, or append unused static footage from the same recording. Leave a short tail after the last word for the music to resolve.
 
 Do not fill time with generic benefits, fabricated guarantees, repeated recaps, or implementation details the viewer cannot use. Small gaps can explain scope, the relation between two stages, or what to check next. Keep natural breaths; eliminate unnecessary dead air rather than demanding uninterrupted speech.
 
@@ -87,6 +107,8 @@ Store per-section decisions in a plan:
 Numbers and text in this example are illustrative. Derive the real slots from the footage. Keep operational notes out of the clean spoken script.
 
 Generate and fit each section independently. A rough word budget can help drafting, but measured synthesis duration decides whether it fits. Prefer a rewrite when the speaking rate sounds rushed or unnaturally stretched.
+
+When sentences in one section must land on different screens, render and place them one sentence at a time. Express each start relative to its visual anchor, for example 0.2 seconds after the answer appears, rather than as an absolute time. Then a change to an earlier cut moves every later slot with it. Trim each render's leading and trailing silence before placing it, and measure the gaps between sentences as part of the pacing.
 
 The pitch-preserving tempo factor is `raw_duration / target_duration`. Render a candidate section to a new WAV, then measure it:
 

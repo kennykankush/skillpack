@@ -24,6 +24,8 @@ whisper-cli -m local_model.bin -f alignment.wav -l en \
 
 Use the model's matching DTW preset and the installed CLI's help. These flags are an adapter example, not a requirement to install that model. Inspect the resulting data before assuming its shape. In the inspected JSON, `offsets.from` and `offsets.to` are milliseconds, while Cap cue times use seconds.
 
+Check which times track the speech before trusting either. On one narration, the per-word segment offsets drifted up to 1.8 seconds early. Each token's DTW time (`t_dtw`, in 10 ms units) stayed 0.1 to 0.3 seconds after the measured onset of every sentence. Compare both against a few known speech onsets. When DTW times lag slightly, pin each sentence's first word to the measured onset.
+
 ## Correct words without concealing a speech mismatch
 
 Compare the recognized sequence with the clean spoken script. Restore known capitalization, punctuation, and product spellings when the audio supports them. Recognition can split a product name into two words; merge their time ranges when correcting it.
@@ -35,6 +37,8 @@ Aligners sometimes attach punctuation across silence. A greeting's final word ma
 ## Group phrases for reading
 
 Start with about five to eight words per cue and roughly 35 to 50 characters when they fit the actual canvas. Treat these as drafting aids, not mandatory lengths. Favor phrase and sentence boundaries, usable reading duration, and no overlap between cues.
+
+A fixed word count splits set phrases such as “notice / period” or “general / counsel”. Break each sentence by least cost instead. Prefer breaks after punctuation. Avoid ending a cue on an article, a preposition, or the first word of a set phrase, and keep cue lengths within a sentence similar. Never let one cue hold the end of one sentence and the start of the next.
 
 Avoid a one-word cue flashing at the end of a phrase. Merge it when the preceding cue remains readable, or rebalance the words. Do not leave a caption displayed through a long silent interval merely because an aligner assigned an overlong word.
 
@@ -76,6 +80,15 @@ source_time = s + (t - o) * speed
 Perform the mapping within the owning clip. The same output boundary can refer to the outgoing clip's end or the incoming clip's start. Carry clip identity, not only a floating-point timestamp. Repeated source footage, reordered clips, recording-segment offsets, holds, and transitions require the editor's full mapping.
 
 One inspected caption normalizer limits individual word duration to 2.5 seconds. A source-timed word accidentally stretched across a removed wait can be clamped or lost when the project reopens. Splitting at cuts and verifying a reopened staged project catches this failure.
+
+The same implementation builds the displayed captions from the source-timed segments in four steps:
+
+1. It splits each caption at every timeline segment edge, and a change of speed counts as an edge.
+2. It rebuilds the displayed text from the words inside each piece.
+3. It ends each piece at its last word.
+4. It ends a caption no later than 2.5 seconds after its last word starts.
+
+So a phrase that crosses an edge appears as two partial captions, even when you wrote it as one. Group words within each segment. Move segment edges into pauses between phrases where the edit allows. Lengthen each cue's last word for a readable hold, because that word's end is where the cue ends. Each cue also fades in from its start over the fade duration.
 
 Preserve per-track overrides such as `positionOverride`, font size, color, and fade settings. Do not erase them when regenerating source-to-output projections.
 

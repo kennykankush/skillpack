@@ -63,6 +63,8 @@ Probe each file for duration, dimensions, audio streams, average and nominal fra
 
 Start with one frame every five seconds for an overview when that matches the brief. Inspect the actual images, not only filenames, generated contact sheets, or OCR output. Revisit important clicks, result appearances, page changes, and cut boundaries with denser samples or short playback. Inspect text at full resolution when a contact sheet cannot resolve it.
 
+Time events exactly before planning cuts. A Cap recording's cursor log stores each click with its time. Frame differences inside one screen region show when a status, answer, or panel changes. When piping raw frames from `ffmpeg`, pass `-fps_mode passthrough` so each frame keeps its own timestamp. The default can duplicate frames from a variable-rate source and shift every measured time.
+
 Use [the study helper](scripts/study_video.py) to create a local inventory and timestamped samples:
 
 ```bash
@@ -82,7 +84,9 @@ Write a compact study: opening state, request or task, processing waits, first v
 
 Create a cut map with source ranges, playback speed, and resulting output ranges. If loading is to be skipped, finalize that map before fitting audio. Preserve enough context to understand the request and response. Cut waiting, not evidence needed to understand the demonstration.
 
-Allow brief result holds for reading or a conclusion. Prefer a shorter script when the footage cannot support the duration. A freeze or speed change must remain an intentional edit; do not invent additional activity.
+Allow brief result holds for reading or a conclusion. When a section needs more time than its footage, slow a static screen rather than squeezing the speech; only the cursor shows the change. Prefer a shorter script when the footage cannot support the duration. A freeze or speed change must remain an intentional edit; do not invent additional activity.
+
+Every cut and speed change starts a new clip, and the inspected Cap build splits captions at clip edges. After the narration is placed, move any edge that falls mid-phrase into a pause between phrases.
 
 ### 3. Write narration for understanding
 
@@ -90,13 +94,13 @@ Use [the narration guidance](references/narration.md) for the full writing and t
 
 1. Greeting, a measured pause, and what the audience will learn
 2. Context and the task being attempted
-3. Selected actions that explain the workflow
+3. Selected actions, each paired with why it is done
 4. Visible results, their meaning, and any visible validation
-5. A conclusion that states the practical takeaway
+5. A closing section on the feature's purpose at a high level
 
-Avoid a cursor transcript: “Click here, move over, click that.” Explain purpose and consequence instead. Keep specific operating instructions when they are the learning objective. Do not read the entire interface aloud or turn every small gap into a pause.
+Keep a steady cadence in every beat. Say what is happening on screen, then why it is done or why it matters, and give the bigger picture at section turns. Neither half works alone. A cursor transcript (“Click here, move over, click that”) explains nothing, and abstraction with no screen behind it loses the viewer. Keep specific operating instructions when they are the learning objective. Do not read the entire interface aloud or turn every small gap into a pause.
 
-Close on the result's significance, not a default “thank you for watching.” Keep claims bounded by the footage. A generated document using supplied figures does not prove autonomous extraction; a permissions answer does not prove access enforcement.
+Plan the closing as its own section of about 10 to 20 seconds, and lengthen the ending footage to give it room. Open with a wrap-up line. Then state what the feature is for: the problem it removes and what it changes for the audience. Do not recap the steps the video already showed, and do not close on a default “thank you for watching.” Keep claims bounded by the footage. A generated document using supplied figures does not prove autonomous extraction; a permissions answer does not prove access enforcement.
 
 Assign each spoken section an output-time slot and visible anchor. Keep the clean script separate from production notes, cut instructions, and timestamps.
 
@@ -170,7 +174,7 @@ Do not rebuild everything for a caption-only or greeting-only request. Record th
 A requested stage passes only with its corresponding evidence:
 
 - **Study:** every requested clip has inspected timestamped observations. Metadata or unviewed samples alone fail; inspect the missing footage.
-- **Script:** every material claim has a visible anchor, the opening establishes purpose, and the ending states a takeaway. A click transcript or unsupported capability claim fails; rewrite it.
+- **Script:** every material claim has a visible anchor, and each beat pairs the on-screen action with why it matters. The opening establishes purpose, and the closing has room to state the feature's purpose at a high level. A click transcript, a closing that only recaps steps, or an unsupported capability claim fails; rewrite it.
 - **Sync:** the final cut map and actual audio slots agree, results are visible when described, and the greeting has its intended pause. Drift or clipped words fail; repair the affected section and recheck later anchors.
 - **Zooms:** manual framing works without a tracker and the transitions have been inspected. Wobble, obscured content, or untested motion fails; fix or remove the affected zoom and report unverified playback honestly.
 - **Captions:** cues match the edited audio, survive reopening, and remain readable without covering essential content. Shifted or disappearing cues fail; correct the time domain and rerender.

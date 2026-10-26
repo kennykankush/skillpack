@@ -53,5 +53,10 @@ Use these cases to inspect the skill's decisions. They are behavioral evaluation
 | Heavy model has a long ETA | Identify any model change and compare its own sample | Substitute lite processing without disclosure |
 | User rejects enhancement | Stop; preserve the accepted export | Continue experimenting or replace the good file |
 | Original project changes during rendering | Merge scoped changes into the current state | Overwrite it with the staged snapshot |
+| Script lists what each screen shows | Pair every action with why it matters, and give the bigger picture at section turns | A tour of screen states with no purpose |
+| Closing recaps the steps | State the feature's purpose at a high level, in its own section of about 10 to 20 seconds | A step recap, or one takeaway squeezed into the last second |
+| Narration outruns the final footage | Hold or slow the last static screen, or add unused static footage | Speed the voice up or cut the closing short |
+| A caption splits mid-phrase at a speed change | Move the clip edge into a pause and group words per clip | Accept partial captions as Cap rebuilt them |
+| A zoom shows a band of background | Compute the target in the build's canvas coordinates and keep it inside the recording | Nudge numbers by eye until one frame looks right |
 
 For a real workflow evaluation, retain inputs, expected decisions, observed actions, output evidence, and any checks unavailable in the host. Static schema checks and this table alone do not establish end-to-end editing performance.
