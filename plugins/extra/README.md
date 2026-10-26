@@ -78,7 +78,24 @@ layers and the output says so.
 $extra:testament 2026
 ```
 
-## Modes
+### `cap-video-editor`
+
+Turns existing screen recordings into narrated demos in Cap Studio. It covers footage study, scripts that explain purpose and results, narration fitted around skipped loading, local Qwen voice generation, fixed manual zooms, subtitles, and verified exports.
+
+Use it to study a recording before writing, continue an existing edit, replace only an opening, add zooms without cursor tracking, or caption and export the current project. It preserves the user's latest cuts, imported audio, music, zooms, and caption style.
+
+The main rule is to explain the bigger picture while anchoring the narration to visible evidence. It includes separate greeting renders with a measured pause, section-level audio fitting, source/output caption mapping, checks for low-magnification zoom wobble, and the difference between an export resolution setting and the encoded canvas. AI enhancement stays an optional comparison experiment; distorted text or numbers fail that experiment.
+
+The skill includes a local sampling helper, operational references, and two worked instances: a software demonstration with loading gaps and a drawing lesson that retains its instructor's narration. It supports Codex and Claude without private paths or a mandatory synthesis provider.
+
+```text
+$extra:cap-video-editor study these recordings and make a synced narrated demo
+/extra:cap-video-editor add captions to this Cap project and export 1080p60
+```
+
+Full workflow: [`cap-video-editor/SKILL.md`](skills/cap-video-editor/SKILL.md).
+
+## Trail Scriber modes
 
 Normal mode handles an explicit date or range:
 
@@ -127,6 +144,7 @@ Codex:
 
 ```text
 $extra:trail-scriber
+$extra:cap-video-editor
 ```
 
 Claude Code:
@@ -152,3 +170,5 @@ Catch up from the last scanned trail point:
 ```text
 /extra:procrastinate
 ```
+
+For recording edits, use `/extra:cap-video-editor` or invoke the skill naturally. The command is a thin adapter to the same workflow.

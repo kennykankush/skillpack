@@ -1,6 +1,6 @@
 {
   "name": "extra",
-  "version": "0.3.2+codex.20260613162745",
+  "version": "0.4.0",
   "description": "Small personal workflows that are useful enough to package but do not belong in Workbench.",
   "author": {
     "name": "kennykankush",
@@ -14,13 +14,17 @@
     "memory",
     "trail",
     "obsidian",
-    "history"
+    "history",
+    "cap",
+    "video",
+    "narration",
+    "subtitles"
   ],
   "skills": "./skills/",
   "interface": {
     "displayName": "Extra",
     "shortDescription": "Personal extra workflows outside the main Workbench bundle.",
-    "longDescription": "A small plugin for useful personal workflows that are worth packaging but should not be mixed into the Workbench meta-tooling bundle. Starts with Trail Scriber, a day-by-day conversation trail reconstruction workflow for Codex and Claude history.",
+    "longDescription": "Personal workflows outside Workbench: reconstruct work trails with Trail Scriber, build evidence-backed contribution accounts with Testament, and edit screen recordings into synced narrated demos with Cap Video Editor.",
     "developerName": "kennykankush",
     "category": "Productivity",
     "capabilities": [
@@ -32,7 +36,7 @@
     "defaultPrompt": [
       "Reconstruct my work trail from these conversation logs.",
       "Update my day-by-day agenda notes from Codex and Claude history.",
-      "Turn this date range into an Obsidian-friendly work trail.",
+      "Edit this screen recording into a narrated Cap demo with zooms and captions.",
       "Run Trail Scriber procrastinate mode to catch up from the last scan."
     ],
     "brandColor": "#6D6A5F"

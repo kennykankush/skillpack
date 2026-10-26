@@ -29,6 +29,7 @@ $hats:birdwatch
 $hats:autoreview
 $videos:storyboard
 $extra:trail-scriber
+$extra:cap-video-editor
 ```
 
 After publishing, the marketplace can be added by repo instead:
@@ -162,6 +163,7 @@ Personal workflows that are durable enough to package but do not belong in Workb
 
 - [`extra:trail-scriber`](plugins/extra/skills/trail-scriber/SKILL.md) - Reconstructs day-by-day work trails from Codex and Claude conversation evidence into Obsidian-friendly day, agenda, domain, and conversation notes.
 - [`extra:testament`](plugins/extra/skills/testament/SKILL.md) - The contribution sweep: reconstructs the evidence-backed totality of what someone did over an era (harvest, analysis, presentation; tiered attribution; adversarial critic gate) into one layered book with receipts.
+- [`extra:cap-video-editor`](plugins/extra/skills/cap-video-editor/SKILL.md) - Studies screen recordings and builds a synced narrated Cap demo: purpose-led scripts, local voice generation, skipped loading, fixed manual zooms, subtitles, and verified exports.
 
 Full plugin docs: [`plugins/extra/README.md`](plugins/extra/README.md)
 
