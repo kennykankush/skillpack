@@ -179,7 +179,9 @@ Passing tests and a commit are not this step. Before telling the user to reload 
 - nothing on the TASTE.md Rejected list or in the project's rejections has crept in (re-read the list against the screenshots; for example coloured outlines on cards)
 - it reads at the references' level, not as a template
 
-Use impeccable critique or the finish reviewer for anything substantial. Fix everything in one batch, re-check once, stop. Show screenshots, not descriptions.
+Use impeccable critique or the finish reviewer for anything substantial. Treat impeccable's detector hook findings as part of this step: when it flags a pattern (a side-stripe accent, say), fix that pattern everywhere it occurs, not only the flagged line, and do not ask the user whether to keep the other instances. The launcher lives at `<impeccable-skill-dir>/scripts/impeccable` (for example `~/.claude/skills/impeccable/scripts/impeccable hooks ignore-value ...`); call it there rather than through npx.
+
+Fix everything you found in one batch, re-check once, then show. Do not hand the user a result with weaknesses you already saw and listed as "next"; fix them first, unless they need a decision only the user can make. Show screenshots, not descriptions.
 
 **Make feedback precise.** When showing work, offer the sharpest feedback tool available: impeccable `live` (the user clicks an element in the browser and gets variants of it), comments on a Claude Design artifact, or numbered annotations on the screenshots so the user can say "3 is off" instead of describing it.
 
