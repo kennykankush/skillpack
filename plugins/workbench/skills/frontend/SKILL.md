@@ -153,6 +153,8 @@ Coverage floor: 15-30 screens from at least 3 different sources (4+ when they ar
 
 When the user asks to "check references", "find the golden standard" or similar, rerun the fan-out for the element in question; do not answer from the earlier set alone.
 
+While a reference search for an element is still running (for example in a background agent), do not design or build that element "on known patterns" in the meantime; the search exists to shape it. Spend the wait on other agreed work (system fixes, other screens, tests, capture), and start the element when the references land.
+
 Write `.design/REFERENCES.md` in the project:
 - a coverage line: how many references came from each source, how many are domain and how many quality, and any source that was unavailable and why
 - each reference: link, screenshot (saved under `.design/refs/`), the source it came from, its group (domain or quality), one line on what it does well
