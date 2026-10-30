@@ -33,7 +33,7 @@ CATEGORIES = [
     ("🎨 FRONTEND ⑤ VERIFY — prove it is actually good",
      r"webapp-testing|playwright|browser|web-design-guidelines|web-quality|core-web-vitals|^seo$|best-practices|fixing-|accessib|vercel-|performance|dataviz"),
     ("✍️ WORDS — copy that does not read as AI",
-     r"writing-guidelines|avoid-ai-writing|ai-writing|voice-preserving|false-positive|preservation-verifier|file-edit-in-place"),
+     r"writing-guidelines|avoid-ai-writing|ai-writing|humaniz|voice-preserving|false-positive|preservation-verifier|file-edit-in-place"),
     ("📊 DIAGRAMS", r"diagram"),
     ("🛡️ EVALS / SECURITY", r"promptfoo|security|redteam"),
     ("📱 MOBILE / NATIVE", r"mobile|react-native|ios|swift"),
