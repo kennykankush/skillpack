@@ -1,6 +1,6 @@
 ---
 name: frontend
-description: Agentic frontend design framework, with a code path and a Claude Design path. Use for any UI work where how it looks matters - new pages and apps, revamps, redesigns, polishing, or when the user says it looks generic, amateurish, plain, cheap or "not it", asks for a style ("premium", "modern", "clean", "sleek", "like Stripe"), or asks to research how good products do something. Checks its tooling first, then runs taste, references, style options, design system and tokens, asset fetching, build with real content and every state, self-critique and memory, with motion as the final layer. Keeps a taste memory that learns from every approval and rejection.
+description: Agentic frontend design framework, with a code path and a Claude Design path. Use for any UI work where how it looks matters - new pages and apps, revamps, redesigns, polishing, or when the user says it looks generic, amateurish, plain, cheap or "not it", asks for a style ("premium", "modern", "clean", "sleek", "like Stripe"), or asks to research how good products do something. Checks its tooling first, studies what the product is and who uses it, then runs taste, references, style options, design system and tokens, asset fetching, build with real content and every state, self-critique and memory, with motion as the final layer. Keeps a taste memory that learns from every approval and rejection.
 ---
 
 # frontend
@@ -82,8 +82,24 @@ Classify the request:
 
 **Calibrate when the words are vague.** On a new project, or when the style words are ambiguous and TASTE.md does not settle them, run a quick visual intake before research goes deep: show 6-9 varied reference screens from the domain and ask which feel right and which feel wrong. One round of pointing replaces several rounds of adjectives. Record the answers in TASTE.md (with the screens) and the log.
 
+### 1b. Understand the product (gate: no references without this)
+Design follows what the product is for. Before looking at anyone else's screens, study this one:
+
+- **Read it**: PRODUCT.md, README, docs, the routes and page components, the data models and API shapes. If the app runs, open it and click through every screen and the main flow end to end, screenshotting as you go.
+- **Write down** (in PRODUCT.md, creating it through impeccable `init` if missing, or confirming it if present):
+  - what the product does and the category it competes in
+  - who uses it (role, expertise, how often, in what setting: a SOC analyst at a desk all day reads differently from a founder checking once a week)
+  - the core jobs, in order of importance, and the one flow that matters most
+  - the information architecture: screens, navigation, how they connect
+  - the key objects and data (findings, assessments, invoices, tracks...) and their states
+  - the mode of each surface: persuade, operate, read or experience (impeccable's terms)
+  - what is working today and must survive the redesign
+- **Then derive** the domain to research, the surfaces in scope, and their element types (step 2), from this, not from the request's wording alone.
+
+Say the product read back to the user in three or four lines so a wrong reading is caught before research starts. On a refine of a product already studied this session, a quick confirmation is enough.
+
 ### 2. See references (gate: no direction without this)
-Name the domain (fintech, security, dev tool, SaaS marketing, consumer app...) and the surface (dashboard, settings, login, onboarding, setup...). Gather two groups of references, labelled, and both are required:
+From the product study, name the domain (fintech, security, dev tool, SaaS marketing, consumer app...) and the surfaces (dashboard, settings, login, onboarding, setup...). Gather two groups of references, labelled, and both are required:
 
 - **Domain references** - products in the same category. They answer what this screen must show and how people in this field expect it to behave: the data, the vocabulary, the workflows, the density. A security tool learns findings, severity and evidence from security tools.
 - **Quality references** - the best-crafted products from any category. They set the visual bar: type, spacing, depth, surfaces, motion.
