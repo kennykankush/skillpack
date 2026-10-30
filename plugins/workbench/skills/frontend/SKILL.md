@@ -22,11 +22,12 @@ It reports every reference MCP, skill, the brand-systems library and the taste m
 - Everything OK: say so in one line and continue.
 - Anything else: show the user the short list with the fix commands and offer to run them. Logins (AUTH) are theirs to do; say exactly where (for example `/mcp` in Claude Code). Paid sources (Refero, Mobbin) are optional: mention once that they exist, never push.
 - If the user declines, continue with what is available. Only a missing browser tool (`chrome-devtools`) or missing `impeccable` blocks the full loop; without them, say what is degraded and proceed.
+- **Config is not the same as loaded.** The script reads config files; a session only has the MCP servers that existed when it started. Confirm the reference tools are actually callable in this session (tool names like `mcp__refero__*`, `mcp__mobbin__*`, `mcp__awwwards__*`, `mcp__madegood__*`, `mcp__lazyweb__*`; load deferred tools through the host's tool search). If a configured source is not loaded, tell the user it needs a fresh session (or `/mcp` reconnect) to appear, and list which sources this session can use.
 - Taste memory missing: copy `TASTE.template.md` to `~/.agents/taste/TASTE.md` (with the user's agreement) so learning can start.
 
 ## Infrastructure
 
-**See (real screens, by domain)** - usually 2-3 per task:
+**See (real screens, by domain)** - query every one that is loaded (see step 2), not just the first that answers:
 - `refero` - styles (type, colour, layout, spacing), screens, flows. Best for why something looks good. Paid; ration calls.
 - `mobbin` - large library of app and web screens, flows, sections. Paid.
 - `lazyweb` - screens, flows, A/B experiments, growth patterns.
@@ -81,9 +82,29 @@ Classify the request:
 **Calibrate when the words are vague.** On a new project, or when the style words are ambiguous and TASTE.md does not settle them, run a quick visual intake before research goes deep: show 6-9 varied reference screens from the domain and ask which feel right and which feel wrong. One round of pointing replaces several rounds of adjectives. Record the answers in TASTE.md (with the screens) and the log.
 
 ### 2. See references (gate: no direction without this)
-Name the domain (fintech, dashboard, dev tool, SaaS marketing, consumer app, login, onboarding, setup...) and the surface. Pull 15-30 real screens across 2-3 sources, open the best 3-5 live and extract their real tokens. For blend, read the named brands' DESIGN.md too. For refine, still find 3-5 references for the specific element so the fix is grounded.
+Name the domain (fintech, dashboard, dev tool, SaaS marketing, consumer app, login, onboarding, setup...) and the surface, then fan out across **every loaded source**, in parallel where the host allows. Each source sees something the others do not:
 
-Write `.design/REFERENCES.md` in the project: each reference with link, screenshot (saved under `.design/refs/`) and one line on what it does well; then the shared patterns: type pairing and scale, spacing rhythm, palette logic, depth, card language, motion character.
+| Source | Ask it for |
+|---|---|
+| `refero` | styles for the domain (type, colour, spacing systems), plus screens for the surface |
+| `mobbin` | screens and flows for the surface and its competitors |
+| `lazyweb` | screens, flows, and experiments if the surface converts (signup, pricing, onboarding) |
+| `awwwards` | sites at the quality bar; motion and scroll treatment |
+| `madegood` | typography and brand references |
+| brand `DESIGN.md` files | 2-4 brands in or near the domain, as complete systems |
+| user-provided screenshots and their own past work | the stated taste, weighted highest |
+
+Coverage floor: 15-30 screens from at least 3 different sources (4+ when they are loaded). One source is never enough, however good its results; stopping at the first answer is the most common way this step fails. Then open the best 3-5 live (`chrome-devtools` / `playwright`) and measure their real tokens: fonts, sizes, radii, spacing, shadows, background treatment. For refine, the floor is 8-10 references for the specific element, from at least 2 sources.
+
+When the user asks to "check references", "find the golden standard" or similar, rerun the fan-out for the element in question; do not answer from the earlier set alone.
+
+Write `.design/REFERENCES.md` in the project:
+- a coverage line: how many references came from each source, and any source that was unavailable and why
+- each reference: link, screenshot (saved under `.design/refs/`), the source it came from, one line on what it does well
+- measured tokens from the live references
+- the shared patterns: type pairing and scale, spacing rhythm, palette logic, background and depth, card language, motion character
+
+If the floor cannot be met (sources not loaded, quotas spent), say so plainly before proposing directions, rather than presenting thin evidence as research.
 
 ### 3. Offer styles (be proactive)
 Do not wait to be told a style. From the references, propose 2-3 named directions that fit the domain, each in a few lines: mood, type, palette, depth, signature detail, and the reference it comes from. Example shapes: "quiet precision" (Linear-like), "glossy fintech" (rich gradients, big numbers), "editorial" (large serif type, generous space), "technical" (mono accents, grids). Recommend one.

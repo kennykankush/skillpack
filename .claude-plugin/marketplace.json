@@ -12,7 +12,7 @@
     {
       "name": "workbench",
       "description": "Portable workbench for codebase study, opportunities, decisions, bounded experiments, research, audits, and context preservation, connected through modular workflow recipes.",
-      "version": "0.13.0",
+      "version": "0.13.1",
       "author": {
         "name": "kennykankush",
         "url": "https://github.com/kennykankush"
