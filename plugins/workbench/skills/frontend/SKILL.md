@@ -222,8 +222,9 @@ Fix everything you found in one batch, re-check once, then show. Do not hand the
 Once the static design is approved, add motion: `motion-director` for the concept and stack, the timing skills for feel, the right package from libraries.md. Motion should confirm the hierarchy already there, not rescue a weak layout. Check with `web-motion-auditor` (including reduced motion) before showing it.
 
 ### 8. Remember
-After each user reaction, before moving on:
+After each user reaction, in the same turn it arrives and before any other work (do not batch it to the commit; a session can end first):
 - Append to `~/.agents/taste/log.md`: date, project, surface, what was shown, the user's words verbatim, verdict (approved / rejected / partial), one-line lesson.
+- Choices between options count as reactions and are the richest signal: log what was offered, what was picked, what was passed over, and any complaint attached to the pick (for example "G1 100%, but the gap between the panes sticks out").
 - Project-specific decisions go to the project's DESIGN.md.
 - When a lesson repeats in 2 or more projects, or the user states it as a general preference, promote it into TASTE.md (decoded words, Approved, Rejected, Working rules).
 - If feedback contradicts a TASTE.md rule, do not overwrite silently: name the conflict and ask which holds.
