@@ -1,0 +1,151 @@
+---
+name: frontend
+description: Agentic frontend design framework, with a code path and a Claude Design path. Use for any UI work where how it looks matters - new pages and apps, revamps, redesigns, polishing, or when the user says it looks generic, amateurish, plain, cheap or "not it", asks for a style ("premium", "modern", "clean", "sleek", "like Stripe"), or asks to research how good products do something. Checks its tooling first, then runs taste, references, style options, design system and tokens, asset fetching, build with real content and every state, self-critique and memory, with motion as the final layer. Keeps a taste memory that learns from every approval and rejection.
+---
+
+# frontend
+
+A framework, not a style. There is an infrastructure of reference sources, design skills, motion skills and design packages, and asset sources. Use what the task needs and skip the rest. The non-negotiables are the gates: see real references before deciding, write the system before building, critique your own screenshots before showing anything, and record what the user says.
+
+The user should never have to be the visual QA, never have to ask for references to be looked at, and never have to ask for the design skills to be loaded.
+
+## 0. Check the setup
+
+Once per session, run:
+
+```
+python3 <skill-dir>/scripts/check.py
+```
+
+It reports every reference MCP, skill, the brand-systems library and the taste memory across Claude Code, Codex and Gemini, as OK / AUTH / MISSING / OFF / UPDATE, with the fix command for each. It never installs anything.
+
+- Everything OK: say so in one line and continue.
+- Anything else: show the user the short list with the fix commands and offer to run them. Logins (AUTH) are theirs to do; say exactly where (for example `/mcp` in Claude Code). Paid sources (Refero, Mobbin) are optional: mention once that they exist, never push.
+- If the user declines, continue with what is available. Only a missing browser tool (`chrome-devtools`) or missing `impeccable` blocks the full loop; without them, say what is degraded and proceed.
+- Taste memory missing: copy `TASTE.template.md` to `~/.agents/taste/TASTE.md` (with the user's agreement) so learning can start.
+
+## Infrastructure
+
+**See (real screens, by domain)** - usually 2-3 per task:
+- `refero` - styles (type, colour, layout, spacing), screens, flows. Best for why something looks good. Paid; ration calls.
+- `mobbin` - large library of app and web screens, flows, sections. Paid.
+- `lazyweb` - screens, flows, A/B experiments, growth patterns.
+- `awwwards` - award-winning sites; captures live sites, motion DNA, scroll maps, side-by-side comparisons.
+- `madegood` - typography and brand references, palettes, UI screens.
+- `~/.agents/references/awesome-design-md/design-md/<brand>/DESIGN.md` - ready-made brand systems (Stripe, Linear, Vercel, Cursor, Framer, Coinbase and more). Free and offline; the fastest way to blend known styles.
+- Galleries reachable through the browser: Godly, Land-book, Lapa Ninja, SiteInspire, Kombai Gallery, Dribbble (often unshipped concepts; treat as mood, not proof).
+
+**Measure and capture** - `playwright` for screenshots at several viewports and clicking through flows; `chrome-devtools`: open a reference live, screenshot it, read computed fonts, sizes, line heights, colours, radii, shadows and spacing (`evaluate_script`, `get_css_styles`). Computer use is the fallback for sites that block headless browsers.
+
+**Decide and build** - `impeccable` is the spine (PRODUCT.md, DESIGN.md, shape, typeset, layout, colorize, bolder, quieter, polish, critique, finish review). `ui-ux-pro-max` for its searchable data (styles, palettes by industry, font pairings, UX rules) when proposing directions; `refero-design` for the Refero research method; `better-icons` to find real icons instead of drawing them; `emil-design-eng` for component feel; `design-taste-frontend`, `high-end-visual-design`, `frontend-design` as extra style lenses when useful.
+
+**Typography** - [typography.md](typography.md): finding faces from references, free and paid sources, pairing, setting (scale, trim, wrapping, numerals) and loading without layout shift.
+
+**Look development** - [lookdev.md](lookdev.md): lighting, materials, texture, depth and compositing, colour grading, lens and post, and the rule for effects. Shaders, textures and effects serve one look.
+
+**Assets and graphics** - [assets.md](assets.md): icons, photography, illustration, 3D, motion files, backgrounds, product imagery, logos. Material is fetched, never faked.
+
+**Packages** - [libraries.md](libraries.md): shaders, 3D, interactive vector, motion, unstyled primitives, type, icons, charts. Installed per project; fetch current docs with `context7`.
+
+**Motion** - `motion-director` (concept and stack), `motion-design` / `motion-design-lottie` (timing, easing, choreography), `gsap-*`, then `web-motion-auditor`, `design-motion-principles`, `fixing-motion-performance` to check it.
+
+**Verify** - impeccable `critique` and its finish reviewer, `web-design-guidelines`, `webapp-testing`.
+
+If a source fails mid-task, say so in one line and use the others. Never replace the reference step with text-only web search.
+
+## Two paths
+
+- **Code path (default)** - design and build directly in the project's code. Works in every agent.
+- **Claude Design path** - when the user says "use Claude Design", wants to see designs before code, or wants comps to share and comment on. Claude Design lives on the web (claude.ai/design): designs and prototypes sit on a canvas there, not in the repo. Available only in Claude Code; in Codex or Gemini, say so and use the code path.
+
+On the Claude Design path, the loop is the same, with these changes:
+- Steps 1-2 run as normal; the references still drive everything.
+- Step 3: create the 2-3 directions as Design artifacts (Artifact tool, quickstart intent `design`, which also lists the user's design systems on claude.ai). Share the links; the user compares and comments on the canvas.
+- Step 4: if a design system exists on claude.ai, build on it; otherwise make one from the system written in DESIGN.md.
+- Iterate on the canvas until a direction is approved, logging feedback as in step 8.
+- Then build the approved design in code (steps 5-7), using the artifact as the comp the self-critique compares against.
+- Afterwards, offer `/design-sync` to keep the project's component library and the claude.ai design system in step, so future designs and decks use the same system.
+
+## The loop
+
+### 1. Read taste
+Read `~/.agents/taste/TASTE.md`, then the project's PRODUCT.md, DESIGN.md and `.design/` if present. Translate the user's style words through TASTE.md; where TASTE.md is silent, state your reading of the word as concrete visual traits. Either way, say the translation in one line so the user can correct it.
+
+Classify the request:
+- **new** - a surface that does not exist yet
+- **revamp** - replace the visual world ("redo", "start over", "not it", "go all out")
+- **refine** - keep the world, raise quality ("spacing is off", "fonts feel weak")
+- **blend** - "like X but Y", "X meets Y"
+- **critique** - review only, no edits
+
+**Calibrate when the words are vague.** On a new project, or when the style words are ambiguous and TASTE.md does not settle them, run a quick visual intake before research goes deep: show 6-9 varied reference screens from the domain and ask which feel right and which feel wrong. One round of pointing replaces several rounds of adjectives. Record the answers in TASTE.md (with the screens) and the log.
+
+### 2. See references (gate: no direction without this)
+Name the domain (fintech, dashboard, dev tool, SaaS marketing, consumer app, login, onboarding, setup...) and the surface. Pull 15-30 real screens across 2-3 sources, open the best 3-5 live and extract their real tokens. For blend, read the named brands' DESIGN.md too. For refine, still find 3-5 references for the specific element so the fix is grounded.
+
+Write `.design/REFERENCES.md` in the project: each reference with link, screenshot (saved under `.design/refs/`) and one line on what it does well; then the shared patterns: type pairing and scale, spacing rhythm, palette logic, depth, card language, motion character.
+
+### 3. Offer styles (be proactive)
+Do not wait to be told a style. From the references, propose 2-3 named directions that fit the domain, each in a few lines: mood, type, palette, depth, signature detail, and the reference it comes from. Example shapes: "quiet precision" (Linear-like), "glossy fintech" (rich gradients, big numbers), "editorial" (large serif type, generous space), "technical" (mono accents, grids). Recommend one.
+
+- revamp / new: show the directions as quick comps or screenshots and let the user pick before the full build. Build the comps in parallel where the host allows (one sub-agent or fork per direction, each given the references and one direction brief), so they come back faster and stay genuinely distinct.
+- refine: skip unless the references show the incumbent style itself is the problem; then say so.
+- After each round of feedback, offer the next useful variation ("bolder", "quieter", a blend of two directions) rather than only asking what to change.
+
+### 4. Write the system (gate: no code without this)
+Record in DESIGN.md (impeccable `init` / `shape` own the file):
+- fonts (named, with the reason seen in references), type scale, weights, set per typography.md
+- look development: light direction, materials per surface, texture, elevation system, colour grade, and at most one signature effect (lookdev.md)
+- spacing grid, container widths, alignment rules
+- palette and roles, gradients, surfaces and depth (shadow, highlight edge, blur)
+- radius, card and button language: one language reused everywhere
+- packages chosen from libraries.md, and why
+- asset language: one icon set, one illustration or photo treatment, the background and texture approach (assets.md)
+- light and dark (if the product has both), and breakpoints
+
+Then write the tokens as code the build must use: CSS custom properties, or the project's theme file (Tailwind theme, token JSON) if it has one. Components reference tokens, never raw hex values or one-off pixel numbers. With impeccable's detector hook on, raw values get flagged as they are written.
+
+### 4b. Fetch material
+Before building, gather the real assets the system calls for (assets.md): icons through `better-icons`, photography graded to the palette, illustration or generated art in one style, product screenshots in a consistent frame, 3D or Lottie files if the direction uses them. Record each with its source and licence in `.design/ASSETS.md`. No lorem pictures, stock blobs or hand-drawn icons in anything shown to the user.
+
+### 5. Build
+Build with impeccable and the craft skills loaded from the start. When one element looks off, check whether the type scale, spacing rhythm or card language is the cause and fix it everywhere, not just there. Build static first; motion comes last.
+
+Build with realistic content: real or realistic copy, long names and numbers, busy and sparse data. Build every state the surface has: empty, loading (skeletons that match the final layout), error, partial, first-run. impeccable `harden` and `onboard` cover these.
+
+### 6. Self-critique (gate: nothing is shown before this)
+Screenshot desktop and mobile and set them beside the top references. Check:
+- edges align to one grid; nothing overflows or scrolls sideways
+- spacing follows the rhythm; no cramped or floating groups
+- type hierarchy is clear and the chosen fonts actually render
+- one card and button language; no mixed styles on one page
+- empty, loading, error and first-run states exist and look designed; loading does not shift layout
+- realistic and long content does not break the layout
+- dark mode (if present) and every breakpoint hold up, not just desktop and one phone width
+- assets are real and share one language; icons come from one set
+- tokens are used; no stray raw values
+- contrast and focus states pass a quick accessibility check; nothing obviously heavy (huge images, blocking fonts)
+- it reads at the references' level, not as a template
+
+Use impeccable critique or the finish reviewer for anything substantial. Fix everything in one batch, re-check once, stop. Show screenshots, not descriptions.
+
+**Make feedback precise.** When showing work, offer the sharpest feedback tool available: impeccable `live` (the user clicks an element in the browser and gets variants of it), comments on a Claude Design artifact, or numbered annotations on the screenshots so the user can say "3 is off" instead of describing it.
+
+### 7. Motion (the final layer)
+Once the static design is approved, add motion: `motion-director` for the concept and stack, the timing skills for feel, the right package from libraries.md. Motion should confirm the hierarchy already there, not rescue a weak layout. Check with `web-motion-auditor` (including reduced motion) before showing it.
+
+### 8. Remember
+After each user reaction, before moving on:
+- Append to `~/.agents/taste/log.md`: date, project, surface, what was shown, the user's words verbatim, verdict (approved / rejected / partial), one-line lesson.
+- Project-specific decisions go to the project's DESIGN.md.
+- When a lesson repeats in 2 or more projects, or the user states it as a general preference, promote it into TASTE.md (decoded words, Approved, Rejected, Working rules).
+- If feedback contradicts a TASTE.md rule, do not overwrite silently: name the conflict and ask which holds.
+
+A rejection of the direction changes the direction; do not polish the rejected one.
+
+## Budget
+
+Refero and Mobbin calls are metered. Search broadly with the free sources and the brand DESIGN.md files first; spend paid calls on the specific screens and styles that matter. Reuse `.design/REFERENCES.md` across iterations instead of re-searching.
+
+## Output
+Short: the one-line taste reading, references used (links), directions offered and the one chosen, screenshots, and what was written to memory.
