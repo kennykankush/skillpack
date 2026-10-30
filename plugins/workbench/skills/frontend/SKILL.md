@@ -90,6 +90,17 @@ Name the domain (fintech, security, dev tool, SaaS marketing, consumer app...) a
 
 Structure comes from the domain group; craft comes from the quality group. Never present a quality reference as the domain's gold standard. When a source is thin on the domain (Refero has few security products, for example), say so and look harder elsewhere: Lazyweb, Mobbin, product documentation screenshots, public demos, the products' own marketing pages showing the real UI.
 
+**Research the parts the surface is made of, not just the page.** Without being asked, break the surface into its element types and gather references for each:
+
+| Surface | Element types to research |
+|---|---|
+| dashboard / analytics | KPI tiles, sparklines, trend and area charts, stacked and inline bars, donuts and gauges (sparingly), heatmaps and coverage grids, progress meters, tables with in-cell bars, legends, filters and date pickers, tooltips, empty and loading states. Load the `dataviz` skill for chart form and colour |
+| settings / admin | row anatomy (label, help, control), grouping and section headings, danger zones, save patterns |
+| onboarding / setup | step structure, progress, defaults, review step, first-run and empty states |
+| auth | single-column form, providers, error and recovery states, the brand moment |
+| marketing / landing | hero, proof, feature sections, pricing, footer, the signature visual |
+| detail / report | header summary, evidence blocks, timelines, export and share |
+
 Fan out across **every loaded source**, in parallel where the host allows. Each source sees something the others do not:
 
 | Source | Ask it for |
@@ -117,8 +128,12 @@ Write `.design/REFERENCES.md` in the project:
 
 If the floor cannot be met (sources not loaded, quotas spent), say so plainly before proposing directions, rather than presenting thin evidence as research.
 
+When a later round of research contradicts an earlier one (corner sizes, palette, density), do not silently switch: name what changed, which evidence supersedes which, and update REFERENCES.md and DESIGN.md so they agree.
+
 ### 3. Offer styles (be proactive)
-**Show, do not describe.** Before asking the user to choose anything, show them the key reference images (the screenshots themselves, or a contact sheet of them) next to a screenshot of the current state. A direction the user has only read about is not approved.
+**Show, do not describe.** Before asking the user to choose anything, show them the key reference images next to a screenshot of the current state. A direction the user has only read about is not approved.
+
+In a terminal host the user cannot see images in the chat, so build a contact sheet: write `.design/refs/index.html`, a simple grid of the saved screenshots, each captioned with name, source, group (domain or quality) and the one thing it teaches, with the current state's screenshot first; then open it for the user (`open` on macOS, `xdg-open` on Linux) and say it is open. Do the same for comps (`.design/comps/index.html`). In hosts that render images inline, show them directly.
 
 Do not wait to be told a style. From the references, propose 2-3 named directions that fit the domain, each in a few lines: mood, type, palette, depth, signature detail, and the reference it comes from. Example shapes: "quiet precision" (Linear-like), "glossy fintech" (rich gradients, big numbers), "editorial" (large serif type, generous space), "technical" (mono accents, grids). Recommend one.
 
