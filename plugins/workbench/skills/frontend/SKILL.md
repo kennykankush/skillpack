@@ -23,6 +23,7 @@ It reports every reference MCP, skill, the brand-systems library and the taste m
 - Anything else: show the user the short list with the fix commands and offer to run them. Logins (AUTH) are theirs to do; say exactly where (for example `/mcp` in Claude Code). Paid sources (Refero, Mobbin) are optional: mention once that they exist, never push.
 - If the user declines, continue with what is available. Only a missing browser tool (`chrome-devtools`) or missing `impeccable` blocks the full loop; without them, say what is degraded and proceed.
 - **Config is not the same as loaded.** The script reads config files; a session only has the MCP servers that existed when it started. Confirm the reference tools are actually callable in this session (tool names like `mcp__refero__*`, `mcp__mobbin__*`, `mcp__awwwards__*`, `mcp__madegood__*`, `mcp__lazyweb__*`; load deferred tools through the host's tool search). If a configured source is not loaded, tell the user it needs a fresh session (or `/mcp` reconnect) to appear, and list which sources this session can use.
+- **Logged in is not the same as paid.** Refero and Mobbin accept the login but refuse searches without an active plan. Make one cheap real search on each paid source during setup; if it refuses, report it here ("Refero: plan inactive") rather than discovering it mid-research.
 - Taste memory missing: copy `TASTE.template.md` to `~/.agents/taste/TASTE.md` (with the user's agreement) so learning can start.
 
 ## Infrastructure
@@ -82,7 +83,14 @@ Classify the request:
 **Calibrate when the words are vague.** On a new project, or when the style words are ambiguous and TASTE.md does not settle them, run a quick visual intake before research goes deep: show 6-9 varied reference screens from the domain and ask which feel right and which feel wrong. One round of pointing replaces several rounds of adjectives. Record the answers in TASTE.md (with the screens) and the log.
 
 ### 2. See references (gate: no direction without this)
-Name the domain (fintech, dashboard, dev tool, SaaS marketing, consumer app, login, onboarding, setup...) and the surface, then fan out across **every loaded source**, in parallel where the host allows. Each source sees something the others do not:
+Name the domain (fintech, security, dev tool, SaaS marketing, consumer app...) and the surface (dashboard, settings, login, onboarding, setup...). Gather two groups of references, labelled, and both are required:
+
+- **Domain references** - products in the same category. They answer what this screen must show and how people in this field expect it to behave: the data, the vocabulary, the workflows, the density. A security tool learns findings, severity and evidence from security tools.
+- **Quality references** - the best-crafted products from any category. They set the visual bar: type, spacing, depth, surfaces, motion.
+
+Structure comes from the domain group; craft comes from the quality group. Never present a quality reference as the domain's gold standard. When a source is thin on the domain (Refero has few security products, for example), say so and look harder elsewhere: Lazyweb, Mobbin, product documentation screenshots, public demos, the products' own marketing pages showing the real UI.
+
+Fan out across **every loaded source**, in parallel where the host allows. Each source sees something the others do not:
 
 | Source | Ask it for |
 |---|---|
@@ -93,24 +101,29 @@ Name the domain (fintech, dashboard, dev tool, SaaS marketing, consumer app, log
 | `madegood` | typography and brand references |
 | brand `DESIGN.md` files | 2-4 brands in or near the domain, as complete systems |
 | user-provided screenshots and their own past work | the stated taste, weighted highest |
+| live sites (`chrome-devtools` / `playwright`) | product pages, docs and public demos of domain products; measured tokens of the quality references |
 
-Coverage floor: 15-30 screens from at least 3 different sources (4+ when they are loaded). One source is never enough, however good its results; stopping at the first answer is the most common way this step fails. Then open the best 3-5 live (`chrome-devtools` / `playwright`) and measure their real tokens: fonts, sizes, radii, spacing, shadows, background treatment. For refine, the floor is 8-10 references for the specific element, from at least 2 sources.
+The brand DESIGN.md files and live capture are free and always available: run them every time, as the baseline that holds even when paid sources refuse or come back thin. Read any reference you saved before writing about it; never cite a screen you have not looked at.
+
+Coverage floor: 15-30 screens from at least 3 different sources (4+ when they are loaded), with at least 5 domain references and at least 5 quality references. One source is never enough, however good its results; stopping at the first answer is the most common way this step fails. Then open the best 3-5 live (`chrome-devtools` / `playwright`) and measure their real tokens: fonts, sizes, radii, spacing, shadows, background treatment. For refine, the floor is 8-10 references for the specific element, from at least 2 sources.
 
 When the user asks to "check references", "find the golden standard" or similar, rerun the fan-out for the element in question; do not answer from the earlier set alone.
 
 Write `.design/REFERENCES.md` in the project:
-- a coverage line: how many references came from each source, and any source that was unavailable and why
-- each reference: link, screenshot (saved under `.design/refs/`), the source it came from, one line on what it does well
+- a coverage line: how many references came from each source, how many are domain and how many quality, and any source that was unavailable and why
+- each reference: link, screenshot (saved under `.design/refs/`), the source it came from, its group (domain or quality), one line on what it does well
 - measured tokens from the live references
 - the shared patterns: type pairing and scale, spacing rhythm, palette logic, background and depth, card language, motion character
 
 If the floor cannot be met (sources not loaded, quotas spent), say so plainly before proposing directions, rather than presenting thin evidence as research.
 
 ### 3. Offer styles (be proactive)
+**Show, do not describe.** Before asking the user to choose anything, show them the key reference images (the screenshots themselves, or a contact sheet of them) next to a screenshot of the current state. A direction the user has only read about is not approved.
+
 Do not wait to be told a style. From the references, propose 2-3 named directions that fit the domain, each in a few lines: mood, type, palette, depth, signature detail, and the reference it comes from. Example shapes: "quiet precision" (Linear-like), "glossy fintech" (rich gradients, big numbers), "editorial" (large serif type, generous space), "technical" (mono accents, grids). Recommend one.
 
-- revamp / new: show the directions as quick comps or screenshots and let the user pick before the full build. Build the comps in parallel where the host allows (one sub-agent or fork per direction, each given the references and one direction brief), so they come back faster and stay genuinely distinct.
-- refine: skip unless the references show the incumbent style itself is the problem; then say so.
+- revamp / new: show each direction as a quick comp of one representative screen (rendered and screenshotted, or a Claude Design artifact), and let the user pick before the full build. Build the comps in parallel where the host allows (one sub-agent or fork per direction, each given the references and one direction brief), so they come back faster and stay genuinely distinct.
+- refine: skip new directions unless the references show the incumbent style itself is the problem; then say so. Show a before and after of the element in question before applying it everywhere.
 - After each round of feedback, offer the next useful variation ("bolder", "quieter", a blend of two directions) rather than only asking what to change.
 
 ### 4. Write the system (gate: no code without this)
