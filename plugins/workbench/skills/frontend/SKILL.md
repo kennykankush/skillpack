@@ -197,6 +197,14 @@ After each user reaction, before moving on:
 
 A rejection of the direction changes the direction; do not polish the rejected one.
 
+## Pace
+
+Stop only at the real decision points: choosing a direction, a change the user did not ask for that alters scope or identity, and anything only the user can do (a login, a purchase). Everywhere else, keep going.
+
+- When the user says "go ahead", "do everything", "keep going" or similar, run the whole remaining plan in one go: every screen and every fix you listed, each through build and self-critique, then report once at the end with screenshots. Do not end a turn with "shall I carry on?" or "next I would..." when the next step is already agreed.
+- Within a turn, finish what you listed; do not stop after the first item to ask about the second.
+- A long conversation is a reason to write the state down (status file, DESIGN.md, REFERENCES.md) so work survives, not a reason to stop. Suggest a fresh session at most once, and keep working if the user says to build here.
+
 ## Budget
 
 Refero and Mobbin calls are metered. Search broadly with the free sources and the brand DESIGN.md files first; spend paid calls on the specific screens and styles that matter. Reuse `.design/REFERENCES.md` across iterations instead of re-searching.
