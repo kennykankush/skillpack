@@ -152,6 +152,8 @@ Record in DESIGN.md (impeccable `init` / `shape` own the file):
 - asset language: one icon set, one illustration or photo treatment, the background and texture approach (assets.md)
 - light and dark (if the product has both), and breakpoints
 
+Change the system at its source: edit the token values and the components that own a style. Do not append override layers (`!important` blocks, selector lists that restyle many components from outside) on top of the old system; they hide the real values, fight each other on the next change, and make drift certain.
+
 Then write the tokens as code the build must use: CSS custom properties, or the project's theme file (Tailwind theme, token JSON) if it has one. Components reference tokens, never raw hex values or one-off pixel numbers. With impeccable's detector hook on, raw values get flagged as they are written.
 
 ### 4b. Fetch material
@@ -163,7 +165,7 @@ Build with impeccable and the craft skills loaded from the start. When one eleme
 Build with realistic content: real or realistic copy, long names and numbers, busy and sparse data. Build every state the surface has: empty, loading (skeletons that match the final layout), error, partial, first-run. impeccable `harden` and `onboard` cover these.
 
 ### 6. Self-critique (gate: nothing is shown before this)
-Screenshot desktop and mobile and set them beside the top references. Check:
+Passing tests and a commit are not this step. Before telling the user to reload or look, you must have screenshotted the result yourself (Playwright or chrome-devtools) at desktop and mobile, in every theme the product has, and looked at the images. Set them beside the top references (add them to the contact sheet). Check:
 - edges align to one grid; nothing overflows or scrolls sideways
 - spacing follows the rhythm; no cramped or floating groups
 - type hierarchy is clear and the chosen fonts actually render
@@ -174,6 +176,7 @@ Screenshot desktop and mobile and set them beside the top references. Check:
 - assets are real and share one language; icons come from one set
 - tokens are used; no stray raw values
 - contrast and focus states pass a quick accessibility check; nothing obviously heavy (huge images, blocking fonts)
+- nothing on the TASTE.md Rejected list or in the project's rejections has crept in (re-read the list against the screenshots; for example coloured outlines on cards)
 - it reads at the references' level, not as a template
 
 Use impeccable critique or the finish reviewer for anything substantial. Fix everything in one batch, re-check once, stop. Show screenshots, not descriptions.
