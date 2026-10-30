@@ -55,6 +55,23 @@ It reports every reference MCP, skill, the brand-systems library and the taste m
 
 If a source fails mid-task, say so in one line and use the others. Never replace the reference step with text-only web search.
 
+## Load the skills, do not just know them
+
+The infrastructure only helps once loaded. At each step, actually invoke the skills it names through the host's skill mechanism (the Skill tool in Claude Code, `$skill` in Codex) and read the reference files; knowing a skill exists is not using it. Load them when the step starts, not after the user asks.
+
+| Step | Load |
+|---|---|
+| 1b product | `impeccable` (run its `context`; `init` if PRODUCT.md is missing) |
+| 2 references | `refero-design` (when Refero is active), `lazyweb` search skills; `dataviz` for dashboards and analytics; `ui-ux-pro-max` for palette, type and style data |
+| 3 styles | `ui-ux-pro-max`; one of `design-taste-frontend`, `high-end-visual-design`, `frontend-design` as a style lens when useful |
+| 4 system | `impeccable` (`shape`, `typeset`, `colorize`, `layout` as needed); read typography.md and lookdev.md |
+| 4b material | `better-icons`; read assets.md |
+| 5 build | `impeccable`, `emil-design-eng`; `harden` / `onboard` for states; read libraries.md |
+| 6 critique | `impeccable` (`critique`, `polish`, the finish reviewer); `web-design-guidelines`; `webapp-testing` for multi-viewport capture |
+| 7 motion | `motion-director`, then `motion-design` or `motion-design-lottie`, `gsap-*` if GSAP is in use; `web-motion-auditor` and `fixing-motion-performance` to check |
+
+Skip a skill only when the step genuinely does not need it, and say which skills were loaded in the step's report.
+
 ## Two paths
 
 - **Code path (default)** - design and build directly in the project's code. Works in every agent.
